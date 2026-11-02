@@ -2624,7 +2624,19 @@ function ukaz(id) {
 }
 async function kopiruj(t) { try { await navigator.clipboard.writeText(t); return true; } catch { return false; } }
 const jeMobil = () => matchMedia("(pointer:coarse)").matches;
-const otevriMessenger = () => window.open("https://m.me/" + NASTAVENI.messenger, "_blank");
+// otevře chat se stránkou a rovnou do něj předvyplní zprávu (parametr ?text= u m.me odkazů)
+function adresaMessengeru(text) {
+  const zaklad = "https://m.me/" + NASTAVENI.messenger;
+  if (!text) return zaklad;
+  let url = zaklad + "?text=" + encodeURIComponent(text);
+  if (url.length > 2000) { // moc dlouhá zpráva → zkrácená verze: hlavička, kontakt a odkaz na návrh
+    const r = text.split("\n"), odkaz = r.filter(x => /#[no]=/.test(x)).pop() || "";
+    const kratky = [r[0], ...r.filter(x => /^(Jméno|Kontakt|Potřebuji do|⚡|Orientační cena)/.test(x)), "", "👉 Návrh:", odkaz].join("\n");
+    url = zaklad + "?text=" + encodeURIComponent(kratky);
+  }
+  return url;
+}
+const otevriMessenger = text => window.open(adresaMessengeru(text), "_blank");
 function ukazOdkaz() { $("odkazPole").value = odkazNavrhu(); }
 function postup(kroky) { ukazOdkaz(); $("rucnePostup").innerHTML = kroky.map(k => `<li>${k}</li>`).join(""); }
 async function posliMessenger() {
@@ -2634,18 +2646,18 @@ async function posliMessenger() {
   // text je zkopírovaný, otevře se chat s naší stránkou a stačí ho vložit
   // (sdílení přes nabídku telefonu nepoužíváme – Messenger v ní stránky často nenabízí)
   postup(jeMobil() ? [
-    `Otevřel se Messenger s chatem stránky <b>${NASTAVENI.nazev || "naší stránky"}</b>.`,
-    "Podržte prst v poli pro zprávu a zvolte <b>Vložit</b>." + (zkopirovano ? "" : " (Kdyby to nešlo, zkopírujte text níže.)"),
-    "Zprávu odešlete šipkou ➤.",
+    `Otevřel se Messenger s chatem stránky <b>${NASTAVENI.nazev || "naší stránky"}</b> a zpráva s vaším návrhem je už napsaná.`,
+    "Stačí ji odeslat šipkou ➤.",
+    "Kdyby bylo pole pro zprávu prázdné: podržte v něm prst a zvolte <b>Vložit</b>" + (zkopirovano ? " (zpráva je zkopírovaná)." : " – nebo zkopírujte text níže."),
     "Vraťte se sem a klepněte na <b>Zprávu jsem odeslal(a)</b>.",
   ] : [
-    `V nové záložce se otevřel Messenger s chatem stránky <b>${NASTAVENI.nazev || "naší stránky"}</b>.`,
-    "Klikněte do pole pro zprávu a stiskněte <b>Ctrl + V</b> (vložit)." + (zkopirovano ? "" : " (Kdyby to nešlo, zkopírujte text níže.)"),
-    "Zprávu odešlete klávesou <b>Enter</b>.",
+    `V nové záložce se otevřel Messenger s chatem stránky <b>${NASTAVENI.nazev || "naší stránky"}</b> a zpráva s vaším návrhem je už napsaná.`,
+    "Stačí ji odeslat klávesou <b>Enter</b>.",
+    "Kdyby bylo pole pro zprávu prázdné: klikněte do něj a stiskněte <b>Ctrl + V</b>" + (zkopirovano ? " (zpráva je zkopírovaná)." : " – nebo zkopírujte text níže."),
     "Vraťte se sem a klikněte na <b>Zprávu jsem odeslal(a)</b>.",
   ]);
   ukaz("rucne");
-  otevriMessenger();
+  otevriMessenger(t);
 }
 
 const naBase64 = blob => new Promise(ok => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1]); r.readAsDataURL(blob); });
@@ -2747,7 +2759,7 @@ $("kopOdkaz").onclick = async () => {
   if (!ok) { $("odkazPole").select(); document.execCommand && document.execCommand("copy"); }
   $("kopOdkaz").textContent = "✔ Hotovo"; setTimeout(() => $("kopOdkaz").textContent = "📋 Kopírovat", 2000);
 };
-$("otevritMsg").onclick = async () => { await kopiruj($("zpravaText").textContent); otevriMessenger(); };
+$("otevritMsg").onclick = async () => { await kopiruj($("zpravaText").textContent); otevriMessenger($("zpravaText").textContent); };
 
 $("znovu").onclick = () => { $("poznamka").value = ""; stav.n = 1; oznac(); ukaz("navrh"); };
 </script>
