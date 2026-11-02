@@ -624,7 +624,7 @@ TVARY.push({ id:"vlastni", nazev:"Vlastní – nakreslit", vlastni:true });
 // místo pro text, když výrobek nemá dírku (magnetka, cedulka, jmenovka) – text se roztáhne i tam, kde byla dírka
 const BOX_BEZ_DIRY = { kolecko:{ cx:0, cy:0, w:34, h:19 }, srdce:{ cx:0, cy:3, w:31, h:15 }, hvezda:{ cx:0, cy:0.5, w:28, h:9 }, domecek:{ cx:0, cy:-3, w:31, h:20 }, mrak:{ cx:0, cy:-2, w:34, h:14 }, kost:{ cx:0, cy:0, w:36, h:14 }, kvetina:{ cx:0, cy:0, w:23, h:13 }, stit:{ cx:0, cy:0, w:32, h:15 }, kapka:{ cx:0, cy:-6, w:26, h:13 }, znamka:{ cx:0, cy:0, w:24, h:30 }, medvidek:{ cx:0, cy:-3, w:30, h:16 }, tricko:{ cx:0, cy:-4, w:24, h:22 }, jablko:{ cx:0, cy:-4, w:32, h:15 }, sestiuhelnik:{ cx:0, cy:0, w:34, h:18 } };
 // jmenovka na stůl musí mít rovný spodek, aby stála ve stojánku
-const ROVNY_SPODEK = ["obdelnik", "oval", "visacka", "domecek", "znamka", "tricko", "sestiuhelnik"];
+const ROVNY_SPODEK = ["obdelnik", "oval", "visacka", "domecek", "znamka", "tricko"];
 TVARY.forEach(t => {
   t.pro = "k";
   t.kat = ["kost", "medvidek", "kvetina", "mrak", "jablko"].includes(t.id) ? "Zvířata a příroda" : t.vlastni ? "Vlastní" : "Základní tvary";
@@ -2278,8 +2278,8 @@ async function rostlinaDetail(fonty, ram, chybi) {
 }
 /* Stojánek pro jmenovku na stůl – kvádr se zářezem, tiskne se naležato zářezem nahoru */
 async function stojanek(presne, T, bb) {
-  const sirka = bb.max.x - bb.min.x, L = Math.min(70, Math.max(30, sirka * 0.45)), sp = (T + 0.35) / 2, V = 10, H = 6;
-  const prof = [[-8, 0], [8, 0], [5.5, V], [sp, V], [sp, V - H], [-sp, V - H], [-sp, V], [-5.5, V]];
+  const sirka = bb.max.x - bb.min.x, L = Math.min(70, Math.max(30, sirka * 0.45)), sp = (T + 0.35) / 2, V = 8, H = 5;
+  const prof = [[-9, 0], [9, 0], [5.5, V], [sp, V], [sp, V - H], [-sp, V - H], [-sp, V], [-5.5, V]];
   const cx = (bb.min.x + bb.max.x) / 2, y0 = bb.min.y - 8 - 8; // naležato pod jmenovkou, zářez souběžně s ní
   if (presne) {
     const M = await manifold();
@@ -2407,7 +2407,13 @@ async function prekresli() {
 
   const bb = gP.boundingBox, sirka = bb.max.x - bb.min.x, vyska = bb.max.y - bb.min.y;
   rozmer = [sirka, vyska]; souhrny();
-  const bc = bb.clone(); if (gS) bc.union(gS.boundingBox);
+  const bc = bb.clone();
+  if (gS) { // náhled jmenovky „sestavené“: stojánek dole, jmenovka zasunutá do zářezu (pro tisk zůstávají díly zvlášť naležato)
+    const yS = (gS.boundingBox.min.y + gS.boundingBox.max.y) / 2;
+    meshStojan.rotation.x = -Math.PI / 2;
+    meshStojan.position.set(0, bb.min.y - 3, T / 2 + yS);
+    bc.min.y -= 3;
+  }
   skupina.position.set(-(bc.min.x + bc.max.x) / 2, -(bc.min.y + bc.max.y) / 2, -T / 2);
   rozmerModelu = [bc.max.x - bc.min.x, bc.max.y - bc.min.y]; zamerKameru();
   obnovOdkaz();
