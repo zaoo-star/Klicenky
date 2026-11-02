@@ -124,6 +124,8 @@ pre.zprava{white-space:pre-wrap;word-break:break-all;background:#f8f9fa;border-r
 .blokNadpis .souhrn{display:none}
 .vsechny{display:block;width:100%;font-family:inherit;font-size:1rem;padding:12px;margin-top:10px;border:2px dashed #bbb;border-radius:14px;background:#fff;color:#444;cursor:pointer}
 #pocetNadpis{white-space:nowrap}
+body[data-obr]:not([data-obr=navrh]) #kosikPlovouci{display:none!important}
+.shrnutiBlok{border-top:1px solid #eee;margin-top:14px;padding-top:12px;line-height:1.7}
 .zaskrt{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:1.05rem;cursor:pointer}
 .zaskrt input{width:26px;height:26px;flex:0 0 auto}
 .radekPocet{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
@@ -349,6 +351,16 @@ pre.zprava{white-space:pre-wrap;word-break:break-all;background:#f8f9fa;border-r
 
   <button type="button" class="plovouci skryt" id="kosikPlovouci" aria-label="Košík">🛒 <b id="kosikPocet">0</b></button>
   <div class="toast" id="toast"></div>
+
+  <section class="krok skryt" id="shrnuti">
+    <h2>📋 Shrnutí objednávky</h2>
+    <p class="pozn" style="margin:-4px 0 12px">Zkontrolujte prosím, že všechno sedí. Pak objednávku odešlete.</p>
+    <div id="shrnutiPolozky"></div>
+    <div class="shrnutiBlok" id="shrnutiCena"></div>
+    <div class="shrnutiBlok" id="shrnutiKontakt"></div>
+    <button class="hlavni" id="shrnutiOdeslat">✔ Vše sedí – odeslat objednávku</button>
+    <button class="vedlejsi" id="shrnutiZpet">✏️ Ještě něco upravit</button>
+  </section>
 
   <section class="krok hotovo skryt" id="dekujeme">
     <div class="velke">🎉</div>
@@ -2701,7 +2713,8 @@ function zkontroluj() {
 }
 function ukaz(id) {
   if (id === "dekujeme" && kosik.length) { kosik = []; ulozKosik(); prepocitejCenu(); } // objednávka odeslána → vysypat košík
-  ["navrh", "dekujeme", "rucne"].forEach(x => $(x).classList.toggle("skryt", x !== id));
+  document.body.dataset.obr = id;
+  ["navrh", "dekujeme", "rucne", "shrnuti"].forEach(x => $(x).classList.toggle("skryt", x !== id));
   $("nahled").classList.toggle("skryt", id !== "navrh");
   scrollTo({ top:0, behavior:"smooth" });
 }
@@ -2789,16 +2802,46 @@ function obnovTermin() {
 }
 $("termin").addEventListener("change", obnovTermin); $("expres").addEventListener("change", obnovTermin);
 $("pridatAkt").addEventListener("change", prepocitejCenu);
-$("messenger").onclick = async () => { if (zkontroluj()) { await pripravObjednavku(); posliMessenger(); } };
+$("messenger").onclick = () => ukazShrnuti("messenger");
 // pokud je v košíku něco a aktuální návrh se od posledního přidání změnil, zeptat se
 async function pripravObjednavku() {
   if (!kosik.length) return;
   if (zahrnoutRozpracovany()) await pridatDoKosiku();
   await obnovOdkazObjednavky();
 }
-$("odeslat").onclick = async () => {
+// Shrnutí před odesláním
+const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+let cilOdeslani = "hlavni";
+async function ukazShrnuti(cil) {
   if (!zkontroluj()) return;
+  cilOdeslani = cil;
   await pripravObjednavku();
+  const polozky = kosik.length ? kosik : [{ popis:kratkyPopis(), detaily:radkyNavrhu(), nahled:await malyNahled(), ks:stav.n }];
+  $("shrnutiPolozky").innerHTML = polozky.map((p, i) => `
+    <div class="polozka" style="align-items:flex-start">
+      <img src="${p.nahled}" alt="">
+      <div class="txt"><b>${polozky.length > 1 ? (i + 1) + ". " : ""}${esc(p.popis)}</b> – <b>${p.ks} ks</b>
+        <details><summary style="color:#1971c2;cursor:pointer">Podrobnosti</summary>${(p.detaily || []).filter(r => !/^Počet:/.test(r)).map(r => esc(r)).join("<br>")}</details>
+      </div>
+    </div>`).join("");
+  const C = NASTAVENI.cena, c = kosik.length ? cenaPolozek(kosik) : { cena:odhad.cena, kc:odhad.bezSlevy, sleva:odhad.sleva, ks:stav.n };
+  $("shrnutiCena").innerHTML = C.zobrazit ? `<div class="cena">Celkem ${c.ks} ks: <b>${c.sleva ? `<s>${c.kc} Kč</s>` : ""}${c.cena} Kč</b></div>
+    <p class="pozn">${c.sleva ? `Se slevou ${c.sleva} %. ` : ""}${expres ? `Včetně expresního příplatku ${C.expres} %. ` : ""}${esc(POZN_CENA)}</p>` : "";
+  const v = id => $(id).value.trim();
+  $("shrnutiKontakt").innerHTML = [
+    zakaznik !== "o" ? `🏢 ${zakaznik === "skola" ? "Škola" : "Firma"}: <b>${esc(v("organizace"))}</b>${v("ico") ? ", IČO " + esc(v("ico")) : ""}` : "",
+    `👤 <b>${esc(v("jmeno"))}</b>`, `📞 ${esc(v("telefon"))}`,
+    termin ? `📅 Potřebuji do: <b>${new Date(termin).toLocaleDateString("cs-CZ")}</b>` : "",
+    expres ? "⚡ Expresní výroba" : "",
+    v("poznamka") ? `📝 ${esc(v("poznamka"))}` : "",
+    `<span class="pozn">Odešle se ${NASTAVENI.firebase || NASTAVENI.emailSkript ? (cil === "messenger" ? "přes Messenger" : "nám rovnou") : NASTAVENI.messenger ? "přes Messenger" : "zpráva"} – ${NASTAVENI.nazev || "my"} se vám pak ozve.</span>`,
+  ].filter(Boolean).join("<br>");
+  ukaz("shrnuti");
+}
+$("shrnutiZpet").onclick = () => { ukaz("navrh"); setTimeout(() => $("objednavka").scrollIntoView({ behavior:"smooth" }), 350); };
+$("shrnutiOdeslat").onclick = () => cilOdeslani === "messenger" ? posliMessenger() : odeslatObjednavku();
+$("odeslat").onclick = () => ukazShrnuti("hlavni");
+async function odeslatObjednavku() {
   if (NASTAVENI.emailSkript || NASTAVENI.firebase) {
     $("odeslat").disabled = true; $("odeslat").textContent = "Odesílám…";
     try {
