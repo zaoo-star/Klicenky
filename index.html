@@ -179,6 +179,18 @@ body[data-obr]:not([data-obr=navrh]) #kosikPlovouci{display:none!important}
       <h2><span class="cislo">3</span><span class="nadpis">Tvar<span class="souhrn"></span></span></h2>
       <div class="volby" id="tvary"></div>
       <button type="button" class="vsechny" id="vsechnyTvary">Zobrazit všechny tvary</button>
+      <div id="magnetBlok" class="skryt">
+        <div class="podnadpis" style="margin-top:16px">🧲 Magnety</div>
+        <div class="volby" id="magnety" style="grid-template-columns:1fr 1fr"></div>
+        <div id="magnetRozmer">
+          <p class="pozn" style="margin-top:10px">Změřte prosím svůj magnet – otvor uděláme přesně na něj:</p>
+          <div class="radekPocet" style="justify-content:flex-start;gap:8px">
+            <label style="flex:1">Průměr (mm)<input type="text" id="magPrumer" class="mensi" inputmode="decimal" maxlength="4" placeholder="10"></label>
+            <label style="flex:1">Výška (mm)<input type="text" id="magVyska" class="mensi" inputmode="decimal" maxlength="4" placeholder="2"></label>
+          </div>
+        </div>
+        <p class="pozn" id="magnetInfo"></p>
+      </div>
       <div id="uchyceniBlok" class="skryt">
         <div class="podnadpis" style="margin-top:16px">Jak cedulku připevníte?</div>
         <div class="volby" id="uchyceni" style="grid-template-columns:1fr 1fr"></div>
@@ -430,11 +442,11 @@ const NASTAVENI = {
     slevy: { firma:10, skola:20 },  // slevy v % podle typu zákazníka
     slevaOdKusu: 15,     // sleva platí až od tohoto počtu kusů
     specialni: 10,       // příplatek v Kč za kus za každý speciální materiál (hedvábný, mramor, dřevo, svítící)
-    magnet: 5,           // cena magnetu v Kč (magnetka)
+    magnet: 0,           // cena za dodání a nalepení magnetu v Kč/ks (0 = cena po domluvě, nepočítá se)
     expres: 30,          // příplatek za expresní výrobu v %
     bezneDni: 5,         // za kolik dní běžně vyrobíte (kvůli upozornění u termínu)
   },
-  magnet: { prumer:10, vyska:2 }, // jaké magnety vlepujete (mm) – podle toho se udělá otvor na zadní straně
+  magnet: { prumer:10, vyska:2 }, // jaké magnety dodáváte vy (mm) – podle toho se udělá otvor na zadní straně
   // Adresa Google Apps Scriptu, který pošle objednávku na váš e-mail i s 3MF souborem a obrázkem (návod v e-mail-skript.gs)
   emailSkript: "",       // např. "https://script.google.com/macros/s/AKfy.../exec"
   // BARVY FILAMENTŮ – které barvy zákazníci uvidí (podle toho, co máte doma)
@@ -646,7 +658,7 @@ const PRODUKTY = [
   { id:"k", nazev:"Klíčenka",         emoji:"🔑", titul:"🔑 Navrhněte si klíčenku",          text:"Text na klíčence" },
   { id:"z", nazev:"Záložka do knihy", emoji:"📖", titul:"📖 Navrhněte si záložku do knihy", text:"Text na záložce" },
   { id:"d", nazev:"Zápich do dortu",  emoji:"🎂", titul:"🎂 Navrhněte si zápich do dortu",  text:"Text na zápichu" },
-  { id:"m", nazev:"Magnetka",         emoji:"🧲", titul:"🧲 Navrhněte si magnetku",          text:"Text na magnetce", typ:"k", bezDiry:true, tl:4, magnet:true, bezZad:true, pozn:"Na zadní stranu vlepíme silný magnet." },
+  { id:"m", nazev:"Magnetka",         emoji:"🧲", titul:"🧲 Navrhněte si magnetku",          text:"Text na magnetce", typ:"k", bezDiry:true, tl:4, magnet:true, bezZad:true, pozn:"Zezadu bude otvor na magnet. Magnety si vlepíte své, nebo je po domluvě dodáme a nalepíme." },
   { id:"c", nazev:"Cedulka na dveře", emoji:"🚪", titul:"🚪 Navrhněte si cedulku na dveře",  text:"Text na cedulce", typ:"k", bezDiry:true, tl:4, bezZad:true, sroubky:true, pozn:"Přilepí se oboustrannou páskou (přibalíme), nebo přišroubuje – vyberete u tvaru." },
   { id:"j", nazev:"Jmenovka na stůl", emoji:"🥂", titul:"🥂 Jmenovky na stůl (svatba, oslava)", text:"Jméno hosta", typ:"k", bezDiry:true, tl:2.5, stojan:true, pozn:"Ke každé jmenovce vytiskneme stojánek, do kterého se zasune. Pro víc hostů zadejte seznam jmen." },
   { id:"r", nazev:"Zápich do květináče", emoji:"🪴", titul:"🪴 Zápich do květináče", text:"Název rostliny", typ:"r", bezZad:true, pozn:"S ikonkami, jak o rostlinu pečovat. Zapíchne se do hlíny." },
@@ -696,6 +708,12 @@ const POZICE = [ { id:"pred", nazev:"Před textem" }, { id:"za", nazev:"Za texte
 const RAMECKY = [ { id:"0", nazev:"Bez rámečku" }, { id:"1", nazev:"S rámečkem" } ];
 const ZADY = [ { id:"0", nazev:"Prázdná" }, { id:"1", nazev:"Stejný nápis" }, { id:"2", nazev:"Jiný text" }, { id:"3", nazev:"QR kód" } ];
 const VELIKOSTI = [ { id:"m", nazev:"Malá", k:{ k:0.8, z:0.86, d:0.77, m:1, c:1.8, j:1.6, v:0.8, r:0.85 } }, { id:"s", nazev:"Střední", k:{ k:1, z:1, d:1, m:1.25, c:2.3, j:2, v:1, r:1 } }, { id:"l", nazev:"Velká", k:{ k:1.25, z:1.14, d:1.23, m:1.5, c:2.9, j:2.4, v:1.2, r:1.2 } } ];
+const MAGNETY = [ { id:"v", nazev:"Mám vlastní magnety", popis:"vlepím si je sám/sama" }, { id:"d", nazev:"Dodejte a nalepte je", popis:"po domluvě" } ];
+// rozměr magnetu: vlastní zákazníka (zadaný), jinak ten, co dodáváte vy
+function rozmerMagnetu(st = stav) {
+  const N = NASTAVENI.magnet, cis = (t, d, min, max) => { const x = parseFloat(String(t || "").replace(",", ".")); return isFinite(x) ? Math.min(max, Math.max(min, x)) : d; };
+  return st.mg === "v" ? { prumer:cis(st.mp, N.prumer, 4, 30), vyska:cis(st.mv, N.vyska, 0.8, 5) } : { prumer:N.prumer, vyska:N.vyska };
+}
 const UCHYCENI = [ { id:"p", nazev:"Lepicí páska", popis:"přibalíme ji" }, { id:"s", nazev:"Dvě dírky na šroubky", popis:"se zápustnou hlavou" } ];
 const R_SVETLO = [ { id:"slunce", nazev:"Slunce", ikona:"sun" }, { id:"polostin", nazev:"Polostín", ikona:"cloud-sun" }, { id:"stin", nazev:"Stín", ikona:"cloud" }, { id:"", nazev:"Neuvádět" } ];
 const R_ZALIVKA = [ { id:"malo", nazev:"Málo", kapky:1 }, { id:"stredne", nazev:"Středně", kapky:2 }, { id:"hodne", nazev:"Stále vlhko", kapky:3 }, { id:"", nazev:"Neuvádět" } ];
@@ -792,12 +810,12 @@ const odhad = { objem:0, vymeny:0, minuty:0, gramy:0, cena:0, bezSlevy:0, sleva:
 let zakaznik = "o", prevOzdoba = null, davkaBezi = false, kosik = [], objednavkaOdkaz = null;
 const ZAKAZNICI = [ { id:"o", nazev:"Soukromá osoba" }, { id:"firma", nazev:"Firma" }, { id:"skola", nazev:"Škola" } ];
 const slevaPro = id => (NASTAVENI.cena.slevy || {})[id] || 0;
-let expres = false, termin = "";
+let expres = false, termin = "", pocetMagnetuPosl = 1;
 // příplatek za kus: speciální materiály, magnet
 function priplatekKs(st = stav) {
   const C = NASTAVENI.cena, bP = BARVY.find(b => b.id === st.b) || {}, bN = BARVY.find(b => b.id === st.c) || {};
   const maNapis = !!((st.t || "").trim() || (st.t2 || "").trim() || st.r === "1" || (st.z === "3" && (st.q || "").trim()));
-  return (bP.spec ? C.specialni || 0 : 0) + (maNapis && bN.spec && bN.id !== bP.id ? C.specialni || 0 : 0) + (produkt(st.p).magnet ? C.magnet || 0 : 0);
+  return (bP.spec ? C.specialni || 0 : 0) + (maNapis && bN.spec && bN.id !== bP.id ? C.specialni || 0 : 0) + (produkt(st.p).magnet && st.mg === "d" ? C.magnet || 0 : 0);
 }
 // expresní příplatek na celou objednávku
 const sExpres = kc => expres ? Math.ceil(kc * (1 + (NASTAVENI.cena.expres || 0) / 100) / (NASTAVENI.cena.zaokrouhlit || 1)) * (NASTAVENI.cena.zaokrouhlit || 1) : kc;
@@ -839,7 +857,7 @@ function prepocitejCenu() {
   $("cenaPozn").textContent = (odhad.sleva ? `Sleva pro ${kdo} ${odhad.sleva} %. `
       : slevaPro(zakaznik) && chybiKs ? `Sleva ${slevaPro(zakaznik)} % pro ${kdo} platí od ${minKs} ks – přidejte ještě ${chybiKs} ks. ` : "") + `Cena za ${n} ks.${ex} ` + POZN_CENA;
 }
-const stav = { ir:"j", ns:"dol", jm:"", p:"k", a:"0", l:"", ob:"", fs:"m", nn:"2", nd:"s", nr:"s", k:"", z:"0", t3:"", t:"Babička", t2:"", s:"obdelnik", f:"obla", o:"srdicko", op:"pred", b:"cervena", c:"bila", r:"0", v:"s", q:"", uc:"p", rs:"polostin", rt:"18–25 °C", rz:"stredne", c3:"", n:1 };
+const stav = { ir:"j", ns:"dol", jm:"", p:"k", a:"0", l:"", ob:"", fs:"m", nn:"2", nd:"s", nr:"s", k:"", z:"0", t3:"", t:"Babička", t2:"", s:"obdelnik", f:"obla", o:"srdicko", op:"pred", b:"cervena", c:"bila", r:"0", v:"s", q:"", uc:"p", mg:"v", mp:"", mv:"", rs:"polostin", rt:"18–25 °C", rz:"stredne", c3:"", n:1 };
 /* ---------- Odkaz na návrh (co nejkratší) ----------
    Do odkazu jde jen to, co se liší od výchozího nastavení, a ještě se to zkomprimuje. */
 const VYCHOZI = { ...stav };
@@ -977,6 +995,7 @@ for (const id of ["barvyPodklad", "barvyNapis", "barvyIkony"]) { // nadpis před
 vytvorVolby("ramecky", RAMECKY, "r", p => `<span>${p.nazev}</span>`);
 vytvorVolby("velikosti", VELIKOSTI, "v", p => `<span>${p.nazev}</span>`);
 vytvorVolby("zady", ZADY, "z", p => `<span>${p.nazev}</span>`);
+vytvorVolby("magnety", MAGNETY, "mg", p => `<span>${p.nazev}</span><span style="font-size:.8rem;color:#666">${p.popis}</span>`);
 vytvorVolby("uchyceni", UCHYCENI, "uc", p => `<span>${p.nazev}</span><span style="font-size:.8rem;color:#666">${p.popis}</span>`);
 vytvorVolby("ikonaRezim", IKONA_REZIM, "ir", p => `<span>${p.nazev}</span><span style="font-size:.8rem;color:#666">${p.popis}</span>`);
 vytvorVolby("velPisma", VEL_PISMA, "fs", p => `<span>${p.nazev}</span>`);
@@ -999,7 +1018,7 @@ vytvorVolby("produkty", PRODUKTY, "p", p => `<span class="emoji" style="font-siz
 });
 
 function oznac() {
-  const sady = { uchyceni:"uc", rSvetlo:"rs", rZalivka:"rz", barvyIkony:"c3", ikonaRezim:"ir", nozStyl:"ns", velPisma:"fs", nozPocet:"nn", nozDelka:"nd", nozRozestup:"nr", produkty:"p", oblouky:"a", zady:"z", tvary:"s", pisma:"f", ozdoby:"o", pozice:"op", barvyPodklad:"b", barvyNapis:"c", ramecky:"r", velikosti:"v" };
+  const sady = { magnety:"mg", uchyceni:"uc", rSvetlo:"rs", rZalivka:"rz", barvyIkony:"c3", ikonaRezim:"ir", nozStyl:"ns", velPisma:"fs", nozPocet:"nn", nozDelka:"nd", nozRozestup:"nr", produkty:"p", oblouky:"a", zady:"z", tvary:"s", pisma:"f", ozdoby:"o", pozice:"op", barvyPodklad:"b", barvyNapis:"c", ramecky:"r", velikosti:"v" };
   for (const [id, k] of Object.entries(sady))
     $(id).querySelectorAll("button:not(.kat)").forEach(b => b.setAttribute("aria-pressed", b.dataset.id === stav[k]));
   $("poziceBlok").classList.toggle("skryt", !stav.o);
@@ -1013,6 +1032,8 @@ function oznac() {
   $("k-tvar").classList.toggle("skryt", P === "d" || P === "r");
   $("k-rostlina").classList.toggle("skryt", P !== "r");
   $("uchyceniBlok").classList.toggle("skryt", !produkt(P).sroubky);
+  $("magnetBlok").classList.toggle("skryt", !produkt(P).magnet);
+  $("magnetRozmer").classList.toggle("skryt", stav.mg !== "v");
   // seznam jmen: u jmenovek přímo v kroku Text, jinak v Dalších možnostech
   { const obal = $("jmenaObal"), cil = P === "j" ? $("jmenaTextMisto") : $("jmenaMisto"); if (obal.parentNode !== cil) cil.appendChild(obal); }
   $("barvyIkonBlok").classList.toggle("skryt", P !== "r");
@@ -1050,10 +1071,10 @@ function oznac() {
   souhrny();
   $("pocet").textContent = stav.n;
 }
-$("text").value = stav.t; $("text2").value = stav.t2; $("text3").value = stav.t3; $("qrText").value = stav.q; $("rTeplota").value = stav.rt;
+$("text").value = stav.t; $("text2").value = stav.t2; $("text3").value = stav.t3; $("qrText").value = stav.q; $("rTeplota").value = stav.rt; $("magPrumer").value = stav.mp; $("magVyska").value = stav.mv;
 $("uvodNazev").textContent = (NASTAVENI.nazev ? "Vytiskne " + NASTAVENI.nazev : "Vytiskneme") + " na 3D tiskárně.";
 let casovac;
-for (const [id, k] of [["text", "t"], ["text2", "t2"], ["text3", "t3"], ["qrText", "q"], ["rTeplota", "rt"]])
+for (const [id, k] of [["text", "t"], ["text2", "t2"], ["text3", "t3"], ["qrText", "q"], ["rTeplota", "rt"], ["magPrumer", "mp"], ["magVyska", "mv"]])
   $(id).addEventListener("input", e => { stav[k] = e.target.value; souhrny(); clearTimeout(casovac); casovac = setTimeout(prekresli, 200); });
 
 /* ---------- Rozbalovací kroky ---------- */
@@ -1089,7 +1110,7 @@ function souhrny() {
     "k-produkt": nz(PRODUKTY, stav.p),
     "k-text": (seznamJmen().length > 1 ? `${seznamJmen().length} jmen (${seznamJmen().slice(0, 3).join(", ")}${seznamJmen().length > 3 ? "…" : ""})` : [q(stav.t.trim()), q(stav.t2.trim())].filter(Boolean).join(" + ") || "bez textu") + ", písmo " + nz(PISMA, stav.f).toLowerCase(),
     "k-zada": stav.z === "2" ? (q(stav.t3.trim()) || "jiný text") : nz(ZADY, stav.z),
-    "k-tvar": nz(TVARY, stav.s) + ((TVARY.find(t => t.id === stav.s) || {}).ikona && typ() === "k" ? (stav.ir === "c" ? " – celá ve tvaru ikony" : " – s jmenovkou") : ""),
+    "k-tvar": nz(TVARY, stav.s) + ((TVARY.find(t => t.id === stav.s) || {}).ikona && typ() === "k" ? (stav.ir === "c" ? " – celá ve tvaru ikony" : " – s jmenovkou") : "") + (produkt().magnet ? (stav.mg === "v" ? ", vlastní magnety" : ", magnety dodáme") : produkt().sroubky ? (stav.uc === "s" ? ", na šroubky" : ", na pásku") : ""),
     "k-nozicky": `${stav.ns === "zad" ? "z boku, bodce vzadu" : "shora"} – ${nz(NOZ_POCET, stav.nn).toLowerCase()}, ${cmNohy()} cm`,
     "k-ozdoba": stav.o ? nz(OZDOBY, stav.o) + ((stav.o === "logo" && !stav.l) || (stav.o === "obrazek" && !stav.ob) ? " (zatím nenahrané)" : "") + " – " + nz(POZICE, stav.op).toLowerCase() : "bez ozdoby",
     "k-barvy": `${nz(BARVY, stav.b)}, písmo ${nz(BARVY, stav.c).toLowerCase()}` + (stav.p === "r" && stav.c3 ? `, ikonky ${nz(BARVY, stav.c3).toLowerCase()}` : ""),
@@ -1979,7 +2000,7 @@ async function postav(presne, jeAktualni = () => true) {
   const zadOK = P !== "d" && !prod.bezZad;
   const zada = zadOK && stav.z === "2" ? sestavBlok(fonty, { t1:stav.t3.trim(), t2:"", o:"", a:"0" }) : null;
   if (zada) chybi.push(...zada.chybi);
-  let vk = velikostK(), zmenseno = false; const fsK = VEL_PISMA.find(v => v.id === stav.fs).k;
+  let vk = velikostK(), zmenseno = false, pocetMagnetu = 0; const fsK = VEL_PISMA.find(v => v.id === stav.fs).k;
   let gP = null, gN = null, gZ = null, gS = null, gM = null, gI = null, qrModul = 0, qrMalo = false, T = TL_PODKLAD, vlastni = null, vyskaTextu = 0, prazdny = false, otocit = false;
   const tvar = TVARY.find(t => t.id === stav.s);
   const vytlac = (tv, hl) => {
@@ -2079,6 +2100,8 @@ async function postav(presne, jeAktualni = () => true) {
     { const zkD = (prod.tl || d.tl || TL_PODKLAD) < 3 ? 0.4 : 0.5; // zkosení hrany dírku zmenší → přidat
       sroubky.forEach(([x, y]) => s.holes.push(kruhOtvor(x, y, 2.2 / vk + zkD))); }
     T = prod.tl || d.tl || TL_PODKLAD;
+    const mag = rozmerMagnetu();
+    if (prod.magnet) T = Math.max(T, Math.ceil((mag.vyska + 0.25 + 1.8) * 5) / 5); // nad magnetem aspoň 1,8 mm (z toho 0,6 mm nápis)
     const maxR = (d.maxRadek || MAX_RADEK) * fsK;
     const zk = T < 3 ? 0.4 : 0.5;
     gP = new THREE.ExtrudeGeometry(s, { depth:T - 2 * zk, bevelEnabled:true, bevelThickness:zk, bevelSize:zk, bevelSegments:2, curveSegments:32 });
@@ -2096,7 +2119,8 @@ async function postav(presne, jeAktualni = () => true) {
     const qr = zadOK && stav.z === "3" && stav.q.trim() ? qrNaZada(s, otvor, ram, vk) : null;
     if (qr) { qrModul = qr.modul * vk; qrMalo = qrModul < 0.9; }
     // magnety (otvor zespodu, po zvětšení přesně podle NASTAVENI.magnet)
-    const magnety = prod.magnet ? ((box.w * vk > 70) ? [[box.cx - box.w / 4, box.cy], [box.cx + box.w / 4, box.cy]] : [[box.cx, box.cy]]) : [];
+    const magnety = prod.magnet ? ((box.w * vk > 70 && box.w * vk / 2 > mag.prumer + 6) ? [[box.cx - box.w / 4, box.cy], [box.cx + box.w / 4, box.cy]] : [[box.cx, box.cy]]) : [];
+    pocetMagnetu = magnety.length;
     if (maPredni) vyskaTextu = umisteni(blok).m * (vyska1 || 0) * vk;
 
     if (!presne) {
@@ -2119,7 +2143,7 @@ async function postav(presne, jeAktualni = () => true) {
       if (maZadni) gZ = g3(zt, HL, -0.01, true);
       if (qr) { gZ = vytlac(qr.tvary, HL); gZ.translate(0, 0, -0.01); }
       if (magnety.length) { // jen pro náhled: šedý magnet zespodu
-        const r = NASTAVENI.magnet.prumer / 2 / vk;
+        const r = mag.prumer / 2 / vk;
         gM = mergeGeometries(magnety.map(([x, y]) => { const c = new THREE.CylinderGeometry(r, r, 0.3, 40); c.rotateX(Math.PI / 2); c.translate(x, y, -0.1); return c; }));
       }
     } else try {
@@ -2163,8 +2187,8 @@ async function postav(presne, jeAktualni = () => true) {
       for (const [x, y] of sroubky) // zápustná hlava šroubku
         deska = deska.subtract(M.Manifold.cylinder(2.2, 2.2 / vk, 4.4 / vk, 48).translate([x, y, T - 2.2 + 0.01]));
       for (const [x, y] of magnety) {
-        const r = (NASTAVENI.magnet.prumer / 2 + 0.2) / vk;
-        deska = deska.subtract(M.Manifold.cylinder(NASTAVENI.magnet.vyska + 0.25 + 1, r, r, 64).translate([x, y, -1]));
+        const r = (mag.prumer / 2 + 0.2) / vk;
+        deska = deska.subtract(M.Manifold.cylinder(mag.vyska + 0.25 + 1, r, r, 64).translate([x, y, -1]));
       }
       gP.dispose(); gP = zManifoldu(deska);
     } catch (e) { console.error("Zapuštění se nepovedlo", e); }
@@ -2173,7 +2197,7 @@ async function postav(presne, jeAktualni = () => true) {
   skaluj(gP); if (gN) skaluj(gN); if (gZ) skaluj(gZ); if (gM) skaluj(gM); if (gI) skaluj(gI);
   gP.computeBoundingBox();
   if (prod.stojan && !prazdny) gS = await stojanek(presne, T, gP.boundingBox);
-  return { gP, gN, gZ, gS, gM, gI, zmenseno, T, P, chybi, tvary, vlastni, tvar, vyskaTextu, prazdny, otocit, qrModul, qrMalo };
+  return { gP, gN, gZ, gS, gM, gI, zmenseno, pocetMagnetu, T, P, chybi, tvary, vlastni, tvar, vyskaTextu, prazdny, otocit, qrModul, qrMalo };
 }
 /* Zápich do květináče: cedulka se špičkou, název nahoře a pod ním řádky s ikonkami péče.
    dekor = písmo (popisky + rámeček), dekor2 = ikonky (může mít třetí barvu). */
@@ -2324,7 +2348,7 @@ async function prekresli() {
   try { r = await postav(false, () => moje === verze); }
   catch (e) { console.error(e); $("tipNahled").textContent = "Nepodařilo se načíst písmo – zkontrolujte připojení."; return; }
   if (!r || moje !== verze) return;
-  const { gP, gN, gZ, gS, gM, gI, zmenseno, T, P, chybi, tvary, vlastni, tvar, vyskaTextu, prazdny, otocit, qrModul, qrMalo } = r;
+  const { gP, gN, gZ, gS, gM, gI, zmenseno, pocetMagnetu, T, P, chybi, tvary, vlastni, tvar, vyskaTextu, prazdny, otocit, qrModul, qrMalo } = r;
   const bP = BARVY.find(b => b.id === stav.b) || BARVY[0], bN = BARVY.find(b => b.id === stav.c) || BARVY[0];
 
   const mat = b => new THREE.MeshStandardMaterial({ color:b.textura ? "#ffffff" : b.hex, map:texturaBarvy(b), roughness:b.silk ? 0.22 : b.kov ? 0.35 : 0.55, metalness:b.silk ? 0.45 : b.kov ? 0.6 : 0.05, emissive:b.sviti ? 0x335522 : 0x000000,
@@ -2365,6 +2389,12 @@ async function prekresli() {
       : `✔ QR kód vyjde ${(qrModul * 1).toFixed(1).replace(".", ",")} mm na čtvereček – dobře čitelný. Otočte náhled prstem.`;
     if (stav.q.trim() && (!qrModul || qrMalo)) dalsiVar.push("⚠ QR kód je moc malý – víc v Dalších možnostech.");
   }
+  if (produkt(P).magnet) {
+    const mg = rozmerMagnetu(), ks = pocetMagnetu * stav.n; pocetMagnetuPosl = pocetMagnetu;
+    $("magnetInfo").textContent = (stav.mg === "v"
+      ? `Otvor bude na magnet ⌀ ${String(mg.prumer).replace(".", ",")} × ${String(mg.vyska).replace(".", ",")} mm. Budete potřebovat ${ks} ${ks === 1 ? "magnet" : ks < 5 ? "magnety" : "magnetů"} (${pocetMagnetu} na kus).`
+      : `Magnety ⌀ ${mg.prumer} × ${mg.vyska} mm dodáme a nalepíme (${ks} ks) – cenu domluvíme ve zprávě.`) + " Zadní stranu uvidíte, když náhled otočíte prstem.";
+  }
   if (zmenseno) dalsiVar.push("ℹ️ Víc se na tiskárnu nevejde – výrobek jsme zmenšili na největší možnou velikost.");
   $("malyText").textContent = varovani.length > (chybi.length ? 1 : 0) ? "⚠ Text je moc malý na tisk – víc v kroku Text." : dalsiVar.join(" ");
   const cm = x => (x / 10).toFixed(1).replace(".", ",");
@@ -2384,7 +2414,7 @@ function aktualizujTiskInfo({ P, T, gZ, gS, qrModul }) {
       (stav.ns === "zad" ? ` Bodce ze zadu ${cmNohy()} cm – v 3MF je zápich otočený lícem dolů a bodce trčí nahoru, tiskne se bez podpěr.` : "")
     : `Rozměr ${sirka.toFixed(1)} × ${vyska.toFixed(1)} mm, tloušťka ${T} mm. Nápisy jsou zapuštěné ${HL} mm do plochy (díly „Napis“${gZ ? " a „Napis_zadni“" : ""}) – v Bambu Studiu jim přiřaďte filament ${bN.nazev.toLowerCase()}, podkladu ${bP.nazev.toLowerCase()}.`);
   const pr = produkt(P), extra = [];
-  if (pr.magnet) extra.push(`Zespodu je otvor na magnet ⌀ ${NASTAVENI.magnet.prumer} × ${NASTAVENI.magnet.vyska} mm – vlepte ho (nebo vložte pauzou tisku).`);
+  if (pr.magnet) extra.push(`Zespodu ${stav.mg === "v" ? "otvor na zákazníkův magnet" : "otvor na náš magnet (dodat a nalepit!)"} ⌀ ${rozmerMagnetu().prumer} × ${rozmerMagnetu().vyska} mm, tloušťka ${T} mm.`);
   if (gS) extra.push("Stojánek je v 3MF jako samostatný díl „Stojanek“ (barva podkladu).");
   if (stav.z === "3" && qrModul) extra.push(`QR kód zezadu, čtvereček ${qrModul.toFixed(2)} mm – po tisku ho vyzkoušejte mobilem.`);
   if (P === "c") extra.push(stav.uc === "s" ? "Dvě zápustné dírky na šroubky ⌀ 4 mm." : "Přibalit oboustrannou lepicí pásku.");
@@ -2651,7 +2681,7 @@ function obnovKosik() {
 // načtení uloženého návrhu zpět do návrháře
 function nactiStav(st) {
   Object.assign(stav, VYCHOZI, st);
-  $("text").value = stav.t; $("text2").value = stav.t2; $("text3").value = stav.t3; $("qrText").value = stav.q; $("rTeplota").value = stav.rt;
+  $("text").value = stav.t; $("text2").value = stav.t2; $("text3").value = stav.t3; $("qrText").value = stav.q; $("rTeplota").value = stav.rt; $("magPrumer").value = stav.mp; $("magVyska").value = stav.mv;
   if (stav.jm) { $("jmena").value = stav.jm; $("jmenaBlok").classList.remove("skryt"); $("jmenaPrepinac").textContent = "✖ Zrušit seznam jmen"; nastavJmena(stav.jm, false); }
   else { $("jmena").value = ""; $("jmenaBlok").classList.add("skryt"); $("text").disabled = false; $("jmenaPrepinac").textContent = "👥 Zadat seznam jmen (třída, firma…)"; }
   tahy = dekodujTahy(stav.k);
@@ -2712,7 +2742,7 @@ function radkyNavrhu() {
     stav.p === "d" || produkt().bezZad ? "" : `Zadní strana: ${p.zadniStrana}`,
     stav.p === "r" ? `Péče: ${[nazev(R_SVETLO, stav.rs), stav.rt.trim(), nazev(R_ZALIVKA, stav.rz)].filter(x => x && x !== "Neuvádět").join(", ") || "bez ikonek"}` : "",
     stav.p === "r" && stav.c3 ? `Barva ikonek: ${nazev(BARVY, stav.c3)}` : "",
-    produkt().magnet ? `Magnet: vlepit (⌀ ${NASTAVENI.magnet.prumer} × ${NASTAVENI.magnet.vyska} mm)` : "",
+    produkt().magnet ? (stav.mg === "v" ? `Magnety: mám vlastní, ⌀ ${rozmerMagnetu().prumer} × ${rozmerMagnetu().vyska} mm, ${pocetMagnetuPosl} na kus (vlepím si je sám/sama)` : `Magnety: prosím dodat a nalepit (⌀ ${rozmerMagnetu().prumer} × ${rozmerMagnetu().vyska} mm, ${pocetMagnetuPosl} na kus) – cena po domluvě`) : "",
     produkt().stojan ? "Stojánek: ano, ke každé jmenovce" : "",
     stav.p === "c" ? (stav.uc === "s" ? "Uchycení: 2 dírky na šroubky (zápustné)" : "Uchycení: přibalit oboustrannou lepicí pásku") : "",
     priplatekKs() ? `Příplatky (materiál/magnet): ${priplatekKs()} Kč/ks` : "", stav.p === "d" ? "" : `Rámeček: ${p.ramecek}`, `Velikost: ${p.velikost}`,
