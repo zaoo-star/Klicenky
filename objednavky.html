@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Objednávky – 3Dz</title>
+<style>
+/* Přehled objednávek z návrháře (index.html). Stejný vzhled jako návrhář: tmavý, oranžová. */
+@font-face{font-family:"Jakarta";font-weight:500;src:url(https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-ext-500-normal.woff2)format("woff2");unicode-range:U+0100-024F}
+@font-face{font-family:"Jakarta";font-weight:500;src:url(https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-500-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F}
+@font-face{font-family:"Jakarta";font-weight:800;src:url(https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-ext-800-normal.woff2)format("woff2");unicode-range:U+0100-024F}
+@font-face{font-family:"Jakarta";font-weight:800;src:url(https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-800-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F}
+:root{color-scheme:dark;--bg:#0b0b0d;--karta:#141418;--karta2:#1b1b20;--linka:#27272e;--linka2:#3a3a43;--text:#f4f4f5;--tl:#a1a1aa;--sl:#71717a;--ak:#ff6b1a;--ok:#4ade80;--ch:#f87171;--r:16px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Jakarta",system-ui,sans-serif;font-weight:500;background:var(--bg);color:var(--text);font-size:17px;line-height:1.45}
+.wrap{max-width:860px;margin:0 auto;padding:16px 14px 60px}
+h1{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin:0}
+.hlava{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.hlava i{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--ak);color:#0b0b0d;font-style:normal;font-weight:800;font-size:.78rem}
+.hlava .vpravo{margin-left:auto}
+button,select,input{font-family:inherit;font-size:1rem}
+.tl{padding:11px 16px;border-radius:12px;border:1.5px solid var(--linka2);background:var(--karta2);color:var(--text);font-weight:700;cursor:pointer}
+.tl.hl{background:var(--ak);border-color:var(--ak);color:#0b0b0d}
+.karta{background:var(--karta);border:1px solid var(--linka);border-radius:20px;padding:16px;margin:12px 0}
+.souhrn{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:6px 0 4px}
+.souhrn div{background:var(--karta);border:1px solid var(--linka);border-radius:var(--r);padding:12px 14px}
+.souhrn b{display:block;font-size:1.4rem;font-weight:800;font-variant-numeric:tabular-nums}
+.souhrn span{color:var(--tl);font-size:.85rem}
+.filtry{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px}
+.filtry button{flex:0 0 auto;padding:9px 14px;border-radius:999px;border:1.5px solid var(--linka2);background:var(--karta2);color:var(--text);font-weight:700;cursor:pointer;white-space:nowrap}
+.filtry button[aria-pressed=true]{border-color:var(--ak);background:rgba(255,107,26,.15)}
+.hledat{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--linka2);background:#101013;color:var(--text);margin-top:8px}
+.obj{background:var(--karta);border:1px solid var(--linka);border-radius:20px;padding:16px;margin:12px 0}
+.obj.nova{border-color:rgba(255,107,26,.6)}
+.obj .r1{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.obj .jm{font-size:1.15rem;font-weight:800}
+.obj .kdy{color:var(--sl);font-size:.85rem}
+.obj .cena{margin-left:auto;font-size:1.2rem;font-weight:800;color:var(--ok);font-variant-numeric:tabular-nums}
+.obj .kontakt a{color:#ffb37f}
+.stitek{display:inline-block;padding:3px 9px;border-radius:999px;font-size:.78rem;font-weight:800;background:#26262c;color:var(--tl);margin:4px 6px 0 0}
+.stitek.ex{background:rgba(255,107,26,.2);color:#ffb37f}
+.stitek.pozde{background:rgba(248,113,113,.18);color:var(--ch)}
+.polozky{margin:10px 0 0;padding-left:1.2em;color:#e4e4e7}
+.polozky li{margin:3px 0}
+.pozn{color:var(--tl);font-size:.9rem;margin:8px 0 0}
+.akce{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.akce select{padding:10px 12px;border-radius:12px;border:1.5px solid var(--linka2);background:var(--karta2);color:var(--text);font-weight:700}
+details{margin-top:10px}
+summary{cursor:pointer;color:#ffb37f;font-weight:700}
+pre{white-space:pre-wrap;word-break:break-word;background:#101013;border:1px solid var(--linka);border-radius:12px;padding:12px;font-size:.85rem;color:var(--tl)}
+label{display:block;font-weight:800;margin:14px 0 6px}
+.pole{width:100%;padding:13px 14px;border-radius:12px;border:2px solid var(--linka2);background:#101013;color:var(--text)}
+.chyba{color:var(--ch);font-weight:700}
+.skryt{display:none!important}
+.navod ol{padding-left:1.2em}.navod li{margin:8px 0}
+code{background:#101013;border:1px solid var(--linka);border-radius:6px;padding:1px 6px;font-size:.85em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hlava"><i>3Dz</i><h1>Objednávky</h1><button class="tl vpravo skryt" id="odhlasit">Odhlásit</button></div>
+
+  <!-- 1) Firebase ještě není nastavený -->
+  <section class="karta navod skryt" id="navod">
+    <h2 style="margin-top:0">Ještě je potřeba propojit Firebase</h2>
+    <p>Přehled ukazuje objednávky, které návrhář ukládá do Firebase. Stačí to udělat jednou:</p>
+    <ol>
+      <li>Na <b>console.firebase.google.com</b> vytvořte projekt (třeba „3dz-objednavky“) a v něm <b>Firestore Database</b> (region europe-west).</li>
+      <li>V <b>Authentication → Sign-in method</b> zapněte <b>Email/Password</b> a v záložce Users přidejte sebe (e-mail a heslo).</li>
+      <li>V <b>Nastavení projektu → Vaše aplikace</b> přidejte webovou aplikaci a zkopírujte <code>firebaseConfig</code>.</li>
+      <li>Ten config vložte do <code>index.html</code> (řádek <code>firebase: null</code>) i sem do <code>objednavky.html</code> (řádek <code>const FIREBASE = null</code>).</li>
+      <li>Ve Firestore → <b>Rules</b> vložte pravidla ze spodní části tohoto souboru (komentář „PRAVIDLA“) a dejte Publish.</li>
+    </ol>
+    <p>Zákazníci dál posílají objednávky přes Messenger – do Firebase se ukládá jen kopie pro tenhle přehled.</p>
+  </section>
+
+  <!-- 2) Přihlášení -->
+  <section class="karta skryt" id="prihlaseni">
+    <h2 style="margin-top:0">Přihlášení</h2>
+    <label for="email">E-mail</label><input class="pole" id="email" type="email" autocomplete="username">
+    <label for="heslo">Heslo</label><input class="pole" id="heslo" type="password" autocomplete="current-password">
+    <p class="chyba" id="prihlChyba"></p>
+    <button class="tl hl" id="prihlasit" style="width:100%;padding:15px">Přihlásit</button>
+  </section>
+
+  <!-- 3) Přehled -->
+  <section class="skryt" id="prehled">
+    <div class="souhrn" id="souhrn"></div>
+    <div class="filtry" id="filtry"></div>
+    <input class="hledat" id="hledat" placeholder="Hledat jméno, kontakt nebo text…">
+    <div id="seznam"></div>
+    <p class="pozn" id="prazdno"></p>
+  </section>
+</div>
+
+<script type="module">
+/* ====== NASTAVENÍ – vložte stejný firebaseConfig jako v index.html ====== */
+const FIREBASE = null;
+/* např. const FIREBASE = { apiKey:"...", authDomain:"...", projectId:"...", appId:"..." }; */
+const KOLEKCE = "objednavky_klicenek";
+const STAVY = ["nová", "tiskne se", "hotovo", "předáno", "zrušeno"];
+/* ======================================================================= */
+const $ = id => document.getElementById(id);
+const esc = t => String(t ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+if (!FIREBASE) $("navod").classList.remove("skryt");
+else {
+  const V = "10.12.2";
+  const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
+  const { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-auth.js`);
+  const { getFirestore, collection, query, orderBy, limit, onSnapshot, doc, updateDoc } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
+  const app = initializeApp(FIREBASE), auth = getAuth(app), db = getFirestore(app);
+  let vse = [], filtr = "aktivní", odhlasitSnap = null;
+
+  $("prihlasit").onclick = async () => {
+    $("prihlChyba").textContent = "";
+    try { await signInWithEmailAndPassword(auth, $("email").value.trim(), $("heslo").value); }
+    catch (e) { $("prihlChyba").textContent = "Přihlášení se nepovedlo – zkontrolujte e-mail a heslo."; }
+  };
+  $("heslo").addEventListener("keydown", e => { if (e.key === "Enter") $("prihlasit").click(); });
+  $("odhlasit").onclick = () => signOut(auth);
+  $("hledat").addEventListener("input", vykresli);
+
+  onAuthStateChanged(auth, u => {
+    $("prihlaseni").classList.toggle("skryt", !!u); $("prehled").classList.toggle("skryt", !u); $("odhlasit").classList.toggle("skryt", !u);
+    if (odhlasitSnap) { odhlasitSnap(); odhlasitSnap = null; }
+    if (!u) return;
+    odhlasitSnap = onSnapshot(query(collection(db, KOLEKCE), orderBy("vytvoreno", "desc"), limit(300)), snap => {
+      vse = snap.docs.map(d => ({ id:d.id, ...d.data() })); vykresli();
+    }, e => { $("prazdno").textContent = "Objednávky nejde načíst: " + e.message + " (zkontrolujte pravidla ve Firestore)."; });
+  });
+
+  const datum = o => o.vytvoreno && o.vytvoreno.toDate ? o.vytvoreno.toDate() : null;
+  const kusy = o => (o.polozky && o.polozky.length ? o.polozky.reduce((a, p) => a + (p.ks || 0), 0) : o.pocet) || 0;
+  const aktivni = o => !["předáno", "zrušeno"].includes(o.stav || "nová");
+  function vykresli() {
+    const q = $("hledat").value.trim().toLowerCase();
+    const pocty = Object.fromEntries(STAVY.map(s => [s, vse.filter(o => (o.stav || "nová") === s).length]));
+    const fronta = vse.filter(o => ["nová", "tiskne se"].includes(o.stav || "nová"));
+    $("souhrn").innerHTML = `<div><b>${pocty["nová"]}</b><span>nových objednávek</span></div><div><b>${fronta.reduce((a, o) => a + kusy(o), 0)}</b><span>kusů k tisku</span></div>
+      <div><b>${fronta.reduce((a, o) => a + (o.orientacniCena || 0), 0)} Kč</b><span>v rozpracovaných</span></div><div><b>${(Math.round(fronta.reduce((a, o) => a + (o.odhadMinut || 0), 0) / 6) / 10).toLocaleString("cs-CZ")} h</b><span>odhad tisku</span></div>`;
+    const F = [["aktivní", "Rozpracované", vse.filter(aktivni).length], ...STAVY.map(s => [s, s[0].toUpperCase() + s.slice(1), pocty[s]]), ["vše", "Vše", vse.length]];
+    $("filtry").innerHTML = F.map(([id, n, c]) => `<button data-f="${esc(id)}" aria-pressed="${filtr === id}">${esc(n)} (${c})</button>`).join("");
+    $("filtry").querySelectorAll("button").forEach(b => b.onclick = () => { filtr = b.dataset.f; vykresli(); });
+    const seznam = vse.filter(o => filtr === "vše" || (filtr === "aktivní" ? aktivni(o) : (o.stav || "nová") === filtr))
+      .filter(o => !q || [o.jmeno, o.kontakt, o.text, o.zprava, o.organizace].join(" ").toLowerCase().includes(q));
+    $("prazdno").textContent = seznam.length ? "" : "Žádné objednávky v tomhle výběru.";
+    const dnes = new Date().toISOString().slice(0, 10);
+    $("seznam").innerHTML = seznam.map(o => {
+      const d = datum(o), st = o.stav || "nová";
+      const polozky = o.polozky && o.polozky.length ? o.polozky.map(p => `<li>${esc(p.popis)} – <b>${p.ks} ks</b></li>`).join("")
+        : `<li>${esc(o.vyrobek || "")}${o.text ? ` „${esc(o.text)}“` : ""}${o.tvar ? ` – ${esc(o.tvar)}` : ""}, ${esc(o.barvaKlicenky || "")}${o.barvaPisma ? " / " + esc(o.barvaPisma) : ""} – <b>${o.pocet || 1} ks</b></li>`;
+      const kontakt = String(o.kontakt || ""), tel = /^[+\d\s]{9,}$/.test(kontakt) ? `tel:${kontakt.replace(/\s/g, "")}` : kontakt.includes("@") ? `mailto:${kontakt}` : "";
+      const pozde = o.termin && o.termin < dnes && aktivni(o);
+      const odkaz = o.odkazObjednavky || o.odkaz || "";
+      return `<article class="obj${st === "nová" ? " nova" : ""}">
+        <div class="r1"><div><div class="jm">${esc(o.jmeno || "bez jména")}</div><div class="kdy">${d ? d.toLocaleString("cs-CZ", { day:"numeric", month:"numeric", hour:"2-digit", minute:"2-digit" }) : ""}${o.organizace ? " · " + esc(o.typZakaznika || "") + " " + esc(o.organizace) : ""}</div></div>
+          <div class="cena">${o.orientacniCena ? o.orientacniCena + " Kč" : ""}</div></div>
+        <div class="kontakt">${tel ? `<a href="${esc(tel)}">${esc(kontakt)}</a>` : esc(kontakt)}</div>
+        <div><span class="stitek">${esc(st)}</span>${o.expres ? `<span class="stitek ex">⚡ expres</span>` : ""}${o.termin ? `<span class="stitek${pozde ? " pozde" : ""}">potřebuje do ${new Date(o.termin).toLocaleDateString("cs-CZ")}</span>` : o.hotovoOdhad ? `<span class="stitek">slíbeno ~ ${new Date(o.hotovoOdhad).toLocaleDateString("cs-CZ")}</span>` : ""}</div>
+        <ul class="polozky">${polozky}</ul>
+        ${o.poznamka ? `<p class="pozn">📝 ${esc(o.poznamka)}</p>` : ""}
+        <div class="akce">
+          ${odkaz ? `<a class="tl hl" href="${esc(odkaz)}" target="_blank" rel="noopener" style="text-decoration:none">🖨 Otevřít pro tisk (3MF)</a>` : ""}
+          <select data-id="${esc(o.id)}" aria-label="Stav objednávky">${STAVY.map(s => `<option${s === st ? " selected" : ""}>${s}</option>`).join("")}</select>
+        </div>
+        ${o.zprava ? `<details><summary>Celá zpráva od zákazníka</summary><pre>${esc(o.zprava)}</pre></details>` : ""}
+      </article>`;
+    }).join("");
+    $("seznam").querySelectorAll("select").forEach(s => s.onchange = async () => {
+      try { await updateDoc(doc(db, KOLEKCE, s.dataset.id), { stav:s.value }); } catch (e) { alert("Stav se neuložil: " + e.message); }
+    });
+  }
+}
+</script>
+<!--
+PRAVIDLA pro Firestore (Firestore → Rules → vložit → Publish). E-mail změňte, pokud se přihlašujete jiným:
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /objednavky_klicenek/{id} {
+      // zákazník může objednávku jen vytvořit (ne číst ani měnit cizí)
+      allow create: if request.resource.data.stav == "nová"
+                    && request.resource.data.jmeno is string && request.resource.data.jmeno.size() < 200
+                    && request.resource.data.kontakt is string && request.resource.data.kontakt.size() < 200
+                    && request.resource.data.size() < 60;
+      // číst, měnit stav a mazat můžete jen vy
+      allow read, update, delete: if request.auth != null && request.auth.token.email == "zaoo@post.cz";
+    }
+  }
+}
+-->
+</body>
+</html>

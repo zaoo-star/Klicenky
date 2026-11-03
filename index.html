@@ -197,6 +197,16 @@ pre.zprava{white-space:pre-wrap;word-break:break-all;background:var(--pole);bord
 .jmRadek button svg.ik{margin:0}
 .jmRadek.nahled input{border-color:var(--akcent)}
 .jmRadek.nahled .oko{border-color:var(--akcent);color:var(--akcent-text)}
+.akce{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;width:100%;margin:14px 0 6px;padding:14px 16px;border-radius:var(--r);border:1px solid rgba(255,107,26,.45);background:linear-gradient(120deg,rgba(255,107,26,.22),rgba(220,38,38,.12));color:var(--text);font-family:inherit;text-align:left;cursor:pointer}
+.akce .akceText{flex:1 1 220px;display:flex;flex-direction:column;gap:2px}
+.akce b{font-size:1.02rem;font-weight:800}
+.akce .akceText span{font-size:.85rem;color:#e7d6cc}
+.akce .akceTl{flex:0 0 auto;padding:10px 14px;border-radius:12px;background:var(--akcent);color:#0b0b0d;font-weight:800;font-size:.9rem}
+.napady{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin}
+.napad{flex:0 0 150px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 8px 12px;border-radius:var(--r);border:1.5px solid var(--linka);background:var(--karta2);color:var(--text);font-family:inherit;font-size:.85rem;font-weight:700;line-height:1.2;text-align:center;cursor:pointer}
+.napad img{width:100%;height:58px;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5))}
+.napad small{font-weight:500;color:var(--tlumeny);font-size:.75rem}
+.hotovoDo{margin:14px 0 0;padding:12px 14px;border-radius:var(--r);background:var(--karta2);border:1px solid var(--linka);font-size:.95rem}
 .posun{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:0 auto}
 .posun .volba{min-height:56px;font-size:1.2rem}
 .posun .volba.stred{font-size:.85rem}
@@ -280,6 +290,7 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
   <header>
     <div class="znacka"><i>3Dz</i><span>3D tisk na zakázku</span></div>
     <h1 id="titul">Navrhněte si vlastní 3D výrobek</h1>
+    <button type="button" id="akce" class="akce skryt"><span class="akceText"><b id="akceNadpis"></b><span id="akcePod"></span></span><span class="akceTl" id="akceTl"></span></button>
     <p class="kratce">Napište text, vyberte tvar a barvy – vytiskneme vám to na 3D tiskárně.</p>
     <p id="podtitul">Klíčenky, magnetky, cedulky na dveře, jmenovky na stůl, visačky na dárky, záložky do knih a zápichy do dortu i do květináče – s vaším jménem nebo textem.</p>
     <p class="uvodKroky">Vyberte výrobek → napište text → zvolte tvar a barvy → pošlete objednávku. <b id="uvodNazev"></b></p>
@@ -297,6 +308,8 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
     <section class="krok skladaci" id="k-produkt">
       <h2><span class="cislo">1</span><span class="nadpis">Co chcete vyrobit?<span class="souhrn"></span></span></h2>
       <div class="volby tri" id="produkty"></div>
+      <div class="podnadpis" style="margin-top:20px">Nebo začněte hotovým nápadem</div>
+      <div class="napady" id="napady"></div>
       <p class="pozn" id="produktPozn"></p>
     </section>
 
@@ -533,6 +546,7 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
           <button type="button" id="plus" aria-label="Více">+</button>
         </div>
       </div>
+      <p class="hotovoDo" id="hotovoDo"></p>
       <div id="cenaBox" class="skryt">
         <div class="cena">Cena: <b id="cena"></b></div>
         <p class="pozn" id="cenaPozn"></p>
@@ -650,8 +664,12 @@ const NASTAVENI = {
     specialni: 10,       // příplatek v Kč za kus za každý speciální materiál (hedvábný, mramor, dřevo, svítící)
     magnet: 0,           // cena za dodání a nalepení magnetu v Kč/ks (0 = cena po domluvě, nepočítá se)
     expres: 30,          // příplatek za expresní výrobu v %
-    bezneDni: 5,         // za kolik dní běžně vyrobíte (kvůli upozornění u termínu)
+    bezneDni: 5,         // za kolik pracovních dní běžně vyrobíte (ukazuje se zákazníkům „hotovo zhruba do…“)
+    // NEJNIŽŠÍ CENA ZA 1 KUS podle výrobku (Kč) – když vyjde výpočet z času tisku nižší, použije se tahle
+    minKus: { k:30, z:40, d:60, m:40, c:90, j:25, r:45, b:50, koule:120, p:50, n:50, u:60, f:180, v:20 },
   },
+  // SEZÓNNÍ AKCE – pruh nahoře; po datu „do“ sám zmizí (zobrazit:false = vypnout)
+  akce: { zobrazit:true, text:"🎄 Vánoční ozdoby se jménem", podtext:"Objednávky do 15. 12., ať je stihneme před Vánoci.", tlacitko:"Navrhnout ozdobu", produkt:"b", do:"2026-12-15" },
   magnet: { prumer:10, vyska:2 }, // jaké magnety dodáváte vy (mm) – podle toho se udělá otvor na zadní straně
   // Adresa Google Apps Scriptu, který pošle objednávku na váš e-mail i s 3MF souborem a obrázkem (návod v e-mail-skript.gs)
   emailSkript: "",       // např. "https://script.google.com/macros/s/AKfy.../exec"
@@ -663,7 +681,8 @@ const NASTAVENI = {
   messenger: "61572738666591", // ID stránky 3Dz (z adresy facebook.com/profile.php?id=…) – nebo uživatelské jméno stránky, např. "vsechnocz" (pro m.me/vsechnocz)
   email: "",             // e-mail pro objednávky (záloha, když není Firebase ani Messenger)
   // Firebase – když vyplníte, objednávky se ukládají samy do Firestore (kolekce "objednavky_klicenek")
-  firebase: null
+  firebase: null,
+  firebaseJenKopie: true, // true = zákazník dál posílá přes Messenger a do Firebase se jen uloží kopie (pro přehled objednávek objednavky.html)
   /* např.:
   firebase: { apiKey:"...", authDomain:"...", projectId:"...", appId:"..." }
   */
@@ -1220,6 +1239,13 @@ const BARVY = [
    STAV
    ========================================================= */
 let verze = 0, rozmer = [0, 0];
+// odhad, kdy bude hotovo: dnes + běžná doba výroby v pracovních dnech (expres = zhruba polovina)
+function hotovoDo() {
+  let dni = Math.max(1, Math.round((NASTAVENI.cena.bezneDni || 5) * (expres ? 0.5 : 1))), d = new Date();
+  while (dni > 0) { d.setDate(d.getDate() + 1); if (d.getDay() !== 0 && d.getDay() !== 6) dni--; }
+  return d;
+}
+const hotovoText = () => hotovoDo().toLocaleDateString("cs-CZ", { weekday:"long", day:"numeric", month:"numeric" });
 const POZN_CENA = "Orientační cena hotového výrobku. Doprava na náklady zákazníka – poslání nebo osobní předání domluvíme.";
 const odhad = { objem:0, vymeny:0, minuty:0, gramy:0, cena:0, bezSlevy:0, sleva:0 };
 let zakaznik = "o", prevOzdoba = null, davkaBezi = false, kosik = [], objednavkaOdkaz = null;
@@ -1244,12 +1270,19 @@ function objem(g) {
   }
   return Math.abs(v / 6);
 }
+// nejnižší cena za kus podle výrobku (kulatá baňka má vlastní)
+function obnovHotovo() { const el = $("hotovoDo"); if (el) el.innerHTML = `📅 Hotovo zhruba <b>${hotovoText()}</b>${expres ? " (expres)" : ""} – přesný termín potvrdíme ve zprávě.`; }
+function minKus(st = stav) {
+  const M = NASTAVENI.cena.minKus || {}, t = TVARY.find(x => x.id === st.s) || {};
+  return (st.p === "b" && t.koule ? M.koule : M[st.p]) || 0;
+}
 function prepocitejCenu() {
   const C = NASTAVENI.cena, n = stav.n;
   odhad.gramy = odhad.objem / 1000 * 1.24;                       // PLA ≈ 1,24 g/cm³
   odhad.minuty = C.start + n * odhad.objem / C.rychlost / 60 + odhad.vymeny * C.vymena;
   odhad.kcNavic = priplatekKs() * n;
   let kc = odhad.minuty / 60 * C.hodina + n * odhad.gramy * C.gram + C.priplatek + odhad.kcNavic;
+  kc = Math.max(kc, n * minKus() + C.priplatek + odhad.kcNavic);
   kc = sExpres(Math.max(C.minimum, Math.ceil(kc / (C.zaokrouhlit || 1)) * (C.zaokrouhlit || 1)));
   odhad.bezSlevy = kc;
   const minKs = C.slevaOdKusu || 0, chybiKs = Math.max(0, minKs - n);
@@ -1262,11 +1295,13 @@ function prepocitejCenu() {
   if (kosik.length) { // celý košík
     const s = zahrnoutRozpracovany(), c = cenaPolozek(s ? [...kosik, aktualniPolozka()] : kosik), kdo = zakaznik === "skola" ? "školy" : "firmy";
     $("cena").innerHTML = (c.sleva ? `<s>${c.kc} Kč</s>${c.cena} Kč` : c.kc + " Kč") + " <span style='font-size:.9rem;color:var(--tlumeny)'>za objednávku</span>";
+    obnovHotovo();
     $("cenaPozn").textContent = (c.sleva ? `Sleva pro ${kdo} ${c.sleva} %. ` : slevaPro(zakaznik) && c.chybiKs ? `Sleva ${slevaPro(zakaznik)} % pro ${kdo} platí od ${minKs} ks – chybí ještě ${c.chybiKs} ks. ` : "") +
       `Cena za ${c.ks} ks.${ex} ` + POZN_CENA;
     return;
   }
   $("cena").innerHTML = odhad.sleva ? `<s>${kc} Kč</s>${odhad.cena} Kč` : kc + " Kč";
+  obnovHotovo();
   const min = Math.round(odhad.minuty);
   const kdo = zakaznik === "skola" ? "školy" : "firmy";
   $("cenaPozn").textContent = (odhad.sleva ? `Sleva pro ${kdo} ${odhad.sleva} %. `
@@ -1563,6 +1598,40 @@ $("uvodNazev").textContent = (NASTAVENI.nazev ? "Vytiskne " + NASTAVENI.nazev : 
 let casovac;
 for (const [id, k] of [["text", "t"], ["text2", "t2"], ["text3", "t3"], ["text3b", "t3"], ["qrText", "q"], ["rTeplota", "rt"], ["magPrumer", "mp"], ["magVyska", "mv"]])
   $(id).addEventListener("input", e => { stav[k] = e.target.value; souhrny(); clearTimeout(casovac); casovac = setTimeout(prekresli, 200); });
+
+/* ---------- Sezónní akce a hotové nápady ---------- */
+{
+  const A = NASTAVENI.akce;
+  const plati = A && A.zobrazit && (!A.do || new Date() <= new Date(A.do + "T23:59:59"));
+  if (plati) {
+    $("akceNadpis").textContent = A.text || ""; $("akcePod").textContent = A.podtext || ""; $("akceTl").textContent = A.tlacitko || "Navrhnout";
+    $("akce").classList.remove("skryt");
+    $("akce").onclick = () => { const b = [...$("produkty").querySelectorAll("button.volba")].find(x => x.dataset.id === A.produkt); if (b) b.click(); otevriKrok($("k-text")); };
+    const b = [...$("produkty").querySelectorAll("button.volba")].find(x => x.dataset.id === A.produkt); if (b) $("produkty").prepend(b); // akční výrobek jako první
+  }
+}
+const NAPADY = [
+  { nazev:"Vánoční baňky pro rodinu", popis:"každá s jiným jménem", st:{ p:"b", s:"koule", b:"cervena", c:"zlata", o:"hvezdicka", z:"1" }, jmena:true },
+  { nazev:"Jmenovky na svatbu", popis:"zlaté písmo, stojánek", st:{ p:"j", s:"obdelnik", f:"elegantni", b:"bila", c:"zlata", o:"" }, jmena:true },
+  { nazev:"Pro nejlepší učitelku", popis:"klíčenka se srdíčkem", st:{ p:"k", t:"Nejlepší učitelka", f:"psaci", o:"srdicko", b:"ruzova", c:"bila" } },
+  { nazev:"Známka pro pejska", popis:"kostička s telefonem", st:{ p:"n", s:"kost", t:"Rex", o:"tlapka", z:"2", b:"modra", c:"bila" } },
+  { nazev:"Podtácky s iniciálou", popis:"černé se zlatou", st:{ p:"p", s:"kolecko", t:"N", f:"noblesni", o:"", b:"cerna", c:"zlata" } },
+  { nazev:"Fotka pro babičku", popis:"srdce proti světlu", st:{ p:"f", ft:"srdce", b:"bila" } },
+  { nazev:"Zápich Sto let", popis:"do dortu, zlatý", st:{ p:"d", t:"Sto let", f:"psaci", b:"zlata", c:"bila", o:"" } },
+];
+NAPADY.forEach(n => {
+  const pr = PRODUKTY.find(x => x.id === n.st.p); if (!pr) return;
+  const b = document.createElement("button"); b.type = "button"; b.className = "napad";
+  b.innerHTML = `${NAHLEDY[pr.id] ? `<img src="${NAHLEDY[pr.id]}" alt="">` : `<span class="emoji">${pr.emoji}</span>`}<span>${n.nazev}</span><small>${n.popis}</small>`;
+  b.onclick = () => {
+    const st = { ...n.st }; if (st.b && !BARVY.some(x => x.id === st.b)) delete st.b; if (st.c && !BARVY.some(x => x.id === st.c)) delete st.c;
+    nactiStav({ ...st, n:1, jm:"" });
+    if (n.jmena) { $("jmenaPrepinac").click(); }
+    otevriKrok(n.st.p === "f" ? $("k-foto") : n.jmena && n.st.p !== "j" ? $("k-dalsi") : $("k-text"));
+    toast(n.jmena ? "Nápad je nastavený – teď napište jména (každé do jednoho políčka)." : "Nápad je nastavený – stačí přepsat text a případně barvy.");
+  };
+  $("napady").appendChild(b);
+});
 
 /* ---------- Editor dalších textů a ikon ---------- */
 const edKrok = () => 1.5 / (posledniNavrh.vk || 1);
@@ -3463,20 +3532,21 @@ function malyNahled() {
 async function pridatDoKosiku() {
   const C = NASTAVENI.cena;
   kosik.push({ st:{ ...stav }, popis:kratkyPopis(), detaily:radkyNavrhu(), nahled:await malyNahled(),
-               minuty:odhad.minuty - C.start, gramy:odhad.gramy * stav.n, ks:stav.n, kcNavic:priplatekKs() * stav.n });
+               minuty:odhad.minuty - C.start, gramy:odhad.gramy * stav.n, ks:stav.n, kcNavic:priplatekKs() * stav.n, minKc:minKus() * stav.n });
   ulozKosik();
 }
 // cena celé objednávky (start tiskárny se počítá jen jednou)
 function cenaPolozek(polozky) {
   const C = NASTAVENI.cena;
   const minuty = C.start + polozky.reduce((a, p) => a + p.minuty, 0), gramy = polozky.reduce((a, p) => a + p.gramy, 0), ks = polozky.reduce((a, p) => a + p.ks, 0);
-  const navic = polozky.reduce((a, p) => a + (p.kcNavic || 0), 0);
+  const navic = polozky.reduce((a, p) => a + (p.kcNavic || 0), 0), minimum = polozky.reduce((a, p) => a + (p.minKc || 0), 0);
   let kc = minuty / 60 * C.hodina + gramy * C.gram + C.priplatek + navic;
+  kc = Math.max(kc, minimum + C.priplatek + navic);
   kc = sExpres(Math.max(C.minimum, Math.ceil(kc / (C.zaokrouhlit || 1)) * (C.zaokrouhlit || 1)));
   const minKs = C.slevaOdKusu || 0, sleva = ks >= minKs ? slevaPro(zakaznik) : 0;
   return { kc, cena:sleva ? Math.round(kc * (1 - sleva / 100)) : kc, sleva, ks, minuty, chybiKs:Math.max(0, minKs - ks) };
 }
-function aktualniPolozka() { const C = NASTAVENI.cena; return { minuty:odhad.minuty - C.start, gramy:odhad.gramy * stav.n, ks:stav.n, kcNavic:priplatekKs() * stav.n }; }
+function aktualniPolozka() { const C = NASTAVENI.cena; return { minuty:odhad.minuty - C.start, gramy:odhad.gramy * stav.n, ks:stav.n, kcNavic:priplatekKs() * stav.n, minKc:minKus() * stav.n }; }
 // rozpracovaný návrh, který ještě není v košíku (přidá se při odeslání, pokud ho zákazník neodškrtne)
 const klicNavrhu = st => { const d = rozdilSt(st); delete d.n; delete d.jm; return JSON.stringify(d); };
 const jeRozpracovany = () => kosik.length > 0 && !davkaBezi && kosik.every(p => klicNavrhu({ ...VYCHOZI, ...p.st }) !== klicNavrhu(stav));
@@ -3591,6 +3661,7 @@ function textObjednavky() {
     $("poznamka").value.trim() ? `Poznámka: ${$("poznamka").value.trim()}` : "",
     termin ? `Potřebuji do: ${new Date(termin).toLocaleDateString("cs-CZ")}` : "",
     expres ? `⚡ Expresní výroba (+${NASTAVENI.cena.expres} %)` : "",
+    `Odhad, kdy bude hotovo: ${hotovoText()}`,
   ];
   if (kosik.length) {
     const c = cenaPolozek(kosik), min = Math.round(c.minuty);
@@ -3660,6 +3731,7 @@ const otevriMessenger = text => window.open(adresaMessengeru(text), "_blank");
 function ukazOdkaz() { $("odkazPole").value = odkazNavrhu(); }
 function postup(kroky) { ukazOdkaz(); $("rucnePostup").innerHTML = kroky.map(k => `<li>${k}</li>`).join(""); }
 async function posliMessenger() {
+  if (NASTAVENI.firebase) ulozFirebase().catch(e => console.warn("Kopie objednávky do Firebase se neuložila", e));
   const t = textObjednavky();
   $("zpravaText").textContent = t;
   const zkopirovano = await kopiruj(t);
@@ -3709,11 +3781,13 @@ async function ulozFirebase() {
     ...popisNavrhu(), pocet: stav.n, polozky: kosik.map(p => ({ popis:p.popis, ks:p.ks })), odkazObjednavky: kosik.length ? odkazObjednavky() : "", orientacniCena: odhad.cena, cenaBezSlevy: odhad.bezSlevy, slevaProcent: odhad.sleva,
         typZakaznika: nazev(ZAKAZNICI, zakaznik), organizace: $("organizace").value.trim(), ico: $("ico").value.trim(), odhadMinut: Math.round(odhad.minuty),
     jmeno: $("jmeno").value.trim(), kontakt: $("telefon").value.trim(), poznamka: $("poznamka").value.trim(),
-    odkaz: odkazNavrhu(), stav: "nová", vytvoreno: serverTimestamp()
+    odkaz: odkazNavrhu(), zprava: textObjednavky(), hotovoOdhad: hotovoDo().toISOString().slice(0, 10), termin: termin || "", expres,
+    stav: "nová", vytvoreno: serverTimestamp()
   });
 }
-if (NASTAVENI.messenger && (NASTAVENI.firebase || NASTAVENI.emailSkript)) $("messenger").classList.remove("skryt");
-if (!NASTAVENI.firebase && !NASTAVENI.emailSkript && NASTAVENI.messenger) $("odeslat").textContent = "💬 Odeslat přes Messenger";
+const jenMessenger = NASTAVENI.messenger && !NASTAVENI.emailSkript && (!NASTAVENI.firebase || NASTAVENI.firebaseJenKopie);
+if (NASTAVENI.messenger && !jenMessenger) $("messenger").classList.remove("skryt");
+if (jenMessenger) $("odeslat").textContent = "💬 Odeslat přes Messenger";
 obnovKosik();
 $("expresProc").textContent = `(+${NASTAVENI.cena.expres} %)`;
 $("termin").min = new Date().toISOString().slice(0, 10);
@@ -3755,7 +3829,7 @@ async function ukazShrnuti(cil) {
   $("shrnutiKontakt").innerHTML = [
     zakaznik !== "o" ? `🏢 ${zakaznik === "skola" ? "Škola" : "Firma"}: <b>${esc(v("organizace"))}</b>${v("ico") ? ", IČO " + esc(v("ico")) : ""}` : "",
     `👤 <b>${esc(v("jmeno"))}</b>`, `📞 ${esc(v("telefon"))}`,
-    termin ? `📅 Potřebuji do: <b>${new Date(termin).toLocaleDateString("cs-CZ")}</b>` : "",
+    termin ? `📅 Potřebuji do: <b>${new Date(termin).toLocaleDateString("cs-CZ")}</b>` : `📅 Hotovo zhruba <b>${hotovoText()}</b>`,
     expres ? "⚡ Expresní výroba" : "",
     v("poznamka") ? `📝 ${esc(v("poznamka"))}` : "",
     `<span class="pozn">Odešle se ${NASTAVENI.firebase || NASTAVENI.emailSkript ? (cil === "messenger" ? "přes Messenger" : "nám rovnou") : NASTAVENI.messenger ? "přes Messenger" : "zpráva"} – ${NASTAVENI.nazev || "my"} se vám pak ozve.</span>`,
@@ -3766,7 +3840,7 @@ $("shrnutiZpet").onclick = () => { ukaz("navrh"); setTimeout(() => otevriKrok($(
 $("shrnutiOdeslat").onclick = () => cilOdeslani === "messenger" ? posliMessenger() : odeslatObjednavku();
 $("odeslat").onclick = () => ukazShrnuti("hlavni");
 async function odeslatObjednavku() {
-  if (NASTAVENI.emailSkript || NASTAVENI.firebase) {
+  if (NASTAVENI.emailSkript || (NASTAVENI.firebase && !(NASTAVENI.firebaseJenKopie && NASTAVENI.messenger))) {
     $("odeslat").disabled = true; $("odeslat").textContent = "Odesílám…";
     try {
       const ukoly = [];
