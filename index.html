@@ -267,7 +267,7 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
 </style>
 <script type="importmap">
 {"imports":{
-  "three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+  "three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.min.js",
   "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
   "opentype":"https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.module.js",
   "manifold-3d":"https://cdn.jsdelivr.net/npm/manifold-3d@3.5.4/manifold.js",
@@ -323,6 +323,10 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
         <input type="text" id="text2" class="mensi" maxlength="22" autocomplete="off" placeholder="např. telefon">
       </div>
       <button type="button" class="vsechny" id="radek2Tl">+ Přidat druhý řádek textu</button>
+      <div id="zadaRychle" class="skryt">
+        <label class="pole" for="text3b">Zezadu <span style="font-weight:500;color:var(--slaby)">(např. telefon – nepovinné)</span></label>
+        <input type="text" id="text3b" class="mensi" maxlength="14" autocomplete="off" placeholder="např. 777 123 456">
+      </div>
       <div id="jmenaTextMisto" style="margin-top:12px"></div>
       <div class="podnadpis" style="margin-top:18px">Písmo</div>
       <div class="volby" id="pisma"></div>
@@ -1504,6 +1508,8 @@ function oznac() {
   $("k-nozicky").classList.toggle("skryt", P !== "d");
   $("velPismaBlok").classList.toggle("skryt", P === "d");
   $("posunBlok").classList.toggle("skryt", P === "d" || P === "r" || P === "z");
+  $("zadaRychle").classList.toggle("skryt", !(P === "n" || P === "u") || stav.z !== "2");
+  if (document.activeElement !== $("text3b")) $("text3b").value = stav.t3; if (document.activeElement !== $("text3")) $("text3").value = stav.t3;
   $("editorBlok").classList.toggle("skryt", typ(P) !== "k" || !!(TVARY.find(t => t.id === stav.s) || {}).koule);
   obnovRadek2();
   $("nozRozestupBlok").classList.toggle("skryt", stav.nn === "1");
@@ -1552,10 +1558,10 @@ document.querySelectorAll("#posunBlok .posun button").forEach(b => b.onclick = (
   else { stav.px = (stav.px || 0) + +b.dataset.px; stav.py = (stav.py || 0) + +b.dataset.py; }
   prekresli();
 });
-$("text").value = stav.t; $("text2").value = stav.t2; $("text3").value = stav.t3; $("qrText").value = stav.q; $("rTeplota").value = stav.rt; $("magPrumer").value = stav.mp; $("magVyska").value = stav.mv;
+$("text").value = stav.t; $("text2").value = stav.t2; $("text3").value = stav.t3; $("text3b").value = stav.t3; $("qrText").value = stav.q; $("rTeplota").value = stav.rt; $("magPrumer").value = stav.mp; $("magVyska").value = stav.mv;
 $("uvodNazev").textContent = (NASTAVENI.nazev ? "Vytiskne " + NASTAVENI.nazev : "Vytiskneme") + " na 3D tiskárně.";
 let casovac;
-for (const [id, k] of [["text", "t"], ["text2", "t2"], ["text3", "t3"], ["qrText", "q"], ["rTeplota", "rt"], ["magPrumer", "mp"], ["magVyska", "mv"]])
+for (const [id, k] of [["text", "t"], ["text2", "t2"], ["text3", "t3"], ["text3b", "t3"], ["qrText", "q"], ["rTeplota", "rt"], ["magPrumer", "mp"], ["magVyska", "mv"]])
   $(id).addEventListener("input", e => { stav[k] = e.target.value; souhrny(); clearTimeout(casovac); casovac = setTimeout(prekresli, 200); });
 
 /* ---------- Editor dalších textů a ikon ---------- */
@@ -3504,7 +3510,7 @@ function obnovKosik() {
 // načtení uloženého návrhu zpět do návrháře
 function nactiStav(st) {
   Object.assign(stav, VYCHOZI, st);
-  $("text").value = stav.t; $("text2").value = stav.t2; $("text3").value = stav.t3; $("qrText").value = stav.q; $("rTeplota").value = stav.rt; $("magPrumer").value = stav.mp; $("magVyska").value = stav.mv;
+  $("text").value = stav.t; $("text2").value = stav.t2; $("text3").value = stav.t3; $("text3b").value = stav.t3; $("qrText").value = stav.q; $("rTeplota").value = stav.rt; $("magPrumer").value = stav.mp; $("magVyska").value = stav.mv;
   if (stav.jm) { $("jmena").value = stav.jm; $("jmenaBlok").classList.remove("skryt"); $("jmenaPrepinac").textContent = "✖ Zrušit seznam jmen"; nastavJmena(stav.jm, false); }
   else { $("jmena").value = ""; $("jmenaBlok").classList.add("skryt"); $("text").disabled = false; $("jmenaPrepinac").textContent = "👥 Zadat seznam jmen (třída, firma…)"; }
   tahy = dekodujTahy(stav.k);
@@ -3546,13 +3552,13 @@ function popisNavrhu() {
     tvar: d ? "podle textu" : stav.p === "r" ? "cedulka se špičkou" : stav.s === "vlastni" ? "vlastní (nakreslený zákazníkem – viz odkaz)" : nazev(TVARY, stav.s) + ((TVARY.find(t => t.id === stav.s) || {}).ikona ? (stav.ir === "c" ? " (celá ve tvaru ikony)" : " (ikona + jmenovka)") : ""), pismo: nazev(PISMA, stav.f),
     ozdoba: stav.o ? nazev(OZDOBY, stav.o) + " – " + nazev(POZICE, stav.op).toLowerCase() : "bez ozdoby",
     barvaKlicenky: nazev(BARVY, stav.b), barvaPisma: nazev(BARVY, stav.c),
-    zadniStrana: d || produkt().bezZad ? "–" : stav.z === "3" ? `QR kód „${stav.q.trim()}“` : stav.z === "2" ? `text „${stav.t3.trim()}“` : stav.z === "1" ? "stejný nápis jako vpředu" : "prázdná",
-    ramecek: d ? "–" : stav.r === "1" ? "ano" : "ne", velikost: nazev(VELIKOSTI, stav.v) + ` (${(rozmer[0]/10).toFixed(1)} × ${(rozmer[1]/10).toFixed(1)} cm)`.replace(/\./g, ","),
+    zadniStrana: d || produkt().bezZad ? "–" : stav.z === "3" ? `QR kód „${stav.q.trim()}“` : stav.z === "2" ? (stav.t3.trim() ? `text „${stav.t3.trim()}“` : "prázdná") : stav.z === "1" ? "stejný nápis jako vpředu" : "prázdná",
+    ramecek: d ? "–" : stav.r === "1" ? "ano" : "ne", velikost: (TVARY.find(t => t.id === stav.s) || {}).koule && stav.p === "b" ? `${nazev(VELIKOSTI, stav.v)} (průměr ${(2 * koulePolomer() / 10).toFixed(1).replace(".", ",")} cm)` : nazev(VELIKOSTI, stav.v) + ` (${(rozmer[0]/10).toFixed(1)} × ${(rozmer[1]/10).toFixed(1)} cm)`.replace(/\./g, ","),
   };
 }
 function radkyNavrhu() {
   if (stav.p === "f") return [ "Výrobek: Fotka ve světle (litofanie)", `Tvar: ${nazev(FOTO_TVARY, stav.ft)}`, `Velikost: ${nazev(FOTO_VEL, stav.v)} (${(rozmer[0]/10).toFixed(1)} × ${(rozmer[1]/10).toFixed(1)} cm)`.replace(/\./g, ","),
-    `Jas: ${nazev(FOTO_JAS, stav.fj).toLowerCase()}`, `Pověšení: ${stav.fd === "1" ? "s ouškem" : "bez ouška"}`,
+    `Jas: ${nazev(FOTO_JAS, stav.fj).toLowerCase()}`, `Pověšení: ${stav.fd === "1" ? "s ouškem" : "bez ouška"}`, `Počet: ${stav.n} ks`,
     stav.fo ? "Fotku vám prosím pošlu i sem do Messengeru v plné kvalitě." : "Fotku vám pošlu do Messengeru." ];
   const p = popisNavrhu();
   return [
