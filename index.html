@@ -190,6 +190,13 @@ pre.zprava{white-space:pre-wrap;word-break:break-all;background:var(--pole);bord
 .edIkony{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;max-height:230px;overflow:auto;padding:2px}
 .edIkony button{height:52px;border-radius:12px;border:1.5px solid var(--linka);background:var(--karta2);display:grid;place-items:center;cursor:pointer}
 .edIkony button svg{width:30px;height:26px}
+.jmRadek{display:flex;align-items:center;gap:8px;margin-top:8px}
+.jmRadek .cis{flex:0 0 1.8em;text-align:right;color:var(--slaby);font-weight:700;font-variant-numeric:tabular-nums}
+.jmRadek input{flex:1;min-width:0}
+.jmRadek button{flex:0 0 auto;width:48px;height:50px;display:grid;place-items:center;border-radius:12px;border:1.5px solid var(--linka2);background:var(--karta2);color:var(--text);font-size:1.1rem;cursor:pointer}
+.jmRadek button svg.ik{margin:0}
+.jmRadek.nahled input{border-color:var(--akcent)}
+.jmRadek.nahled .oko{border-color:var(--akcent);color:var(--akcent-text)}
 .posun{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:300px;margin:0 auto}
 .posun .volba{min-height:56px;font-size:1.2rem}
 .posun .volba.stred{font-size:.85rem}
@@ -494,8 +501,11 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
         <div class="blokNadpis">Víc kusů s různými jmény</div>
         <button type="button" class="vedlejsi" id="jmenaPrepinac" style="margin-top:0">👥 Zadat seznam jmen (třída, firma…)</button>
         <div id="jmenaBlok" class="skryt">
-          <textarea id="jmena" rows="6" placeholder="Jana&#10;Petr&#10;Eva" style="margin-top:10px"></textarea>
-          <p class="pozn" id="jmenaInfo">Každé jméno na nový řádek.</p>
+          <p class="pozn" style="margin:12px 2px 8px;color:var(--text);font-size:.95rem">Do každého políčka napište <b>jedno jméno</b>. Každé jméno = jedna klíčenka se stejným vzhledem. Okem 👁 se podíváte, jak bude vypadat.</p>
+          <div id="jmenaPole"></div>
+          <button type="button" class="vsechny" id="jmenoPridat">＋ Přidat další jméno</button>
+          <textarea id="jmena" class="skryt" rows="6"></textarea>
+          <p class="pozn" id="jmenaInfo"></p>
         </div>
         </div>
       </div>
@@ -1759,17 +1769,47 @@ function nastavJmena(text, prekreslit = true) {
   const jm = seznamJmen();
   if (jm.length) { stav.t = jm[0]; $("text").value = jm[0]; stav.n = jm.length; }
   $("text").disabled = jm.length > 0;
-  $("jmenaInfo").textContent = jm.length ? `${jm.length} ${jm.length === 1 ? "jméno" : jm.length < 5 ? "jména" : "jmen"} = ${jm.length} ks. V náhledu vidíte první jméno.` : "V náhledu vidíte první jméno. Počet kusů se nastaví podle počtu jmen.";
+  $("jmenaInfo").textContent = jm.length ? `${jm.length} ${jm.length === 1 ? "jméno" : jm.length < 5 ? "jména" : "jmen"} = ${jm.length} ks. Prázdná políčka nevadí, nepočítají se.` : "V náhledu vidíte první jméno. Počet kusů se nastaví podle počtu jmen.";
   oznac(); prepocitejCenu();
   if (prekreslit) { clearTimeout(casovac); casovac = setTimeout(prekresli, 250); }
 }
 $("jmenaPrepinac").onclick = () => {
   const skryte = $("jmenaBlok").classList.toggle("skryt");
   if (skryte) { $("jmena").value = ""; nastavJmena(""); }
-  else $("jmena").focus();
+  else { if (!seznamJmen().length) { jmenaPoli = [stav.t.trim() !== VYCHOZI.t ? stav.t.trim() : "", "", ""]; ulozJmena(); vykresliJmena(jmenaPoli[0] ? 1 : 0); } else vykresliJmena(); }
   $("jmenaPrepinac").textContent = skryte ? "👥 Zadat seznam jmen (třída, firma…)" : "✖ Zrušit seznam jmen";
 };
 $("jmena").addEventListener("input", e => nastavJmena(e.target.value));
+// jména po jednom v políčkách (data zůstávají v #jmena, každé jméno na řádku)
+let jmenaPoli = [], jmenoNahled = 0, jmenaPise = false;
+function ulozJmena() { jmenaPise = true; $("jmena").value = jmenaPoli.join("\n"); nastavJmena($("jmena").value); jmenaPise = false; }
+function vykresliJmena(fokus = -1) {
+  const box = $("jmenaPole"); box.innerHTML = "";
+  jmenaPoli.forEach((j, i) => {
+    const r = document.createElement("div"); r.className = "jmRadek" + (seznamJmen()[jmenoNahled] === j.trim() && j.trim() ? " nahled" : "");
+    r.innerHTML = `<span class="cis">${i + 1}.</span><input type="text" class="mensi" maxlength="20" autocomplete="off" placeholder="Jméno ${i + 1}"><button type="button" class="oko" aria-label="Ukázat v náhledu">👁</button><button type="button" aria-label="Smazat jméno">✖</button>`;
+    const inp = r.querySelector("input"); inp.value = j;
+    inp.addEventListener("input", () => { jmenaPoli[i] = inp.value; ulozJmena(); });
+    inp.addEventListener("paste", ev => { // vložený seznam (řádky / čárky) se rozdělí do políček
+      const t = (ev.clipboardData || window.clipboardData).getData("text"); const casti = t.split(/[\n,;]+/).map(x => x.trim()).filter(Boolean);
+      if (casti.length < 2) return; ev.preventDefault();
+      jmenaPoli.splice(i, 1, ...casti); ulozJmena(); vykresliJmena(i + casti.length - 1);
+    });
+    inp.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); jmenaPoli.splice(i + 1, 0, ""); vykresliJmena(i + 1); } });
+    const [oko, smaz] = r.querySelectorAll("button");
+    oko.onclick = () => { const jm = j.trim() || inp.value.trim(); if (!jm) return; jmenoNahled = seznamJmen().indexOf(jm); stav.t = jm; $("text").value = jm; prekresli(); vykresliJmena(); scrollTo({ top:0, behavior:"smooth" }); };
+    smaz.onclick = () => { jmenaPoli.splice(i, 1); if (!jmenaPoli.length) jmenaPoli = [""]; ulozJmena(); vykresliJmena(); };
+    box.appendChild(r);
+  });
+  if (fokus >= 0) { const v = box.querySelectorAll("input")[fokus]; if (v) v.focus(); }
+}
+$("jmenoPridat").onclick = () => { jmenaPoli.push(""); vykresliJmena(jmenaPoli.length - 1); };
+// když se seznam nastaví zvenku (košík, odkaz), překreslit políčka
+const puvodniNastavJmena = nastavJmena;
+nastavJmena = function (text, prekreslit = true) {
+  puvodniNastavJmena(text, prekreslit);
+  if (!jmenaPise) { jmenaPoli = String(text || "").split("\n"); while (jmenaPoli.length < 3) jmenaPoli.push(""); jmenoNahled = 0; vykresliJmena(); }
+};
 if (stav.jm) { // návrh z odkazu se seznamem jmen
   $("jmena").value = stav.jm; $("jmenaBlok").classList.remove("skryt");
   $("jmenaPrepinac").textContent = "✖ Zrušit seznam jmen"; nastavJmena(stav.jm, false);
