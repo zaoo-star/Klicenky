@@ -181,6 +181,12 @@ pre.zprava{white-space:pre-wrap;word-break:break-all;background:var(--pole);bord
 #editorSvg .prvek{fill:var(--pismo,#fff);cursor:grab}
 #editorSvg .prvek.vybrany{fill:#ff6b1a;filter:drop-shadow(0 0 2px #ff6b1a)}
 #editorSvg .dira{fill:#121215}
+.edRada{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:thin}
+.edRada button{flex:0 0 auto;min-width:64px;height:56px;padding:0 10px;border-radius:12px;border:1.5px solid var(--linka);background:var(--karta2);color:var(--text);font-size:1.25rem;cursor:pointer}
+.edRada button[aria-pressed=true]{border-color:var(--akcent);box-shadow:0 0 0 1px var(--akcent) inset}
+.edRada button.kruh{min-width:44px;width:44px;height:44px;border-radius:50%;padding:0}
+.edAkce .volba{min-height:52px;font-size:.9rem}
+.edAkce .volba:disabled{opacity:.35}
 .edIkony{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px;max-height:230px;overflow:auto;padding:2px}
 .edIkony button{height:52px;border-radius:12px;border:1.5px solid var(--linka);background:var(--karta2);display:grid;place-items:center;cursor:pointer}
 .edIkony button svg{width:30px;height:26px}
@@ -417,10 +423,21 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
         <div class="volby" style="grid-template-columns:1fr 1fr;margin-top:10px">
           <button type="button" class="volba" id="edPridatText">＋ Text</button>
           <button type="button" class="volba" id="edPridatIkonu">＋ Ikona</button>
+          <label class="volba" id="edPridatObr" style="grid-column:1/-1;cursor:pointer">＋ Obrázek nebo logo<input type="file" id="edObrSoubor" accept="image/*" style="display:none"></label>
+        </div>
+        <div class="volby tri edAkce" style="margin-top:10px">
+          <button type="button" class="volba" id="edZpet" disabled>↶ Zpět</button>
+          <button type="button" class="volba" id="edKopie">⧉ Kopie</button>
+          <button type="button" class="volba" id="edStred">⇔ Na střed</button>
         </div>
         <div id="edIkony" class="skryt"><div class="podnadpis">Vyberte ikonu</div><div class="edIkony"></div></div>
         <div id="edOvladani" class="skryt">
           <input type="text" id="edText" class="mensi" maxlength="20" autocomplete="off" placeholder="Napište text" style="margin-top:12px">
+          <div id="edTextVolby">
+            <div class="podnadpis" style="margin-top:12px">Písmo</div><div class="edRada" id="edPisma"></div>
+            <div class="podnadpis">Oblouk</div><div class="volby tri" id="edOblouk"></div>
+          </div>
+          <div class="podnadpis" style="margin-top:12px">Barva</div><div class="edRada" id="edBarvy"></div>
           <div class="posun" style="margin-top:12px">
             <button type="button" class="volba" data-ed="mensi" aria-label="Menší">−</button><button type="button" class="volba" data-ed="y+" aria-label="Nahoru">▲</button><button type="button" class="volba" data-ed="vetsi" aria-label="Větší">＋</button>
             <button type="button" class="volba" data-ed="x-" aria-label="Doleva">◀</button><button type="button" class="volba stred" data-ed="otocit">⟳ Otočit</button><button type="button" class="volba" data-ed="x+" aria-label="Doprava">▶</button>
@@ -1533,13 +1550,17 @@ for (const [id, k] of [["text", "t"], ["text2", "t2"], ["text3", "t3"], ["qrText
 
 /* ---------- Editor dalších textů a ikon ---------- */
 const edKrok = () => 1.5 / (posledniNavrh.vk || 1);
-function edZmen(i, zmena, hned = true) {
+const edHistorie = [];
+function edUloz() { edHistorie.push(JSON.stringify(stav.pr || [])); if (edHistorie.length > 40) edHistorie.shift(); $("edZpet").disabled = false; }
+function edZmen(i, zmena, hned = true, ulozit = true) {
+  if (ulozit) edUloz();
   stav.pr = stav.pr.map((e, j) => j === i ? { ...e, ...zmena } : e);
   if (hned) { clearTimeout(edZmen.c); edZmen.c = setTimeout(prekresli, 150); }
   obnovEditor();
 }
 function edPridej(e) {
   if ((stav.pr || []).length >= 8) { toast("Víc než 8 prvků se na výrobek nevejde."); return; }
+  edUloz();
   const n = stav.pr.length, b = posledniNavrh.box;
   stav.pr = [...stav.pr, { ...e, x:0, y:-(b.h / 2 + 2) + (n % 3) * 3, r:0 }];
   edVybrany = stav.pr.length - 1; souhrny(); prekresli(); obnovEditor();
@@ -1550,7 +1571,35 @@ $("edPridatIkonu").onclick = () => $("edIkony").classList.toggle("skryt");
 { const box = document.querySelector(".edIkony");
   IKONY.forEach(([id, nazev]) => { const b = document.createElement("button"); b.type = "button"; b.title = nazev; b.innerHTML = miniIkona(id, "width:30px;height:26px");
     b.onclick = () => { $("edIkony").classList.add("skryt"); edPridej({ d:"i", v:id, h:9 / (posledniNavrh.vk || 1) }); }; box.appendChild(b); }); }
-$("edText").addEventListener("input", e => { if (edVybrany >= 0) edZmen(edVybrany, { v:e.target.value }); });
+let edPsani = false;
+$("edText").addEventListener("focus", () => edPsani = false);
+$("edText").addEventListener("input", e => { if (edVybrany >= 0) { edZmen(edVybrany, { v:e.target.value }, true, !edPsani); edPsani = true; } });
+$("edZpet").onclick = () => { const h = edHistorie.pop(); if (h === undefined) return; stav.pr = JSON.parse(h); if (edVybrany >= stav.pr.length) edVybrany = stav.pr.length - 1; $("edZpet").disabled = !edHistorie.length; souhrny(); prekresli(); obnovEditor(); };
+$("edKopie").onclick = () => { const e = stav.pr[edVybrany]; if (!e) { toast("Nejdřív klepněte na prvek, který chcete zkopírovat."); return; }
+  if (stav.pr.length >= 8) { toast("Víc než 8 prvků se na výrobek nevejde."); return; }
+  edUloz(); const k = edKrok() * 2; stav.pr = [...stav.pr, { ...e, x:e.x + k, y:e.y - k }]; edVybrany = stav.pr.length - 1; souhrny(); prekresli(); obnovEditor(); };
+$("edStred").onclick = () => { if (edVybrany < 0) { toast("Nejdřív klepněte na prvek, který chcete dát na střed."); return; } edZmen(edVybrany, { x:0 }); };
+{ // písma, oblouk, barvy pro vybraný prvek
+  PISMA.forEach(p => { const b = document.createElement("button"); b.type = "button"; b.dataset.id = p.id; b.title = p.nazev; b.textContent = "Abc"; b.style.fontFamily = `"K-${p.id}"`;
+    b.onclick = () => { if (edVybrany >= 0) edZmen(edVybrany, { f:p.id }); }; $("edPisma").appendChild(b); });
+  OBLOUKY.forEach(p => { const b = document.createElement("button"); b.type = "button"; b.className = "volba"; b.dataset.id = p.id; b.innerHTML = `<span class="emoji">${p.ikona}</span><span>${p.nazev}</span>`;
+    b.onclick = () => { if (edVybrany >= 0) edZmen(edVybrany, { a:p.id }); }; $("edOblouk").appendChild(b); });
+  BARVY.forEach(p => { const b = document.createElement("button"); b.type = "button"; b.className = "kruh"; b.dataset.id = p.id; b.title = p.nazev; b.style.background = p.hex;
+    b.onclick = () => { if (edVybrany >= 0) edZmen(edVybrany, { c:p.id }); }; $("edBarvy").appendChild(b); });
+}
+$("edObrSoubor").addEventListener("change", ev => {
+  const f = ev.target.files && ev.target.files[0]; ev.target.value = ""; if (!f) return;
+  const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = () => { // stejné zpracování jako u loga, ale výsledek patří prvku
+    const puv = { l:stav.l, cache:logoCache, info:$("logoInfo").textContent, skryto:$("logoNahled").classList.contains("skryt") };
+    logoObraz = img; logoObratit = false; zpracujLogo(); const kod = stav.l;
+    stav.l = puv.l; logoCache = puv.cache; $("logoInfo").textContent = puv.info; $("logoNahled").classList.toggle("skryt", puv.skryto); URL.revokeObjectURL(url);
+    if (!kod || kod === puv.l) { toast("V obrázku jsme nic nenašli – zkuste obrázek na bílém pozadí."); return; }
+    edPridej({ d:"o", v:kod, h:14 / (posledniNavrh.vk || 1) });
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); toast("Tenhle obrázek se nepodařilo otevřít."); };
+  img.src = url;
+});
 document.querySelectorAll("#edOvladani [data-ed]").forEach(b => b.onclick = () => {
   const e = stav.pr[edVybrany]; if (!e) return; const k = edKrok();
   const z = { "x-":{ x:e.x - k }, "x+":{ x:e.x + k }, "y-":{ y:e.y - k }, "y+":{ y:e.y + k }, mensi:{ h:Math.max(2 / posledniNavrh.vk, e.h / 1.15) }, vetsi:{ h:Math.min(40 / posledniNavrh.vk, e.h * 1.15) }, otocit:{ r:((e.r || 0) + 15) % 360 } }[b.dataset.ed];
@@ -1572,12 +1621,18 @@ function obnovEditor() {
   (stav.pr || []).forEach((e, i) => {
     const pol = N.prvky[i];
     const d = pol && pol.length ? edCesta(pol) : `M${N.box.cx + e.x - e.h / 2},${-(N.box.cy + e.y) - e.h / 2}h${e.h}v${e.h}h${-e.h}Z`;
-    h += `<path class="prvek${i === edVybrany ? " vybrany" : ""}" data-i="${i}" fill-rule="evenodd" d="${d}"/>`;
+    const bc = BARVY.find(b => b.id === (e.c || stav.c));
+    h += `<path class="prvek${i === edVybrany ? " vybrany" : ""}" data-i="${i}" fill-rule="evenodd" d="${d}"${bc && i !== edVybrany ? ` style="fill:${bc.hex}"` : ""}/>`;
   });
   svg.innerHTML = h;
   const e = stav.pr[edVybrany];
   $("edOvladani").classList.toggle("skryt", !e);
-  if (e) { $("edText").classList.toggle("skryt", e.d !== "t"); if (document.activeElement !== $("edText")) $("edText").value = e.d === "t" ? e.v : ""; }
+  if (e) {
+    $("edText").classList.toggle("skryt", e.d !== "t"); $("edTextVolby").classList.toggle("skryt", e.d !== "t");
+    if (document.activeElement !== $("edText")) $("edText").value = e.d === "t" ? e.v : "";
+    const zn = (id, v) => $(id).querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.id === v));
+    zn("edPisma", e.f || stav.f); zn("edOblouk", e.a || "0"); zn("edBarvy", e.c || stav.c);
+  }
   $("editorTip").textContent = stav.pr.length ? (e ? "Vybraný prvek je oranžově. Posuňte ho prstem nebo šipkami." : "Klepněte na prvek, který chcete upravit, nebo ho rovnou posuňte prstem.") : "Přidejte text nebo ikonu. Pak ji posunete prstem nebo šipkami.";
 }
 { // tažení prvků prstem / myší
@@ -1749,7 +1804,7 @@ controls.enablePan = false; controls.enableZoom = false; controls.enableDamping 
 let houpani = true;
 controls.addEventListener("start", () => houpani = false);
 const skupina = new THREE.Group(); scene.add(skupina);
-let meshPodklad = null, meshNapis = null, meshZadni = null, meshStojan = null, meshMagnet = null, meshIkony = null, otaceni = false;
+let meshPrvky = [], meshPodklad = null, meshNapis = null, meshZadni = null, meshStojan = null, meshMagnet = null, meshIkony = null, otaceni = false;
 
 let posledniVel = "", rozmerModelu = null;
 function velikost() {
@@ -2109,6 +2164,18 @@ function logoData() {
   logoCache = { kod:stav.l, v };
   return v;
 }
+const prvekObrCache = new Map();
+function prvekObrTvary(kod, h) { // obrázek z editoru (stejný formát jako logo), výška h, střed v 0
+  let d = prvekObrCache.get(kod);
+  if (d === undefined) {
+    const [hl, telo] = String(kod).split(";"), [W, H] = (hl || "").split(",").map(Number);
+    const sm = (telo || "").split("|").map(t => t.split(" ").map(p => { const [x, y] = p.split(",").map(Number); return new V2(x, y); })).filter(t => t.length > 2);
+    d = sm.length && W && H ? { W, H, sm } : null; prvekObrCache.set(kod, d);
+  }
+  if (!d) return [];
+  const k = h / d.H;
+  return smyckyNaTvary(d.sm.map(s => s.map(p => new V2((p.x - d.W / 2) * k, (p.y - d.H / 2) * k))));
+}
 function logoTvary(cx, cy, h) {
   const d = logoData(); if (!d) return [];
   const k = h / d.H;
@@ -2136,7 +2203,7 @@ function zpracujLogo() {
   let m;
   if (pruhledne && !logoObratit) m = new Uint8Array(W * H).map((_, i) => kryje(i) ? 1 : 0); // logo = neprůhledná část
   else {
-    m = new Uint8Array(W * H).map((_, i) => kryje(i) && jas[i] < prah ? 1 : 0);
+    m = new Uint8Array(W * H).map((_, i) => kryje(i) && jas[i] <= prah ? 1 : 0); // Otsu: tmavá třída je ≤ práh (jinak u čistě černobílého loga nic nezbude)
     // pozadí je to, čeho je víc na okraji → když je „logo“ na okraji, obrátíme
     let okraj = 0, okrN = 0;
     for (let x = 0; x < W; x++) { okraj += m[x] + m[(H - 1) * W + x]; okrN += 2; }
@@ -2558,7 +2625,7 @@ async function postav(presne, jeAktualni = () => true) {
   const zada = zadOK && stav.z === "2" ? sestavBlok(fonty, { t1:stav.t3.trim(), t2:"", o:"", a:"0" }) : null;
   if (zada) chybi.push(...zada.chybi);
   let vk = velikostK(), zmenseno = false, pocetMagnetu = 0; const fsK = VEL_PISMA.find(v => v.id === stav.fs).k;
-  let gP = null, gN = null, gZ = null, gS = null, gM = null, gI = null, qrModul = 0, qrMalo = false, T = TL_PODKLAD, vlastni = null, vyskaTextu = 0, prazdny = false, otocit = false;
+  let gE = [], gP = null, gN = null, gZ = null, gS = null, gM = null, gI = null, qrModul = 0, qrMalo = false, T = TL_PODKLAD, vlastni = null, vyskaTextu = 0, prazdny = false, otocit = false;
   const tvar = TVARY.find(t => t.id === stav.s);
   const vytlac = (tv, hl) => {
     try { return new THREE.ExtrudeGeometry(tv, { depth:hl, bevelEnabled:false, curveSegments:10 }); }
@@ -2758,20 +2825,30 @@ async function postav(presne, jeAktualni = () => true) {
     const prvkyCS = async () => {
       if (!prvky.length || d.rot || d.uhel) return null;
       const M = await manifold(), casti = [];
-      for (const e of prvky) {
-        let cs;
-        if (e.d === "i") { try { cs = csZ(M, ikonaTvary(e.v, 0, 0, 1), 6); } catch { continue; } }
+      for (const e of stav.pr || []) {
+        let cs = null;
+        if (!e || !(e.d === "i" || e.d === "o" ? e.v : String(e.v || "").trim())) { casti.push(null); continue; }
+        if (e.d === "i") { try { cs = csZ(M, ikonaTvary(e.v, 0, 0, 1), 6); } catch {} }
+        else if (e.d === "o") { const tv = prvekObrTvary(e.v, 1); if (tv.length) cs = csZ(M, tv, 4); }
         else {
-          const b = sestavBlok(fonty, { t1:String(e.v).trim(), t2:"", o:"", a:"0" }); if (!b.tvary.length) continue;
-          const ob = obalka(b.tvary), vy = b.vyska1 || (ob.max.y - ob.min.y);
-          cs = csZ(M, b.tvary).translate([-(ob.min.x + ob.max.x) / 2, -(ob.min.y + ob.max.y) / 2]).scale([1 / vy, 1 / vy]);
+          const fe = e.f && e.f !== stav.f ? await pismo(e.f) : fonty;
+          const b = sestavBlok(fe, { t1:String(e.v).trim(), t2:"", o:"", a:e.a || "0" });
+          if (b.tvary.length) { const ob = obalka(b.tvary), vy = b.vyska1 || (ob.max.y - ob.min.y);
+            cs = csZ(M, b.tvary).translate([-(ob.min.x + ob.max.x) / 2, -(ob.min.y + ob.max.y) / 2]).scale([1 / vy, 1 / vy]); }
         }
-        casti.push(cs.scale([e.h, e.h]).rotate(e.r || 0).translate([box.cx + e.x, box.cy + e.y]));
+        casti.push(cs ? { c:e.c || stav.c, cs:cs.scale([e.h, e.h]).rotate(e.r || 0).translate([box.cx + e.x, box.cy + e.y]) } : null);
       }
-      if (!casti.length) return null;
+      if (!presne && jeAktualni()) posledniNavrh.prvky = casti.map(c => c ? c.cs.toPolygons() : []);
+      const platne = casti.filter(Boolean); if (!platne.length) return null;
       const zakl = new M.CrossSection([s, ...s.holes].map(c => c.getPoints(24).map(p => [p.x, p.y])), "EvenOdd").offset(-0.8 / vk, "Round", 2, 16);
-      if (!presne && jeAktualni()) posledniNavrh.prvky = casti.map(c => c.toPolygons());
-      return M.CrossSection.union(casti).intersect(zakl);
+      // seskupit podle barvy: barva písma jde k nápisu, ostatní barvy jsou samostatné díly
+      // pozdější prvek leží navrchu: z dřívějších se vyřízne (jinak by se dvě barvy překrývaly)
+      let navrchu = null;
+      for (let i = platne.length - 1; i >= 0; i--) { const c0 = platne[i].cs; if (navrchu) platne[i].cs = c0.subtract(navrchu); navrchu = navrchu ? navrchu.add(c0) : c0; }
+      const skup = new Map(); platne.forEach(p => skup.set(p.c, [...(skup.get(p.c) || []), p.cs]));
+      const vys = { hlavni:null, dalsi:[] };
+      for (const [c, l] of skup) { const cs = M.CrossSection.union(l).intersect(zakl); if (cs.isEmpty()) continue; if (c === stav.c) vys.hlavni = cs; else vys.dalsi.push({ c, cs }); }
+      return vys;
     };
     if (!presne && jeAktualni()) { // podklad pro editor: obrys, dírka, hlavní text
       const u = maPredni ? umisteni(blok) : null;
@@ -2794,7 +2871,11 @@ async function postav(presne, jeAktualni = () => true) {
       if (ram && !d.vlastniRam) { const g = vytlac([rameckovyTvar(s)], HL); g.translate(0, 0, T - HL + 0.01); predni.push(g); }
       if (d.dekor && d.dekor.length) { const g = vytlac(d.dekor, HL); g.translate(0, 0, T - HL + 0.01); predni.push(g); }
       if (d.dekor2 && d.dekor2.length) { gI = vytlac(d.dekor2, HL); gI.translate(0, 0, T - HL + 0.01); }
-      { const pc = await prvkyCS(); if (pc && jeAktualni()) { const tv = smyckyNaTvary(pc.toPolygons().map(p => p.map(([x, y]) => new V2(x, y)))); if (tv.length) { const g = vytlac(tv, HL); g.translate(0, 0, T - HL + 0.01); predni.push(g); } } }
+      { const pc = await prvkyCS(); if (pc && jeAktualni()) {
+          const naG = cs => { const tv = smyckyNaTvary(cs.toPolygons().map(p => p.map(([x, y]) => new V2(x, y)))); if (!tv.length) return null; const g = vytlac(tv, HL); g.translate(0, 0, T - HL + 0.012); return g; };
+          if (pc.hlavni) { const g = naG(pc.hlavni); if (g) predni.push(g); }
+          for (const x of pc.dalsi) { const g = naG(x.cs); if (g) gE.push({ g, c:x.c }); }
+        } }
       if (predni.length) gN = mergeGeometries(predni);
       if (maZadni) gZ = g3(zt, HL, -0.01, true);
       if (qr) { gZ = vytlac(qr.tvary, HL); gZ.translate(0, 0, -0.01); }
@@ -2817,15 +2898,21 @@ async function postav(presne, jeAktualni = () => true) {
       if (maPredni) predni.push(csBlok(blok, false));
       if (ram && !d.vlastniRam) predni.push(csZ(M, [rameckovyTvar(s)]));
       if (d.dekor && d.dekor.length) predni.push(csZ(M, d.dekor));
-      { const pc = await prvkyCS(); if (pc) predni.push(pc); }
+      const pcE = await prvkyCS();
+      if (pcE && pcE.hlavni) predni.push(pcE.hlavni);
       const zadni = maZadni ? csBlok(zt, true) : null;
       let deska;
       try { deska = naManifold(M, gP); if (deska.isEmpty()) throw 0; }
       catch { deska = new CrossSection([s, ...s.holes].map(c => c.getPoints(24).map(p => [p.x, p.y])), "EvenOdd").extrude(T); }
-      if (predni.length) {
-        const cs = CrossSection.union(predni);
-        gN = zManifoldu(cs.extrude(HL).translate([0, 0, T - HL]));
-        deska = deska.subtract(cs.extrude(HL + 1).translate([0, 0, T - HL]));
+      { // zapuštěné nápisy a prvky: vše se z podkladu vyřízne najednou (čistá uzavřená síť)
+        const dalsi = pcE ? pcE.dalsi : [], vse = [...predni, ...dalsi.map(x => x.cs)];
+        if (vse.length) deska = deska.subtract(CrossSection.union(vse).extrude(HL + 1).translate([0, 0, T - HL]));
+        if (predni.length) {
+          let cs = CrossSection.union(predni);
+          if (dalsi.length) cs = cs.subtract(CrossSection.union(dalsi.map(x => x.cs))); // prvky jiné barvy jsou navrchu
+          gN = zManifoldu(cs.extrude(HL).translate([0, 0, T - HL]));
+        }
+        for (const x of dalsi) gE.push({ g:zManifoldu(x.cs.extrude(HL).translate([0, 0, T - HL])), c:x.c });
       }
       if (d.dekor2 && d.dekor2.length) {
         const c2 = csZ(M, d.dekor2);
@@ -2851,10 +2938,10 @@ async function postav(presne, jeAktualni = () => true) {
     } catch (e) { console.error("Zapuštění se nepovedlo", e); }
   }
   const skaluj = g => { g.scale(vk, vk, 1); const sit = g.userData.sit; if (sit) for (let i = 0; i < sit.v.length; i += 3) { sit.v[i] *= vk; sit.v[i + 1] *= vk; } };
-  skaluj(gP); if (gN) skaluj(gN); if (gZ) skaluj(gZ); if (gM) skaluj(gM); if (gI) skaluj(gI);
+  skaluj(gP); if (gN) skaluj(gN); if (gZ) skaluj(gZ); if (gM) skaluj(gM); if (gI) skaluj(gI); gE.forEach(x => skaluj(x.g));
   gP.computeBoundingBox();
   if (prod.stojan && !prazdny) gS = await stojanek(presne, T, gP.boundingBox);
-  return { gP, gN, gZ, gS, gM, gI, zmenseno, pocetMagnetu, T, P, chybi, tvary, vlastni, tvar, vyskaTextu, prazdny, otocit, qrModul, qrMalo };
+  return { gE, gP, gN, gZ, gS, gM, gI, zmenseno, pocetMagnetu, T, P, chybi, tvary, vlastni, tvar, vyskaTextu, prazdny, otocit, qrModul, qrMalo };
 }
 /* Zápich do květináče: cedulka se špičkou, název nahoře a pod ním řádky s ikonkami péče.
    dekor = písmo (popisky + rámeček), dekor2 = ikonky (může mít třetí barvu). */
@@ -3005,7 +3092,7 @@ async function prekresli() {
   try { r = await postav(false, () => moje === verze); }
   catch (e) { console.error(e); $("tipNahled").textContent = "Nepodařilo se načíst písmo – zkontrolujte připojení."; return; }
   if (!r || moje !== verze) return;
-  const { gP, gN, gZ, gS, gM, gI, zmenseno, pocetMagnetu, T, P, chybi, tvary, vlastni, tvar, vyskaTextu, prazdny, otocit, qrModul, qrMalo } = r;
+  const { gE, gP, gN, gZ, gS, gM, gI, zmenseno, pocetMagnetu, T, P, chybi, tvary, vlastni, tvar, vyskaTextu, prazdny, otocit, qrModul, qrMalo } = r;
   setTimeout(obnovEditor, 0);
   const bP = BARVY.find(b => b.id === stav.b) || BARVY[0], bN = BARVY.find(b => b.id === stav.c) || BARVY[0];
 
@@ -3020,6 +3107,8 @@ async function prekresli() {
   meshPodklad = new THREE.Mesh(gP, gP.userData.lito ? new THREE.MeshStandardMaterial({ vertexColors:true, roughness:0.95, metalness:0, emissive:0x2a2218 }) : matP(bP)); skupina.add(meshPodklad);
   meshNapis = gN ? new THREE.Mesh(gN, mat(bN)) : null; if (meshNapis) skupina.add(meshNapis);
   meshZadni = gZ ? new THREE.Mesh(gZ, mat(bN)) : null; if (meshZadni) skupina.add(meshZadni);
+  meshPrvky.forEach(m => { skupina.remove(m); m.geometry.dispose(); m.material.dispose(); });
+  meshPrvky = (gE || []).map(x => { const m = new THREE.Mesh(x.g, mat(BARVY.find(b => b.id === x.c) || bN)); skupina.add(m); return m; });
   otaceni = !!gZ || !!gM || otocit;
   // podklady pro kalkulačku (nápisy jsou uvnitř podkladu, takže stačí objem podkladu)
   const vrstvy = HL / 0.2;
@@ -3027,7 +3116,7 @@ async function prekresli() {
   if ((TVARY.find(t => t.id === stav.s) || {}).koule && stav.p === "b") { // koule se tiskne s výplní ~15 %, ne plná
     const R = koulePolomer(), st = 1.2; odhad.objem = 4 * Math.PI * R * R * st + 0.15 * 4 / 3 * Math.PI * Math.pow(R - st, 3);
   }
-  odhad.vymeny = Math.round((gN ? vrstvy : 0) + (gZ ? vrstvy : 0) + (gN || gZ ? 1 : 0) + (gI && stav.c3 && stav.c3 !== stav.c ? vrstvy + 1 : 0));
+  odhad.vymeny = Math.round(((gE || []).length ? (gE.length * vrstvy) : 0) + (gN ? vrstvy : 0) + (gZ ? vrstvy : 0) + (gN || gZ ? 1 : 0) + (gI && stav.c3 && stav.c3 !== stav.c ? vrstvy + 1 : 0));
   prepocitejCenu();
 
   const bb = gP.boundingBox, sirka = bb.max.x - bb.min.x, vyska = bb.max.y - bb.min.y;
@@ -3077,7 +3166,7 @@ async function prekresli() {
   if (rezimTisk) aktualizujTiskInfo(r);
   if (!manifoldSlib) setTimeout(() => manifold().catch(() => {}), 1500); // připravit přesné výpočty dopředu
 }
-function aktualizujTiskInfo({ P, T, gZ, gS, qrModul }) {
+function aktualizujTiskInfo({ P, T, gZ, gS, gE, qrModul }) {
   const bP = BARVY.find(b => b.id === stav.b) || BARVY[0], bN = BARVY.find(b => b.id === stav.c) || BARVY[0];
   const [sirka, vyska] = rozmer, jm = seznamJmen();
   $("tiskInfo").textContent = `Odhad: ${odhad.gramy.toFixed(1)} g/ks, tisk ${Math.round(odhad.minuty)} min (${stav.n} ks, ${odhad.vymeny} výměn filamentu), ${odhad.cena} Kč. ` +
@@ -3090,6 +3179,7 @@ function aktualizujTiskInfo({ P, T, gZ, gS, qrModul }) {
   const pr = produkt(P), extra = [];
   if (pr.magnet) extra.push(`Zespodu ${stav.mg === "v" ? "otvor na zákazníkův magnet" : "otvor na náš magnet (dodat a nalepit!)"} ⌀ ${rozmerMagnetu().prumer} × ${rozmerMagnetu().vyska} mm, tloušťka ${T} mm.`);
   if (gS) extra.push("Stojánek je v 3MF jako samostatný díl „Stojanek“ (barva podkladu).");
+  if (gE && gE.length) extra.push(`Další barvy z editoru: ${gE.map(x => `díl „Prvky_${nazev(BARVY, x.c).replace(/\s+/g, "_")}“ = ${nazev(BARVY, x.c).toLowerCase()}`).join(", ")}.`);
   if ((TVARY.find(t => t.id === stav.s) || {}).koule) extra.push(`Kulatá baňka ⌀ ${Math.round(2 * koulePolomer())} mm: v 3MF jsou dvě poloviny vedle sebe, plochou stranou dolů (bez podpěr). Víčko s ouškem a nápis jsou díl „Napis“ (${bN.nazev.toLowerCase()}). Po tisku do dírek vložte 2 kousky filamentu 1,75 mm (asi 9 mm) jako kolíčky a poloviny slepte (vteřiňák / CA lepidlo).`);
   if (stav.z === "3" && qrModul) extra.push(`QR kód zezadu, čtvereček ${qrModul.toFixed(2)} mm – po tisku ho vyzkoušejte mobilem.`);
   if (P === "c") extra.push(stav.uc === "s" ? "Dvě zápustné dírky na šroubky ⌀ 4 mm." : "Přibalit oboustrannou lepicí pásku.");
@@ -3181,6 +3271,7 @@ async function presneKusy(navrhy, prubeh = () => {}) {
         r.gZ && { geo:r.gZ, nazev:stav.z === "3" ? "QR_kod" : "Napis_zadni", barva:bN.hex },
         r.gS && { geo:r.gS, nazev:"Stojanek", barva:bP.hex },
         r.gI && { geo:r.gI, nazev:"Ikony", barva:(BARVY.find(b => b.id === stav.c3) || bN).hex },
+        ...(r.gE || []).map(x => { const b = BARVY.find(y => y.id === x.c) || bN; return { geo:x.g, nazev:"Prvky_" + b.nazev.replace(/\s+/g, "_"), barva:b.hex }; }),
       ].filter(Boolean) });
     }
   } finally { Object.assign(stav, zaloha); davkaBezi = false; }
@@ -3415,7 +3506,7 @@ function radkyNavrhu() {
     stav.p === "d" ? `${stav.ns === "zad" ? "Bodce ze zadu (zapíchnout z boku dortu)" : "Nožičky dolů (zapíchnout shora)"}: ${nazev(NOZ_POCET, stav.nn).toLowerCase()}, ${cmNohy()} cm${stav.nn !== "1" ? ", " + nazev(NOZ_ROZESTUP, stav.nr).toLowerCase() : ""}` : "",
     stav.p !== "d" && stav.fs !== "m" ? `Velikost písma: ${nazev(VEL_PISMA, stav.fs).toLowerCase()}` : "",
     `Tvar: ${p.tvar}`, `Písmo: ${p.pismo}`, `Ozdoba: ${p.ozdoba}`,
-    (stav.pr || []).length ? `Další prvky: ${stav.pr.map(e => e.d === "i" ? "ikona " + (IKONY.find(x => x[0] === e.v) || [, e.v])[1].toLowerCase() : `text „${String(e.v).trim()}“`).join(", ")}` : "",
+    (stav.pr || []).length ? `Další prvky: ${stav.pr.map(e => (e.d === "i" ? "ikona " + (IKONY.find(x => x[0] === e.v) || [, e.v])[1].toLowerCase() : e.d === "o" ? "vlastní obrázek" : `text „${String(e.v).trim()}“`) + (e.c && e.c !== stav.c ? ` (${nazev(BARVY, e.c).toLowerCase()})` : "")).join(", ")}` : "",
     `Barva ${stav.p === "d" ? "obrysu" : "podkladu"}: ${p.barvaKlicenky}`,
     `Barva písma: ${p.barvaPisma}`,
     stav.p === "d" || produkt().bezZad ? "" : `Zadní strana: ${p.zadniStrana}`,
