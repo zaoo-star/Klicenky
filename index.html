@@ -1455,7 +1455,7 @@ vytvorVolby("produkty", PRODUKTY, "p", p => `${NAHLEDY[p.id] ? `<img src="${NAHL
   if (p.id === "r") { stav.r = "1"; if (stav.t === VYCHOZI.t) { stav.t = "Monstera"; $("text").value = stav.t; } if (stav.f === "obla") stav.f = "tucne"; }
   if (p.id === "d" && stav.f === "obla") stav.f = "psaci";
   if (p.id === "z") stav.a = "0";
-  if (p.id !== "b" && (TVARY.find(t => t.id === stav.s) || {}).koule) stav.s = "banka";
+  if (p.id !== "b" && (TVARY.find(t => t.id === stav.s) || {}).vanoce) stav.s = { p:"kolecko", n:"kost", u:"visacka" }[p.id] || "obdelnik"; // vánoční tvary jen u ozdob
   if (p.id === "p" && stav.s === VYCHOZI.s) stav.s = "kolecko";
   if (p.id === "n") { if (stav.s === VYCHOZI.s) stav.s = "kost"; if (stav.t === VYCHOZI.t) { stav.t = "Rex"; $("text").value = stav.t; } if (stav.o === VYCHOZI.o) stav.o = "tlapka"; if (stav.z === "0") stav.z = "2"; }
   if (p.id === "u") { if (stav.z === "0") stav.z = "2"; if (stav.s === VYCHOZI.s) stav.s = "visacka"; }
@@ -3235,10 +3235,10 @@ function seznamJmen() { return (stav.jm || "").split("\n").map(x => x.trim()).fi
 // tlačítko během přípravy ukazuje průběh
 async function sPrubehem(tl, fn) {
   if (tl.disabled) return;
-  const puvodni = tl.textContent; tl.disabled = true;
-  try { await fn((hotovo, celkem) => tl.textContent = `⏳ Připravuji… ${hotovo} / ${celkem}`); }
+  const puvodni = tl.innerHTML; tl.disabled = true;
+  try { await fn((hotovo, celkem) => tl.textContent = `Připravuji… ${hotovo} / ${celkem}`); }
   catch (e) { console.error(e); alert("Soubor se nepodařilo připravit: " + e.message); }
-  finally { tl.disabled = false; tl.textContent = puvodni; }
+  finally { tl.disabled = false; tl.innerHTML = puvodni; }
 }
 async function navrhZOdkazu(odkaz) {
   const h = new URLSearchParams((odkaz.split("#")[1] || ""));
@@ -3259,10 +3259,16 @@ async function presneKusy(navrhy, prubeh = () => {}) {
       else for (let i = 0; i < Math.max(1, +stav.n || 1); i++) ukoly.push({ nv, t:null });
     }
     let i = 0;
+    const hotove = new Map(); // stejný návrh (např. 10 stejných klíčenek) se spočítá jen jednou a pak se zkopíruje
+    const kopie = g => { if (!g) return g; const c = g.clone(); const sit = g.userData.sit; c.userData = sit ? { sit:{ v:sit.v.slice(), t:sit.t } } : {}; return c; };
     for (const u of ukoly) {
       prubeh(++i, ukoly.length);
+      await new Promise(r => setTimeout(r, 0)); // ať se ukáže průběh a stránka nezamrzne
       Object.assign(stav, u.nv); if (u.t !== null) stav.t = u.t;
-      const r = await postav(true);
+      const klic = JSON.stringify(rozdilSt({ ...stav }));
+      let r = hotove.get(klic);
+      if (r) r = { ...r, gP:kopie(r.gP), gN:kopie(r.gN), gZ:kopie(r.gZ), gS:kopie(r.gS), gI:kopie(r.gI), gE:(r.gE || []).map(x => ({ ...x, g:kopie(x.g) })) };
+      else { r = await postav(true); hotove.set(klic, { ...r, gP:kopie(r.gP), gN:kopie(r.gN), gZ:kopie(r.gZ), gS:kopie(r.gS), gI:kopie(r.gI), gE:(r.gE || []).map(x => ({ ...x, g:kopie(x.g) })) }); }
       if (r.otocit) otocLicemDolu([r.gP, r.gN, r.gZ].filter(Boolean)); // bodce nahoru, líc na podložce
       const bP = BARVY.find(b => b.id === stav.b) || BARVY[0], bN = BARVY.find(b => b.id === stav.c) || BARVY[0];
       kusy.push({ nazev:`${i} ${stav.t || "návrh"} (${bP.nazev}${r.gN || r.gZ ? " / " + bN.nazev : ""})`, dily:[
@@ -3306,13 +3312,21 @@ async function aktualni3MF(dalsi = [], prubeh) {
   return vytvor3MF(kusy);
 }
 
+let posledniSloty = [];
+function ukazSloty() {
+  let el = $("tiskSloty");
+  if (!el) { el = document.createElement("p"); el.id = "tiskSloty"; el.className = "pozn"; el.style.cssText = "font-size:1rem;color:var(--text);margin-top:12px"; $("tiskInfo").after(el); }
+  el.innerHTML = posledniSloty.length ? `<b>Filamenty v Bambu Studiu:</b> ${posledniSloty.map((n, i) => `${i + 1} = ${n.toLowerCase()}`).join(", ")}. Takhle je mějte v AMS – díly jsou k nim už přiřazené.` : "";
+}
 async function vytvor3MF(kusy) {
   const objekty = [], celky = [], polozky = [];
   const zakladni = [], indexBarvy = {};
+  const sloty = [], slotBarvy = hex => { const h = hex.toUpperCase(); let i = sloty.indexOf(h); if (i < 0) { sloty.push(h); i = sloty.length - 1; } return i + 1; };
+  const nastaveni = []; // pro Bambu Studio: který díl tisknout kterým filamentem
   let id = 1;
   const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
   for (const kus of kusy) {
-    const komponenty = [];
+    const komponenty = [], dilyCfg = [];
     for (const d of kus.dily) {
       const klic = d.nazev + d.barva;
       if (!(klic in indexBarvy)) { indexBarvy[klic] = zakladni.length; zakladni.push(`<base name="${d.nazev}" displaycolor="${d.barva.toUpperCase()}FF"/>`); }
@@ -3327,10 +3341,12 @@ async function vytvor3MF(kusy) {
       }
       objekty.push(`<object id="${id}" type="model" name="${esc(d.nazev)}" pid="100" pindex="${indexBarvy[klic]}"><mesh><vertices>${v.join("")}</vertices><triangles>${t.join("")}</triangles></mesh></object>`);
       komponenty.push(`<component objectid="${id}"/>`);
+      dilyCfg.push(`<part id="${id}" subtype="normal_part"><metadata key="name" value="${esc(d.nazev)}"/><metadata key="extruder" value="${slotBarvy(d.barva)}"/></part>`);
       id++;
       g.dispose(); if (m) m.dispose();
     }
     celky.push(`<object id="${id}" type="model" name="${esc(kus.nazev)}"><components>${komponenty.join("")}</components></object>`);
+    nastaveni.push(`<object id="${id}"><metadata key="name" value="${esc(kus.nazev)}"/><metadata key="extruder" value="${slotBarvy(kus.dily[0].barva)}"/>${dilyCfg.join("")}</object>`);
     polozky.push(`<item objectid="${id}"/>`);
     id++;
   }
@@ -3345,7 +3361,8 @@ ${celky.join("")}</resources>
     { nazev:"[Content_Types].xml", data:enc.encode(`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/></Types>`) },
     { nazev:"_rels/.rels", data:enc.encode(`<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Target="/3D/3dmodel.model" Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/></Relationships>`) },
     { nazev:"3D/3dmodel.model", data:enc.encode(model) },
-  ]);
+    { nazev:"Metadata/model_settings.config", data:enc.encode(`<?xml version="1.0" encoding="UTF-8"?>\n<config>\n${nastaveni.join("\n")}\n</config>\n`) },
+  ]).then(z => { posledniSloty = sloty.map(h => (BARVY.find(b => b.hex.toUpperCase() === h) || { nazev:h }).nazev); ukazSloty(); return z; });
 }
 // Jednoduchý ZIP bez komprese
 async function zip(soubory) {
