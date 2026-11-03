@@ -67,7 +67,7 @@ code{background:#101013;border:1px solid var(--linka);border-radius:6px;padding:
     <p>Přehled ukazuje objednávky, které návrhář ukládá do Firebase. Stačí to udělat jednou:</p>
     <ol>
       <li>Na <b>console.firebase.google.com</b> vytvořte projekt (třeba „3dz-objednavky“) a v něm <b>Firestore Database</b> (region europe-west).</li>
-      <li>V <b>Authentication → Sign-in method</b> zapněte <b>Email/Password</b> a v záložce Users přidejte sebe (e-mail a heslo).</li>
+      <li>V <b>Authentication → Sign-in method</b> zapněte <b>Google</b> a do Authorized domains přidejte <code>zaoo-star.github.io</code>.</li>
       <li>V <b>Nastavení projektu → Vaše aplikace</b> přidejte webovou aplikaci a zkopírujte <code>firebaseConfig</code>.</li>
       <li>Ten config vložte do <code>index.html</code> (řádek <code>firebase: null</code>) i sem do <code>objednavky.html</code> (řádek <code>const FIREBASE = null</code>).</li>
       <li>Ve Firestore → <b>Rules</b> vložte pravidla ze spodní části tohoto souboru (komentář „PRAVIDLA“) a dejte Publish.</li>
@@ -78,10 +78,9 @@ code{background:#101013;border:1px solid var(--linka);border-radius:6px;padding:
   <!-- 2) Přihlášení -->
   <section class="karta skryt" id="prihlaseni">
     <h2 style="margin-top:0">Přihlášení</h2>
-    <label for="email">E-mail</label><input class="pole" id="email" type="email" autocomplete="username">
-    <label for="heslo">Heslo</label><input class="pole" id="heslo" type="password" autocomplete="current-password">
+    <p class="pozn" style="font-size:1rem">Přihlaste se Google účtem, pod kterým máte Firebase.</p>
     <p class="chyba" id="prihlChyba"></p>
-    <button class="tl hl" id="prihlasit" style="width:100%;padding:15px">Přihlásit</button>
+    <button class="tl hl" id="prihlasit" style="width:100%;padding:15px">Přihlásit přes Google</button>
   </section>
 
   <!-- 3) Přehled -->
@@ -96,7 +95,8 @@ code{background:#101013;border:1px solid var(--linka);border-radius:6px;padding:
 
 <script type="module">
 /* ====== NASTAVENÍ – vložte stejný firebaseConfig jako v index.html ====== */
-const FIREBASE = null;
+const FIREBASE = { apiKey:"AIzaSyCKUXFiIS28fhEXGdLtuT2dTUPGT3_T3SY", authDomain:"dz-objednavky.firebaseapp.com", projectId:"dz-objednavky", storageBucket:"dz-objednavky.firebasestorage.app", messagingSenderId:"926222074790", appId:"1:926222074790:web:5d16fd2fb2848f7824c567" };
+const MAJITEL = "zaoosek@gmail.com"; // jen tento Google účet uvidí objednávky (stejně je to nastavené v pravidlech Firestore)
 /* např. const FIREBASE = { apiKey:"...", authDomain:"...", projectId:"...", appId:"..." }; */
 const KOLEKCE = "objednavky_klicenek";
 const STAVY = ["nová", "tiskne se", "hotovo", "předáno", "zrušeno"];
@@ -107,17 +107,17 @@ if (!FIREBASE) $("navod").classList.remove("skryt");
 else {
   const V = "10.12.2";
   const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
-  const { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-auth.js`);
+  const { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-auth.js`);
   const { getFirestore, collection, query, orderBy, limit, onSnapshot, doc, updateDoc } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
   const app = initializeApp(FIREBASE), auth = getAuth(app), db = getFirestore(app);
   let vse = [], filtr = "aktivní", odhlasitSnap = null;
 
   $("prihlasit").onclick = async () => {
     $("prihlChyba").textContent = "";
-    try { await signInWithEmailAndPassword(auth, $("email").value.trim(), $("heslo").value); }
-    catch (e) { $("prihlChyba").textContent = "Přihlášení se nepovedlo – zkontrolujte e-mail a heslo."; }
+    const p = new GoogleAuthProvider();
+    try { await signInWithPopup(auth, p); }
+    catch (e) { if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") await signInWithRedirect(auth, p); else $("prihlChyba").textContent = "Přihlášení se nepovedlo (" + (e.code || e.message) + ")."; }
   };
-  $("heslo").addEventListener("keydown", e => { if (e.key === "Enter") $("prihlasit").click(); });
   $("odhlasit").onclick = () => signOut(auth);
   $("hledat").addEventListener("input", vykresli);
 
@@ -125,6 +125,7 @@ else {
     $("prihlaseni").classList.toggle("skryt", !!u); $("prehled").classList.toggle("skryt", !u); $("odhlasit").classList.toggle("skryt", !u);
     if (odhlasitSnap) { odhlasitSnap(); odhlasitSnap = null; }
     if (!u) return;
+    if (u.email !== MAJITEL) { $("prehled").classList.add("skryt"); $("prihlaseni").classList.remove("skryt"); $("prihlChyba").textContent = `Účet ${u.email} k objednávkám nemá přístup. Přihlaste se účtem ${MAJITEL}.`; return; }
     odhlasitSnap = onSnapshot(query(collection(db, KOLEKCE), orderBy("vytvoreno", "desc"), limit(300)), snap => {
       vse = snap.docs.map(d => ({ id:d.id, ...d.data() })); vykresli();
     }, e => { $("prazdno").textContent = "Objednávky nejde načíst: " + e.message + " (zkontrolujte pravidla ve Firestore)."; });
@@ -174,7 +175,7 @@ else {
 }
 </script>
 <!--
-PRAVIDLA pro Firestore (Firestore → Rules → vložit → Publish). E-mail změňte, pokud se přihlašujete jiným:
+PRAVIDLA pro Firestore (už jsou nastavená v projektu dz-objednavky). E-mail = Google účet majitele:
 
 rules_version = '2';
 service cloud.firestore {
@@ -186,7 +187,7 @@ service cloud.firestore {
                     && request.resource.data.kontakt is string && request.resource.data.kontakt.size() < 200
                     && request.resource.data.size() < 60;
       // číst, měnit stav a mazat můžete jen vy
-      allow read, update, delete: if request.auth != null && request.auth.token.email == "zaoo@post.cz";
+      allow read, update, delete: if request.auth != null && request.auth.token.email == "zaoosek@gmail.com" && request.auth.token.email_verified == true;
     }
   }
 }

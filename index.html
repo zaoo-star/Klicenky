@@ -681,7 +681,7 @@ const NASTAVENI = {
   messenger: "61572738666591", // ID stránky 3Dz (z adresy facebook.com/profile.php?id=…) – nebo uživatelské jméno stránky, např. "vsechnocz" (pro m.me/vsechnocz)
   email: "",             // e-mail pro objednávky (záloha, když není Firebase ani Messenger)
   // Firebase – když vyplníte, objednávky se ukládají samy do Firestore (kolekce "objednavky_klicenek")
-  firebase: null,
+  firebase: { apiKey:"AIzaSyCKUXFiIS28fhEXGdLtuT2dTUPGT3_T3SY", authDomain:"dz-objednavky.firebaseapp.com", projectId:"dz-objednavky", storageBucket:"dz-objednavky.firebasestorage.app", messagingSenderId:"926222074790", appId:"1:926222074790:web:5d16fd2fb2848f7824c567" }, // projekt „3Dz objednavky“ (dz-objednavky)
   firebaseJenKopie: true, // true = zákazník dál posílá přes Messenger a do Firebase se jen uloží kopie (pro přehled objednávek objednavky.html)
   /* např.:
   firebase: { apiKey:"...", authDomain:"...", projectId:"...", appId:"..." }
@@ -3777,13 +3777,15 @@ async function ulozFirebase() {
   const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
   const { getFirestore, collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
   const db = getFirestore(initializeApp(NASTAVENI.firebase));
-  await addDoc(collection(db, "objednavky_klicenek"), {
+  const data = {
     ...popisNavrhu(), pocet: stav.n, polozky: kosik.map(p => ({ popis:p.popis, ks:p.ks })), odkazObjednavky: kosik.length ? odkazObjednavky() : "", orientacniCena: odhad.cena, cenaBezSlevy: odhad.bezSlevy, slevaProcent: odhad.sleva,
         typZakaznika: nazev(ZAKAZNICI, zakaznik), organizace: $("organizace").value.trim(), ico: $("ico").value.trim(), odhadMinut: Math.round(odhad.minuty),
     jmeno: $("jmeno").value.trim(), kontakt: $("telefon").value.trim(), poznamka: $("poznamka").value.trim(),
     odkaz: odkazNavrhu(), zprava: textObjednavky(), hotovoOdhad: hotovoDo().toISOString().slice(0, 10), termin: termin || "", expres,
     stav: "nová", vytvoreno: serverTimestamp()
-  });
+  };
+  for (const k in data) if (data[k] === undefined || (typeof data[k] === "number" && !isFinite(data[k]))) delete data[k]; // Firestore nebere undefined ani NaN
+  await addDoc(collection(db, "objednavky_klicenek"), data);
 }
 const jenMessenger = NASTAVENI.messenger && !NASTAVENI.emailSkript && (!NASTAVENI.firebase || NASTAVENI.firebaseJenKopie);
 if (NASTAVENI.messenger && !jenMessenger) $("messenger").classList.remove("skryt");
