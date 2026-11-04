@@ -332,10 +332,8 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
     <nav id="postup" aria-label="Postup"></nav>
     <section class="krok skladaci" id="k-produkt">
       <h2><span class="cislo">1</span><span class="nadpis">Co chcete vyrobit?<span class="souhrn"></span></span></h2>
-      <div class="filtrVyr" id="produktFiltr" role="tablist" aria-label="Druh výrobku"></div>
       <div class="volby tri" id="produkty"></div>
-      <div class="podnadpis" style="margin-top:20px">Nebo začněte hotovým nápadem</div>
-      <div class="napady" id="napady"></div>
+      <div class="napady skryt" id="napady"></div><!-- hotové nápady vypnuté -->
       <p class="pozn" id="produktPozn"></p>
     </section>
 
@@ -1918,6 +1916,7 @@ function obnovEditor() {
     { n:"🏢 Firmy a školy", ids:"qcjmplkt" },
   ];
   const el = $("produktFiltr");
+  if (el) {
   let akt = 0;
   const filtruj = () => {
     [...el.children].forEach((b, i) => { b.classList.toggle("on", i === akt); b.setAttribute("aria-selected", i === akt); });
@@ -1930,6 +1929,7 @@ function obnovEditor() {
     el.appendChild(b);
   });
   filtruj();
+  }
 }
 /* ---------- Průvodce po krocích: vždy jen jeden krok, dole lišta Zpět / Pokračovat ---------- */
 const kroky = [...document.querySelectorAll(".krok.skladaci")];
