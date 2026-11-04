@@ -1030,15 +1030,16 @@ const FOTO_VEL = [ { id:"m", nazev:"Malá", popis:"8 cm" }, { id:"s", nazev:"St�
 const FOTO_JAS = [ { id:"t", nazev:"Tmavší" }, { id:"n", nazev:"Normální" }, { id:"s", nazev:"Světlejší" } ];
 const FOTO_DIRA = [ { id:"1", nazev:"S ouškem", popis:"na pověšení do okna" }, { id:"0", nazev:"Bez ouška", popis:"do rámečku / stojánku" } ];
 const LITO = { min:0.8, max:3, okraj:3 };
-let fotoCache = { kod:null, d:null };
+let fotoCache = { kod:null, d:null }, fotoHi = { kod:null, d:null }; // fotoHi = nahraná fotka v plném rozlišení (jen v tomto okně)
 function fotoData() { // jas fotky 0–1 (1 = světlá), z kódu ve stav.fo, jinak ukázkový obrázek
+  if (stav.fo && fotoHi.kod === stav.fo && fotoHi.d) return fotoHi.d;
   if (fotoCache.kod === stav.fo && fotoCache.d) return fotoCache.d;
   let d = null;
   const m = /^(\d+)x(\d+):(.+)$/.exec(stav.fo || "");
   if (m) try {
     const w = +m[1], h = +m[2], b = zB64(m[3]), px = new Float32Array(w * h);
     for (let i = 0; i < w * h; i++) px[i] = ((b[i >> 1] >> (i & 1 ? 0 : 4)) & 15) / 15;
-    d = { w, h, px };
+    d = { w, h, px:rozmaz(px, w, h) }; // 16 odstínů → jemné vyhlazení, ať nevznikají schody
   } catch (e) { d = null; }
   if (!d) { // ukázka: srdce a nápis
     const w = 128, h = 96, cv = document.createElement("canvas"); cv.width = w; cv.height = h;
@@ -1052,18 +1053,37 @@ function fotoData() { // jas fotky 0–1 (1 = světlá), z kódu ve stav.fo, jin
   }
   return (fotoCache = { kod:stav.fo, d }).d;
 }
+function rozmaz(px, w, h) { // lehké rozmazání 3×3 (oddělitelné), zachová rozměr
+  let a = px;
+  for (let r = 0; r < 1; r++) {
+    const b = new Float32Array(w * h), c = new Float32Array(w * h);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x; b[i] = (a[i - (x > 0)] + 2 * a[i] + a[i + (x < w - 1)]) / 4; }
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = y * w + x; c[i] = (b[i - (y > 0) * w] + 2 * b[i] + b[i + (y < h - 1) * w]) / 4; }
+    a = c;
+  }
+  return a;
+}
 function nactiFotku(soubor) {
   const img = new Image(), url = URL.createObjectURL(soubor);
   img.onload = () => {
     const k = Math.min(1, 128 / Math.max(img.width, img.height)), w = Math.max(8, Math.round(img.width * k)), h = Math.max(8, Math.round(img.height * k));
     const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
-    const c = cv.getContext("2d"); c.drawImage(img, 0, 0, w, h); URL.revokeObjectURL(url);
+    const c = cv.getContext("2d"); c.drawImage(img, 0, 0, w, h);
     const id = c.getImageData(0, 0, w, h).data, b = new Uint8Array(Math.ceil(w * h / 2));
     for (let i = 0; i < w * h; i++) {
       const y = 0.299 * id[i * 4] + 0.587 * id[i * 4 + 1] + 0.114 * id[i * 4 + 2], q = Math.round(y / 255 * 15);
       b[i >> 1] |= i & 1 ? q : q << 4;
     }
     stav.fo = `${w}x${h}:${naB64(b)}`;
+    { // plné rozlišení pro náhled a přesný model v tomto okně (do odkazu jde jen zmenšená verze)
+      const k2 = Math.min(1, 480 / Math.max(img.width, img.height)), w2 = Math.max(8, Math.round(img.width * k2)), h2 = Math.max(8, Math.round(img.height * k2));
+      const cv2 = document.createElement("canvas"); cv2.width = w2; cv2.height = h2;
+      const c2 = cv2.getContext("2d"); c2.drawImage(img, 0, 0, w2, h2);
+      const d2 = c2.getImageData(0, 0, w2, h2).data, px2 = new Float32Array(w2 * h2);
+      for (let i = 0; i < w2 * h2; i++) px2[i] = (0.299 * d2[i * 4] + 0.587 * d2[i * 4 + 1] + 0.114 * d2[i * 4 + 2]) / 255;
+      fotoHi = { kod:stav.fo, d:{ w:w2, h:h2, px:px2 } };
+    }
+    URL.revokeObjectURL(url);
     $("fotoInfo").textContent = "Fotka je nahraná. Nahoře vidíte, jak bude vypadat proti světlu. Pro nejlepší kvalitu nám ji pak pošlete i v Messengeru.";
     $("fotoTl").textContent = "📷 Vybrat jinou fotku"; souhrny(); prekresli();
   };
@@ -1074,7 +1094,7 @@ function nactiFotku(soubor) {
 function litofanie(M, presne) {
   const F = fotoData(), tv = FOTO_TVARY.find(t => t.id === stav.ft) || FOTO_TVARY[0];
   const L = { m:80, s:100, l:130 }[stav.v] || 100, W = tv.pomer >= 1 ? L : L * tv.pomer, H = tv.pomer >= 1 ? L / tv.pomer : L;
-  const krok = presne ? 0.4 : 0.8;
+  const krok = presne ? 0.4 : 0.6;
   const pa = F.w / F.h, ar = W / H; let sx0 = 0, sy0 = 0, sw = F.w, sh = F.h;
   if (pa > ar) { sw = F.h * ar; sx0 = (F.w - sw) / 2; } else { sh = F.w / ar; sy0 = (F.h - sh) / 2; }
   const jas = { t:-0.1, n:0, s:0.1 }[stav.fj] || 0;
@@ -1130,7 +1150,10 @@ function litofanie(M, presne) {
   const deska = new M.Manifold(new M.Mesh({ numProp:3, vertProperties:vp, triVerts:new Uint32Array(tri) }));
   let tvar = deska.intersect(celek.extrude(LITO.max + 2).translate([0, 0, -1]));
   if (dira) tvar = tvar.subtract(dira.extrude(LITO.max + 2).translate([0, 0, -1]));
-  return { tvar:tvar.translate([-cx, -cy, 0]), W, H };
+  // propustnost světla pro texturu náhledu (x, y v mm od středu): tenké = světlé
+  const vyska = (x, y) => vObrazku(x + cx, y + cy) ? LITO.max - (LITO.max - LITO.min) * Math.pow(vzorek((x + cx) / W, (y + cy) / H), 0.9) : LITO.max;
+  return { tvar:tvar.translate([-cx, -cy, 0]), W, H, vyska, vnitrek:vnitrek.map(pl => pl.map(p => [p.x - cx, p.y - cy])), vzorek:(x, y) => vzorek((x + cx) / W, (y + cy) / H),
+    bb:{ x0:bb.min[0] - cx, y0:bb.min[1] - cy, x1:bb.max[0] - cx, y1:bb.max[1] - cy } };
 }
 const OBLOUKY = [ { id:"0", nazev:"Rovně", ikona:"━━━" }, { id:"1", nazev:"Obloukem nahoru", ikona:"⌒" }, { id:"2", nazev:"Obloukem dolů", ikona:"‿" } ];
 
@@ -2954,16 +2977,31 @@ async function postav(presne, jeAktualni = () => true) {
     // ---------- litofanie z fotky
     const M = await manifold();
     if (!jeAktualni()) return null;
-    const { tvar:lit } = litofanie(M, presne);
+    const L = litofanie(M, presne);
     vk = 1; T = LITO.max;
-    gP = zManifoldu(lit);
-    if (!presne) { // náhled „proti světlu“: tenká místa světlá, tlustá tmavá
-      const p = gP.attributes.position, col = new Float32Array(p.count * 3);
-      for (let i = 0; i < p.count; i++) {
-        const t = Math.max(0, Math.min(1, (p.getZ(i) - LITO.min) / (LITO.max - LITO.min))), l = Math.pow(1 - t, 1.3);
-        col[i * 3] = 0.16 + 0.84 * l; col[i * 3 + 1] = 0.11 + 0.84 * l; col[i * 3 + 2] = 0.07 + 0.74 * l;
+    gP = zManifoldu(L.tvar);
+    if (!presne) { // náhled „proti světlu“: textura v jemném rozlišení místo barev po trojúhelnících
+      const { x0, y0, x1, y1 } = L.bb, sw = x1 - x0, sh = y1 - y0, ppm = Math.min(6, 900 / Math.max(sw, sh));
+      const tw = Math.round(sw * ppm), th = Math.round(sh * ppm), cv = document.createElement("canvas"); cv.width = tw; cv.height = th;
+      const c = cv.getContext("2d");
+      c.fillStyle = "#fff"; c.beginPath(); // maska plochy s fotkou
+      for (const pl of L.vnitrek) pl.forEach(([x, y], i) => c[i ? "lineTo" : "moveTo"]((x - x0) * ppm, (y1 - y) * ppm));
+      c.fill("evenodd");
+      const id = c.getImageData(0, 0, tw, th), d = id.data;
+      const svetlo = z => Math.pow(1 - Math.max(0, Math.min(1, (z - LITO.min) / (LITO.max - LITO.min))), 1.3);
+      const ram = svetlo(LITO.max);
+      for (let j = 0; j < th; j++) for (let i = 0; i < tw; i++) {
+        const k = (j * tw + i) * 4, a = d[k + 3] / 255;
+        const z = LITO.max - (LITO.max - LITO.min) * Math.pow(L.vzorek(x0 + (i + 0.5) / ppm, y1 - (j + 0.5) / ppm), 0.9);
+        const l = svetlo(z) * a + ram * (1 - a);
+        d[k] = 255 * (0.16 + 0.84 * l); d[k + 1] = 255 * (0.11 + 0.84 * l); d[k + 2] = 255 * (0.07 + 0.74 * l); d[k + 3] = 255;
       }
-      gP.setAttribute("color", new THREE.BufferAttribute(col, 3)); gP.userData.lito = true;
+      c.putImageData(id, 0, 0);
+      const p = gP.attributes.position, uv = new Float32Array(p.count * 2);
+      for (let i = 0; i < p.count; i++) { uv[i * 2] = (p.getX(i) - x0) / sw; uv[i * 2 + 1] = (p.getY(i) - y0) / sh; }
+      gP.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+      const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+      gP.userData.lito = tex;
     }
   } else if (SPEC3D.includes(P)) {
     // ---------- razítko, vykrajovátko, stojánek na mobil, puzzle
@@ -3476,12 +3514,12 @@ async function prekresli() {
   const mat = b => new THREE.MeshStandardMaterial({ color:b.textura ? "#ffffff" : b.hex, map:texturaBarvy(b), roughness:b.silk ? 0.22 : b.kov ? 0.35 : 0.55, metalness:b.silk ? 0.45 : b.kov ? 0.6 : 0.05, emissive:b.sviti ? 0x335522 : 0x000000,
     polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-4 });
   const matP = b => new THREE.MeshStandardMaterial({ color:b.textura ? "#ffffff" : b.hex, map:texturaBarvy(b), roughness:b.silk ? 0.22 : b.kov ? 0.35 : 0.55, metalness:b.silk ? 0.45 : b.kov ? 0.6 : 0.05, emissive:b.sviti ? 0x335522 : 0x000000 });
-  [meshPodklad, meshNapis, meshZadni, meshStojan, meshMagnet, meshIkony].forEach(m => { if (m) { skupina.remove(m); m.geometry.dispose(); m.material.dispose(); } });
+  [meshPodklad, meshNapis, meshZadni, meshStojan, meshMagnet, meshIkony].forEach(m => { if (m) { skupina.remove(m); m.geometry.dispose(); if (m.material.map) m.material.map.dispose(); m.material.dispose(); } });
   const bI = BARVY.find(b => b.id === stav.c3) || bN;
   meshIkony = gI ? new THREE.Mesh(gI, mat(bI)) : null; if (meshIkony) skupina.add(meshIkony);
   meshStojan = gS ? new THREE.Mesh(gS, matP(bP)) : null; if (meshStojan) skupina.add(meshStojan);
   meshMagnet = gM ? new THREE.Mesh(gM, new THREE.MeshStandardMaterial({ color:0x666a70, metalness:0.7, roughness:0.35 })) : null; if (meshMagnet) skupina.add(meshMagnet);
-  meshPodklad = new THREE.Mesh(gP, gP.userData.lito ? new THREE.MeshStandardMaterial({ vertexColors:true, roughness:0.95, metalness:0, emissive:0x2a2218 }) : matP(bP)); skupina.add(meshPodklad);
+  meshPodklad = new THREE.Mesh(gP, gP.userData.lito ? new THREE.MeshStandardMaterial({ color:0x2a221a, roughness:0.9, metalness:0, emissive:0xffffff, emissiveMap:gP.userData.lito, map:gP.userData.lito }) : matP(bP)); skupina.add(meshPodklad);
   meshNapis = gN ? new THREE.Mesh(gN, mat(bN)) : null; if (meshNapis) skupina.add(meshNapis);
   meshZadni = gZ ? new THREE.Mesh(gZ, mat(bN)) : null; if (meshZadni) skupina.add(meshZadni);
   meshPrvky.forEach(m => { skupina.remove(m); m.geometry.dispose(); m.material.dispose(); });
