@@ -386,8 +386,8 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:block}
       <div class="volby tri" id="fotoVel"></div>
       <div class="podnadpis">Jas fotky</div>
       <div class="volby tri" id="fotoJas"></div>
-      <div class="podnadpis">Pověšení</div>
-      <div class="volby" id="fotoDira" style="grid-template-columns:1fr 1fr"></div>
+      <div class="podnadpis">Jak ji vystavíte?</div>
+      <div class="volby" id="fotoDira" style="grid-template-columns:repeat(3,minmax(0,1fr))"></div>
     </section>
 
     <section class="krok skladaci" id="k-text">
@@ -1112,7 +1112,7 @@ const FOTO_TVARY = [
   { id:"srdce", nazev:"Srdce", pomer:1.1 }, { id:"kruh", nazev:"Kolečko", pomer:1 }, { id:"oval", nazev:"Ovál", pomer:3 / 4 } ];
 const FOTO_VEL = [ { id:"m", nazev:"Malá", popis:"8 cm" }, { id:"s", nazev:"Střední", popis:"10 cm" }, { id:"l", nazev:"Velká", popis:"13 cm" } ];
 const FOTO_JAS = [ { id:"t", nazev:"Tmavší" }, { id:"n", nazev:"Normální" }, { id:"s", nazev:"Světlejší" } ];
-const FOTO_DIRA = [ { id:"1", nazev:"S ouškem", popis:"na pověšení do okna" }, { id:"0", nazev:"Bez ouška", popis:"do rámečku / stojánku" } ];
+const FOTO_DIRA = [ { id:"1", nazev:"S ouškem", popis:"na pověšení do okna" }, { id:"s", nazev:"Se stojánkem", popis:"postaví se na parapet nebo stůl" }, { id:"0", nazev:"Bez ouška", popis:"do vlastního rámečku" } ];
 const LITO = { min:0.8, max:3, okraj:3 };
 let fotoCache = { kod:null, d:null }, fotoHi = { kod:null, d:null }; // fotoHi = nahraná fotka v plném rozlišení (jen v tomto okně)
 function fotoData() { // jas fotky 0–1 (1 = světlá), z kódu ve stav.fo, jinak ukázkový obrázek
@@ -3497,7 +3497,7 @@ async function postav(presne, jeAktualni = () => true) {
   const skaluj = g => { g.scale(vk, vk, 1); const sit = g.userData.sit; if (sit) for (let i = 0; i < sit.v.length; i += 3) { sit.v[i] *= vk; sit.v[i + 1] *= vk; } };
   skaluj(gP); if (gN) skaluj(gN); if (gZ) skaluj(gZ); if (gM) skaluj(gM); if (gI) skaluj(gI); gE.forEach(x => skaluj(x.g));
   gP.computeBoundingBox();
-  if (prod.stojan && !prazdny) gS = await stojanek(presne, T, gP.boundingBox);
+  if ((prod.stojan || (P === "f" && stav.fd === "s")) && !prazdny) gS = await stojanek(presne, T, gP.boundingBox, P === "f");
   return { objemNavic, gE, gP, gN, gZ, gS, gM, gI, zmenseno, pocetMagnetu, qrDlouhy:!!(d0 && d0.qrDlouhy), T, P, chybi, tvary, vlastni, tvar, vyskaTextu, prazdny, otocit, qrModul, qrMalo };
 }
 /* Zápich do květináče: cedulka se špičkou, název nahoře a pod ním řádky s ikonkami péče.
@@ -3544,9 +3544,18 @@ async function rostlinaDetail(fonty, ram, chybi) {
 /* Stojánek pro jmenovku na stůl – kvádr se zářezem, tiskne se naležato zářezem nahoru */
 // Stojánek pod jmenovku / QR cedulku. Vrací díl v poloze pro tisk (podstava na z = 0, zářez nahoře, souběžně s osou x)
 // a v userData.zarez bod dna zářezu + náklon – podle toho se v náhledu jmenovka „zasune“.
-async function stojanek(presne, T, bb) {
+async function stojanek(presne, T, bb, foto = false) {
   const M = await manifold(), CS = M.CrossSection;
   const sirka = bb.max.x - bb.min.x, cx = (bb.min.x + bb.max.x) / 2;
+  if (foto) { // fotka ve světle: vyšší a širší lišta s hlubším zářezem (destička je velká a tenká)
+    const sp = (T + 0.4) / 2, V = 10, H = 6, dno = V - H, L = Math.min(120, Math.max(50, sirka * 0.75));
+    const prof = new CS([[[-15, 0], [15, 0], [sp + 3, V], [-sp - 3, V]]]).subtract(CS.square([2 * sp, H + 2]).translate([-sp, dno]));
+    let m = prof.extrude(L).rotate([90, 0, 0]).rotate([0, 0, 90]).translate([-L / 2, 0, 0]);
+    const yMax = m.boundingBox().max[1], y0 = bb.min.y - 4 - yMax;
+    m = m.translate([cx, y0, 0]);
+    const g = zManifoldu(m); g.computeBoundingBox(); g.userData.zarez = { x:cx, y:y0, z:dno, naklon:0 };
+    return g;
+  }
   const sp = (T + 0.35) / 2, V = 8, H = 5, dno = V - H; // zářez: šířka podle tloušťky jmenovky + vůle, hloubka 5 mm
   const typ = STOJAN_TVARY.some(t => t.id === stav.sj) ? stav.sj : "l";
   const zarez = CS.square([2 * sp, H + 2]).translate([-sp, dno]);
@@ -3728,7 +3737,7 @@ async function prekresli() {
   [meshPodklad, meshNapis, meshZadni, meshStojan, meshMagnet, meshIkony].forEach(m => { if (m) { skupina.remove(m); m.geometry.dispose(); if (m.material.map) m.material.map.dispose(); m.material.dispose(); } });
   const bI = BARVY.find(b => b.id === stav.c3) || bN;
   meshIkony = gI ? new THREE.Mesh(gI, mat(bI)) : null; if (meshIkony) skupina.add(meshIkony);
-  meshStojan = gS ? new THREE.Mesh(gS, matP(bP)) : null; if (meshStojan) skupina.add(meshStojan);
+  meshStojan = gS ? new THREE.Mesh(gS, matP(stav.p === "f" ? (BARVY.find(b => b.id === "cerna") || bP) : bP)) : null; if (meshStojan) skupina.add(meshStojan);
   meshMagnet = gM ? new THREE.Mesh(gM, new THREE.MeshStandardMaterial({ color:0x666a70, metalness:0.7, roughness:0.35 })) : null; if (meshMagnet) skupina.add(meshMagnet);
   meshPodklad = new THREE.Mesh(gP, gP.userData.lito ? new THREE.MeshStandardMaterial({ color:0x2a221a, roughness:0.9, metalness:0, emissive:0xffffff, emissiveMap:gP.userData.lito, map:gP.userData.lito }) : matP(bP)); skupina.add(meshPodklad);
   meshNapis = gN ? new THREE.Mesh(gN, mat(bN)) : null; if (meshNapis) skupina.add(meshNapis);
@@ -3928,7 +3937,7 @@ async function presneKusy(navrhy, prubeh = () => {}) {
         { geo:r.gP, nazev:"Podklad", barva:bP.hex },
         r.gN && { geo:r.gN, nazev:"Napis", barva:bN.hex },
         r.gZ && { geo:r.gZ, nazev:stav.z === "3" ? "QR_kod" : "Napis_zadni", barva:bN.hex },
-        r.gS && { geo:r.gS, nazev:"Stojanek", barva:bP.hex },
+        r.gS && { geo:r.gS, nazev:"Stojanek", barva:(stav.p === "f" ? (BARVY.find(b => b.id === "cerna") || bP) : bP).hex },
         r.gI && { geo:r.gI, nazev:"Ikony", barva:(BARVY.find(b => b.id === stav.c3) || bN).hex },
         ...(r.gE || []).map(x => { const b = BARVY.find(y => y.id === x.c) || bN; return { geo:x.g, nazev:"Prvky_" + b.nazev.replace(/\s+/g, "_"), barva:b.hex }; }),
       ].filter(Boolean) });
@@ -4169,7 +4178,7 @@ function popisNavrhu() {
 }
 function radkyNavrhu() {
   if (stav.p === "f") return [ "Výrobek: Fotka ve světle (litofanie)", `Tvar: ${nazev(FOTO_TVARY, stav.ft)}`, `Velikost: ${nazev(FOTO_VEL, stav.v)} (${(rozmer[0]/10).toFixed(1)} × ${(rozmer[1]/10).toFixed(1)} cm)`.replace(/\./g, ","),
-    `Jas: ${nazev(FOTO_JAS, stav.fj).toLowerCase()}`, `Pověšení: ${stav.fd === "1" ? "s ouškem" : "bez ouška"}`, `Počet: ${stav.n} ks`,
+    `Jas: ${nazev(FOTO_JAS, stav.fj).toLowerCase()}`, `Pověšení: ${stav.fd === "1" ? "s ouškem" : stav.fd === "s" ? "se stojánkem (černý)" : "bez ouška (do rámečku)"}`, `Počet: ${stav.n} ks`,
     stav.fo ? "Fotku vám prosím pošlu i sem do Messengeru v plné kvalitě." : "Fotku vám pošlu do Messengeru." ];
   const p = popisNavrhu();
   return [
