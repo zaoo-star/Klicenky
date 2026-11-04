@@ -395,6 +395,20 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
         <div class="podnadpis" style="margin-top:16px">Jak cedulku připevníte?</div>
         <div class="volby" id="uchyceni" style="grid-template-columns:1fr 1fr"></div>
       </div>
+      <div id="stojanBlok" class="skryt">
+        <div class="podnadpis" style="margin-top:16px">Tvar stojánku</div>
+        <div class="volby" id="stojanTvary" style="grid-template-columns:1fr 1fr"></div>
+      </div>
+      <div id="mobilBlok" class="skryt">
+        <div class="podnadpis" style="margin-top:16px">Pro co je stojánek?</div>
+        <div class="volby" id="mobilPro" style="grid-template-columns:1fr 1fr"></div>
+        <div class="podnadpis" style="margin-top:14px">Sklon</div>
+        <div class="volby" id="mobilSklon" style="grid-template-columns:1fr 1fr"></div>
+        <div class="podnadpis" style="margin-top:14px">Nabíječka</div>
+        <div class="volby" id="mobilNab" style="grid-template-columns:1fr 1fr"></div>
+        <div class="podnadpis" style="margin-top:14px">Tvar opěrky</div>
+        <div class="volby" id="mobilOperka" style="grid-template-columns:1fr 1fr"></div>
+      </div>
       <div id="ikonaRezimBlok" class="skryt">
         <div class="podnadpis" style="margin-top:16px">Jak má klíčenka s ikonou vypadat?</div>
         <div class="volby" id="ikonaRezim" style="grid-template-columns:1fr 1fr"></div>
@@ -1215,6 +1229,15 @@ function rozmerMagnetu(st = stav) {
   const N = NASTAVENI.magnet, cis = (t, d, min, max) => { const x = parseFloat(String(t || "").replace(",", ".")); return isFinite(x) ? Math.min(max, Math.max(min, x)) : d; };
   return st.mg === "v" ? { prumer:cis(st.mp, N.prumer, 4, 30), vyska:cis(st.mv, N.vyska, 0.8, 5) } : { prumer:N.prumer, vyska:N.vyska };
 }
+// tvary stojánku u jmenovek a QR cedulek; náklon ve stupních (šikmý = jmenovka opřená dozadu)
+const STOJAN_TVARY = [
+  { id:"l", nazev:"Lišta", popis:"klasický podstavec" }, { id:"n", nazev:"Dvě nožičky", popis:"nenápadné" },
+  { id:"o", nazev:"Ovál", popis:"oblý podstavec" }, { id:"s", nazev:"Srdíčko", popis:"na svatbu" },
+  { id:"h", nazev:"Hvězda", popis:"na oslavu" }, { id:"k", nazev:"Šikmý", popis:"opřený dozadu" } ];
+const MOBIL_PRO = [ { id:"m", nazev:"Mobil", popis:"do 15 mm i s obalem" }, { id:"t", nazev:"Tablet", popis:"do 20 mm i s obalem" } ];
+const MOBIL_SKLON = [ { id:"v", nazev:"Strmější", popis:"na video, hovory" }, { id:"c", nazev:"Plošší", popis:"na čtení, recepty" } ];
+const MOBIL_NAB = [ { id:"1", nazev:"S výřezem", popis:"nabíjení ve stojánku" }, { id:"0", nazev:"Bez výřezu", popis:"" } ];
+const MOBIL_OPERKA = [ { id:"r", nazev:"Rovná" }, { id:"s", nazev:"Srdce" }, { id:"k", nazev:"Kočičí uši" }, { id:"m", nazev:"Mráček" } ];
 const UCHYCENI = [ { id:"p", nazev:"Lepicí páska", popis:"přibalíme ji" }, { id:"s", nazev:"Dvě dírky na šroubky", popis:"se zápustnou hlavou" } ];
 const R_SVETLO = [ { id:"slunce", nazev:"Slunce", ikona:"sun" }, { id:"polostin", nazev:"Polostín", ikona:"cloud-sun" }, { id:"stin", nazev:"Stín", ikona:"cloud" }, { id:"", nazev:"Neuvádět" } ];
 const R_ZALIVKA = [ { id:"malo", nazev:"Málo", kapky:1 }, { id:"stredne", nazev:"Středně", kapky:2 }, { id:"hodne", nazev:"Stále vlhko", kapky:3 }, { id:"", nazev:"Neuvádět" } ];
@@ -1394,7 +1417,7 @@ function prepocitejCenu() {
   $("cenaPozn").textContent = (odhad.sleva ? `Sleva pro ${kdo} ${odhad.sleva} %. `
       : slevaPro(zakaznik) && chybiKs ? `Sleva ${slevaPro(zakaznik)} % pro ${kdo} platí od ${minKs} ks – přidejte ještě ${chybiKs} ks. ` : "") + `Cena za ${n} ks.${ex} ` + POZN_CENA;
 }
-const stav = { pr:[], fo:"", ft:"sirka", fj:"n", fd:"1", px:0, py:0, ir:"j", ns:"dol", jm:"", p:"k", a:"0", l:"", ob:"", fs:"m", nn:"2", nd:"s", nr:"s", k:"", z:"0", t3:"", t:"Babička", t2:"", s:"obdelnik", f:"obla", o:"srdicko", op:"pred", b:"cervena", c:"bila", r:"0", v:"s", vs:"", vd:"w", qt:"u", qs:"", qh:"", qn:"", qx:"", qu:"s", q:"", uc:"p", mg:"v", mp:"", mv:"", rs:"polostin", rt:"18–25 °C", rz:"stredne", c3:"", n:1 };
+const stav = { sj:"l", wz:"m", ws:"v", wn:"1", wm:"r", pr:[], fo:"", ft:"sirka", fj:"n", fd:"1", px:0, py:0, ir:"j", ns:"dol", jm:"", p:"k", a:"0", l:"", ob:"", fs:"m", nn:"2", nd:"s", nr:"s", k:"", z:"0", t3:"", t:"Babička", t2:"", s:"obdelnik", f:"obla", o:"srdicko", op:"pred", b:"cervena", c:"bila", r:"0", v:"s", vs:"", vd:"w", qt:"u", qs:"", qh:"", qn:"", qx:"", qu:"s", q:"", uc:"p", mg:"v", mp:"", mv:"", rs:"polostin", rt:"18–25 °C", rz:"stredne", c3:"", n:1 };
 /* ---------- Odkaz na návrh (co nejkratší) ----------
    Do odkazu jde jen to, co se liší od výchozího nastavení, a ještě se to zkomprimuje. */
 const VYCHOZI = { ...stav };
@@ -1569,6 +1592,9 @@ vytvorVolby("qrTyp", QR_TYP, "qt", p => `<span class="emoji">${p.emoji}</span><s
 });
 vytvorVolby("qrPouziti", QR_POUZITI, "qu", p => `<span class="emoji">${p.emoji}</span><span>${p.nazev}</span><span style="font-size:.8rem;opacity:.7">${p.popis}</span>`);
 vytvorVolby("magnety", MAGNETY, "mg", p => `<span>${p.nazev}</span><span style="font-size:.8rem;color:var(--tlumeny)">${p.popis}</span>`);
+{ const h = p => `<span>${p.nazev}</span>` + (p.popis ? `<span style="font-size:.8rem;color:var(--tlumeny)">${p.popis}</span>` : "");
+  vytvorVolby("stojanTvary", STOJAN_TVARY, "sj", h); vytvorVolby("mobilPro", MOBIL_PRO, "wz", h); vytvorVolby("mobilSklon", MOBIL_SKLON, "ws", h);
+  vytvorVolby("mobilNab", MOBIL_NAB, "wn", h); vytvorVolby("mobilOperka", MOBIL_OPERKA, "wm", h); }
 vytvorVolby("uchyceni", UCHYCENI, "uc", p => `<span>${p.nazev}</span><span style="font-size:.8rem;color:var(--tlumeny)">${p.popis}</span>`);
 vytvorVolby("fotoTvary", FOTO_TVARY, "ft", p => `<span>${p.nazev}</span>`);
 vytvorVolby("fotoVel", FOTO_VEL, "v", p => `<span>${p.nazev}</span><span style="font-size:.8rem;color:var(--tlumeny)">${p.popis}</span>`);
@@ -1626,7 +1652,7 @@ vytvorVolby("produkty", PRODUKTY.filter(p => !p.skryty), "p", p => `${NAHLEDY[p.
 });
 
 function oznac() {
-  const sady = { qrTyp:"qt", qrPouziti:"qu", fotoTvary:"ft", fotoVel:"v", fotoJas:"fj", fotoDira:"fd", magnety:"mg", uchyceni:"uc", rSvetlo:"rs", rZalivka:"rz", barvyIkony:"c3", ikonaRezim:"ir", nozStyl:"ns", velPisma:"fs", nozPocet:"nn", nozDelka:"nd", nozRozestup:"nr", produkty:"p", oblouky:"a", zady:"z", tvary:"s", pisma:"f", ozdoby:"o", pozice:"op", barvyPodklad:"b", barvyNapis:"c", ramecky:"r", velikosti:"v" };
+  const sady = { stojanTvary:"sj", mobilPro:"wz", mobilSklon:"ws", mobilNab:"wn", mobilOperka:"wm", qrTyp:"qt", qrPouziti:"qu", fotoTvary:"ft", fotoVel:"v", fotoJas:"fj", fotoDira:"fd", magnety:"mg", uchyceni:"uc", rSvetlo:"rs", rZalivka:"rz", barvyIkony:"c3", ikonaRezim:"ir", nozStyl:"ns", velPisma:"fs", nozPocet:"nn", nozDelka:"nd", nozRozestup:"nr", produkty:"p", oblouky:"a", zady:"z", tvary:"s", pisma:"f", ozdoby:"o", pozice:"op", barvyPodklad:"b", barvyNapis:"c", ramecky:"r", velikosti:"v" };
   for (const [id, k] of Object.entries(sady))
     $(id).querySelectorAll(":scope > button:not(.kat)").forEach(b => b.setAttribute("aria-pressed", b.dataset.id === stav[k]));
   $("poziceBlok").classList.toggle("skryt", !stav.o);
@@ -1645,6 +1671,14 @@ function oznac() {
   { const cil = P === "q" ? $("k-qr") : $("k-tvar"), mb = $("magnetBlok"); if (mb.parentNode !== cil) cil.insertBefore(mb, cil.querySelector("#k-velikost") || cil.querySelector(".dalsi")); }
   $("k-rostlina").classList.toggle("skryt", P !== "r");
   $("uchyceniBlok").classList.toggle("skryt", !produkt(P).sroubky);
+  { // stojánek: u jmenovky v kroku Tvar, u QR v kroku QR kód, u stojánku na mobil v kroku Text
+    const sb = $("stojanBlok"), ma = produkt(P).stojan, cil = P === "q" ? $("k-qr") : $("k-tvar");
+    if (sb.parentNode !== cil) cil.insertBefore(sb, cil.querySelector(".dalsi"));
+    sb.classList.toggle("skryt", !ma);
+    const mb = $("mobilBlok"), ct = $("k-text");
+    if (mb.parentNode !== ct) ct.insertBefore(mb, ct.querySelector(".dalsi"));
+    mb.classList.toggle("skryt", P !== "w");
+  }
   { const sec = $(P === "d" ? "k-nozicky" : P === "r" ? "k-rostlina" : P === "q" ? "k-qr" : ["e", "o", "l", "w", "y", "g", "t"].includes(P) ? "k-text" : "k-tvar"), bl = $("k-velikost"); if (bl.parentNode !== sec) sec.insertBefore(bl, sec.querySelector(".dalsi")); }
   $("magnetBlok").classList.toggle("skryt", !produkt(P).magnet);
   $("magnetRozmer").classList.toggle("skryt", stav.mg !== "v");
@@ -2061,7 +2095,7 @@ controls.addEventListener("start", () => houpani = false);
 const skupina = new THREE.Group(); scene.add(skupina);
 let meshPrvky = [], meshPodklad = null, meshNapis = null, meshZadni = null, meshStojan = null, meshMagnet = null, meshIkony = null, otaceni = false;
 
-let posledniVel = "", rozmerModelu = null;
+let posledniVel = "", rozmerModelu = null, kameraShora = false;
 function velikost() {
   const w = canvas.clientWidth, h = canvas.clientHeight;
   if (!w || !h) return;
@@ -2073,7 +2107,8 @@ function velikost() {
 function zamerKameru() {
   if (!rozmerModelu || !houpani) return;
   const [sirka, vyska] = rozmerModelu, vzd = Math.max(sirka / camera.aspect, vyska) * 1.9 + 20;
-  camera.position.set(0, -vzd * 0.22, vzd); controls.target.set(0, 0, 0);
+  // se stojánkem koukáme trochu shora, ať je vidět i jeho tvar
+  camera.position.set(0, kameraShora ? vzd * 0.42 : -vzd * 0.22, vzd); controls.target.set(0, 0, 0);
 }
 addEventListener("resize", velikost); velikost();
 // Náhled: normální / malý (při posunu dolů) / zvětšený (po klepnutí).
@@ -2920,18 +2955,53 @@ function vykrajovatko(M, blok, k) {
 }
 // Stojánek na mobil: bočnice vytažená do šířky, jméno zapuštěné na přední hraně; náhled ve stoje, tisk na boku
 function stojanekMobil(M, blok, presne, k) {
-  const W = 75 * k;
-  const prof = [[0, 0], [80, 0], [80, 5], [36, 5], [62.6, 78], [56.6, 78], [30, 5], [12, 5], [12, 20], [9, 22], [3, 22], [0, 20]];
-  let telo = new M.CrossSection([prof]).offset(-1.2, "Round", 2, 16).offset(1.2, "Round", 2, 16).extrude(W);
+  // profil v rovině (u = hloubka zepředu dozadu, v = výška), vytažený do šířky W (osa z)
+  const tablet = stav.wz === "t", W = (tablet ? 150 : 75) * k;
+  const lt = tablet ? 14 : 12, lipH = tablet ? 28 : 22, mezera = tablet ? 24 : 18, pt = tablet ? 8 : 6, bT = tablet ? 6 : 5;
+  const u0 = lt + mezera, vrch = tablet ? 115 : 78, uhel = (stav.ws === "c" ? 58 : 70) * Math.PI / 180;
+  const CS = M.CrossSection;
+  // obrys opěrky při pohledu zepředu (z = šířka, v = výška); u „Rovné“ žádný
+  let silueta = null, navic = 0;
+  if (stav.wm === "s") {
+    let h = new CS([srdcovyObrys(0, 0, 1).getPoints(40).map(p => [p.x, p.y])], "NonZero");
+    const b0 = h.bounds(), kk = W / (b0.max[0] - b0.min[0]), hh = (b0.max[1] - b0.min[1]) * kk;
+    const spodek = lipH + 6 - hh * 0.4; // spodní špička srdce schovaná v plné části, ať opěrka nemá tenký krk
+    navic = Math.max(0, spodek + hh - vrch);
+    h = h.translate([-b0.min[0], -b0.min[1]]).scale([kk, kk]).translate([0, spodek]);
+    silueta = h;
+  } else if (stav.wm === "k") {
+    navic = W * 0.2;
+    const hlava = new CS([zaoblenyObdelnik(0, -2, W, vrch + 2, Math.min(14, W * 0.18)).getPoints(10).map(p => [p.x, p.y])]);
+    const ucho = x0 => new CS([[[x0, vrch - 12], [x0 + W * 0.32, vrch - 12], [x0 + W * 0.06, vrch + navic]]]);
+    const ucho2 = x1 => new CS([[[x1 - W * 0.32, vrch - 12], [x1, vrch - 12], [x1 - W * 0.06, vrch + navic]]]);
+    silueta = CS.union([hlava, ucho(0), ucho2(W)]).offset(-1.5, "Round", 2, 16).offset(1.5, "Round", 2, 16);
+  } else if (stav.wm === "m") {
+    navic = W * 0.12;
+    const kr = (x, y, r) => CS.circle(r, 64).translate([x, y]);
+    const telo = new CS([zaoblenyObdelnik(0, -2, W, vrch - W * 0.08, 6).getPoints(8).map(p => [p.x, p.y])]);
+    silueta = CS.union([telo, kr(W * 0.24, vrch - W * 0.14, W * 0.22), kr(W * 0.52, vrch - W * 0.16 + 0, W * 0.28), kr(W * 0.79, vrch - W * 0.14, W * 0.2)])
+      .intersect(CS.square([W, vrch + navic + 5]).translate([0, -3]));
+  }
+  const vr = vrch + navic, dx = (vr - bT) / Math.tan(uhel), Lb = u0 + pt + dx + (tablet ? 20 : 17);
+  const prof = [[0, 0], [Lb, 0], [Lb, bT], [u0 + pt, bT], [u0 + pt + dx, vr], [u0 + dx, vr], [u0, bT], [lt, bT], [lt, lipH - 2], [lt - 3, lipH], [3, lipH], [0, lipH - 2]];
+  let telo = new CS([prof]).offset(-1.2, "Round", 2, 16).offset(1.2, "Round", 2, 16).extrude(W);
+  if (silueta) { // zepředu: celý spodek (podstava + přední lišta) zůstává, nahoře ořízne opěrku do tvaru
+    const sil = CS.union([silueta, CS.square([W, lipH + 6]).translate([0, -1])]);
+    telo = telo.intersect(sil.extrude(Lb + 10).rotate([0, -90, 0]).translate([Lb + 5, 0, 0]));
+  }
+  if (stav.wn === "1") { // kanálek na kabel: ze žlábku dolů a pod opěrkou ven dozadu
+    const s = tablet ? 16 : 14;
+    telo = telo.subtract(M.Manifold.cube([Lb - lt + 2, bT + 6, s]).translate([lt + 1, -1, W / 2 - s / 2]));
+  }
   let N = null, vt = 0;
   if (blok.tvary.length) {
-    const t = csTextu(M, blok.tvary, W - 14, 12); vt = t.m * (blok.vyska1 || 0);
-    const cs = t.cs.translate([W / 2, 11.5]);
+    const t = csTextu(M, blok.tvary, W - 14, lipH - 10); vt = t.m * (blok.vyska1 || 0);
+    const cs = t.cs.translate([W / 2, lipH / 2 + 0.5]);
     N = cs.extrude(0.6).rotate([0, -90, 0]).translate([0.6, 0, 0]);
     telo = telo.subtract(cs.extrude(1.6).rotate([0, -90, 0]).translate([0.6, 0, 0]));
   }
-  if (!presne) { telo = telo.rotate([0, 90, 0]).translate([0, 0, 80]); if (N) N = N.rotate([0, 90, 0]).translate([0, 0, 80]); }
-  return { P:telo, N, T:80, vt };
+  if (!presne) { telo = telo.rotate([0, 90, 0]).translate([0, 0, Lb]); if (N) N = N.rotate([0, 90, 0]).translate([0, 0, Lb]); }
+  return { P:telo, N, T:Lb, vt };
 }
 // Jmenné puzzle: destička s vybráním ve tvaru písmen + písmena zvlášť (v náhledu vložená, pro tisk vedle)
 function puzzleJmeno(M, fonty, presne, k) {
@@ -3405,17 +3475,51 @@ async function rostlinaDetail(fonty, ram, chybi) {
            box:{ cx:0, cy:H - m - nameH / 2, w:iw, h:Math.max(nameH, 1) } };
 }
 /* Stojánek pro jmenovku na stůl – kvádr se zářezem, tiskne se naležato zářezem nahoru */
+// Stojánek pod jmenovku / QR cedulku. Vrací díl v poloze pro tisk (podstava na z = 0, zářez nahoře, souběžně s osou x)
+// a v userData.zarez bod dna zářezu + náklon – podle toho se v náhledu jmenovka „zasune“.
 async function stojanek(presne, T, bb) {
-  const sirka = bb.max.x - bb.min.x, L = Math.min(70, Math.max(30, sirka * 0.45)), sp = (T + 0.35) / 2, V = 8, H = 5;
-  const prof = [[-9, 0], [9, 0], [5.5, V], [sp, V], [sp, V - H], [-sp, V - H], [-sp, V], [-5.5, V]];
-  const cx = (bb.min.x + bb.max.x) / 2, y0 = bb.min.y - 8 - 8; // naležato pod jmenovkou, zářez souběžně s ní
-  if (presne) {
-    const M = await manifold();
-    const m = new M.CrossSection([prof]).extrude(L).rotate([90, 0, 0]).rotate([0, 0, 90]).translate([cx - L / 2, y0, 0]);
-    const g = zManifoldu(m); g.computeBoundingBox(); return g;
+  const M = await manifold(), CS = M.CrossSection;
+  const sirka = bb.max.x - bb.min.x, cx = (bb.min.x + bb.max.x) / 2;
+  const sp = (T + 0.35) / 2, V = 8, H = 5, dno = V - H; // zářez: šířka podle tloušťky jmenovky + vůle, hloubka 5 mm
+  const typ = STOJAN_TVARY.some(t => t.id === stav.sj) ? stav.sj : "l";
+  const zarez = CS.square([2 * sp, H + 2]).translate([-sp, dno]);
+  // hranol z profilu (u = napříč zářezem, v = výška) o délce L, vycentrovaný na x = 0
+  const hranol = (prof, L) => prof.extrude(L).rotate([90, 0, 0]).rotate([0, 0, 90]).translate([-L / 2, 0, 0]);
+  const lichobeznik = (a, b, v) => new CS([[[-a, 0], [a, 0], [b, v], [-b, v]]]);
+  const L = Math.min(70, Math.max(30, sirka * 0.45));
+  let m, naklon = 0;
+  if (typ === "n") { // dvě nožičky na krajích
+    const d = Math.min(60, Math.max(12, sirka / 2 - 11)), noha = hranol(lichobeznik(11, 5.5, V).subtract(zarez), 14);
+    m = M.Manifold.union([noha.translate([-d, 0, 0]), noha.translate([d, 0, 0])]);
+  } else if (typ === "k") { // šikmý: zářez nakloněný o 15° dozadu (+y), vyšší a hlubší podstavec
+    naklon = 15;
+    const telo = new CS([[[-10, 0], [13, 0], [10, V + 4], [-4, V + 4]]]);
+    const sz = CS.square([2 * sp, 20]).translate([-sp, 0]).rotate(-naklon).translate([0, dno]);
+    m = hranol(telo.subtract(sz), L);
+  } else if (typ === "l") {
+    m = hranol(lichobeznik(9, 5.5, V).subtract(zarez), L);
+  } else { // ovál / srdce / hvězda: deska 3 mm + hřbet se zářezem
+    let deska, Lh, yh = 0;
+    if (typ === "o") { Lh = L; deska = CS.circle(1, 96).scale([L / 2 + 8, 15]); }
+    else if (typ === "s") {
+      const sir = Math.min(80, Math.max(44, sirka * 0.55));
+      deska = new CS([srdcovyObrys(0, 0, 1).getPoints(40).map(p => [p.x, p.y])], "NonZero");
+      const b0 = deska.bounds(), k = sir / (b0.max[0] - b0.min[0]);
+      deska = deska.translate([-(b0.min[0] + b0.max[0]) / 2, -(b0.min[1] + b0.max[1]) / 2]).scale([k, k]);
+      const b1 = deska.bounds(); yh = b1.min[1] + (b1.max[1] - b1.min[1]) * 0.6; Lh = sir * 0.62; // hřbet v široké horní části srdce
+    } else {
+      const R = Math.min(42, Math.max(24, sirka * 0.3)), body = [];
+      for (let i = 0; i < 10; i++) { const a = Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? R * 0.5 : R; body.push([Math.cos(a) * r, Math.sin(a) * r]); }
+      deska = new CS([body]).offset(-1.5, "Round", 2, 16).offset(1.5, "Round", 2, 16); Lh = R * 1.05; yh = -R * 0.05;
+    }
+    const hrbet = hranol(lichobeznik(sp + 3.5, sp + 2, V).subtract(zarez), Lh).translate([0, yh, 0]);
+    m = M.Manifold.union([deska.extrude(dno), hrbet]).translate([0, -yh, 0]); // zářez na y = 0
   }
-  const g = new THREE.ExtrudeGeometry(mnohouhelnik(prof), { depth:L, bevelEnabled:false });
-  g.rotateX(Math.PI / 2); g.rotateZ(Math.PI / 2); g.translate(cx - L / 2, y0, 0); g.computeBoundingBox();
+  // pod jmenovku: zářez ve středu jmenovky (x), celý stojánek 4 mm pod ní (y)
+  const yMax = m.boundingBox().max[1], y0 = bb.min.y - 4 - yMax;
+  m = m.translate([cx, y0, 0]);
+  const g = zManifoldu(m); g.computeBoundingBox();
+  g.userData.zarez = { x:cx, y:y0, z:dno, naklon };
   return g;
 }
 /* QR kód na zadní stranu: najde největší čtverec uvnitř tvaru (mimo dírku) a vrátí moduly jako tvary.
@@ -3577,16 +3681,21 @@ async function prekresli() {
   const bb = gP.boundingBox, sirka = bb.max.x - bb.min.x, vyska = bb.max.y - bb.min.y;
   rozmer = [sirka, vyska]; souhrny();
   const bc = bb.clone();
+  let naklonNahledu = 0;
+  kameraShora = !!gS;
   if (gS) { // náhled jmenovky „sestavené“: stojánek dole, jmenovka zasunutá do zářezu (pro tisk zůstávají díly zvlášť naležato)
-    const yS = (gS.boundingBox.min.y + gS.boundingBox.max.y) / 2;
-    meshStojan.rotation.x = -Math.PI / 2;
-    meshStojan.position.set(0, bb.min.y - 3, T / 2 + yS);
-    bc.min.y -= 3;
+    const z = gS.userData.zarez, a = (z.naklon || 0) * Math.PI / 180;
+    meshStojan.rotation.set(-Math.PI / 2 + a, 0, 0); // u šikmého stojánku natočíme stojánek tak, aby byl zářez svisle…
+    const S = new THREE.Vector3(z.x, z.y, z.z).applyEuler(meshStojan.rotation);
+    meshStojan.position.set(z.x - S.x, bb.min.y - S.y, T / 2 - S.z); // dno zářezu = spodní hrana jmenovky
+    naklonNahledu = a; // …a celé to pak skloníme, aby stojánek stál rovně a jmenovka se opírala dozadu
+    bc.min.y -= 4;
   }
   // dlouhou záložku ukážeme naležato – v širokém náhledu je pak text velký a čte se zleva doprava
   const nalezato = P === "z" && !rezimTisk && bc.max.y - bc.min.y > 2 * (bc.max.x - bc.min.x);
   const sx = (bc.min.x + bc.max.x) / 2, sy = (bc.min.y + bc.max.y) / 2;
   skupina.rotation.z = nalezato ? -Math.PI / 2 : 0;
+  skupina.rotation.x = -naklonNahledu;
   if (nalezato) skupina.position.set(-sy, sx, -T / 2); else skupina.position.set(-sx, -sy, -T / 2);
   rozmerModelu = nalezato ? [bc.max.y - bc.min.y, bc.max.x - bc.min.x] : [bc.max.x - bc.min.x, bc.max.y - bc.min.y]; zamerKameru();
   obnovOdkaz();
@@ -4015,12 +4124,12 @@ function radkyNavrhu() {
     stav.p === "l" ? "Medaile s průvlakem na stužku (do 18 mm)" : "",
     stav.p === "h" ? `Domovní číslo – ${stav.uc === "s" ? "na šroubky" : "na pásku"}, ven doporučujeme PETG` : "",
     stav.p === "g" ? "Značka na skleničku (kroužek na stopku)" : "",
-    stav.p === "w" ? "Stojánek na mobil (do 15 mm tloušťky)" : "",
+    stav.p === "w" ? `Stojánek na ${stav.wz === "t" ? "tablet (do 20 mm tloušťky)" : "mobil (do 15 mm tloušťky)"} – sklon ${nazev(MOBIL_SKLON, stav.ws).toLowerCase()}, ${stav.wn === "1" ? "s výřezem na nabíječku" : "bez výřezu na nabíječku"}, opěrka ${nazev(MOBIL_OPERKA, stav.wm).toLowerCase()}` : "",
     stav.p === "y" ? `Jmenné puzzle: ${((stav.t || "").trim().toUpperCase() || "EMA").slice(0, 10)}` : "",
     stav.p === "q" ? `QR kód (${nazev(QR_TYP, stav.qt)}): ${stav.qt === "w" ? `síť „${stav.qs.trim()}“, heslo „${stav.qh.trim()}“` : qrObsah()}` : "",
     stav.p === "q" ? `Použití: ${nazev(QR_POUZITI, stav.qu)}` : "",
     produkt().magnet ? (stav.mg === "v" ? `Magnety: mám vlastní, ⌀ ${rozmerMagnetu().prumer} × ${rozmerMagnetu().vyska} mm, ${pocetMagnetuPosl} na kus (vlepím si je sám/sama)` : `Magnety: prosím dodat a nalepit (⌀ ${rozmerMagnetu().prumer} × ${rozmerMagnetu().vyska} mm, ${pocetMagnetuPosl} na kus) – cena po domluvě`) : "",
-    produkt().stojan ? "Stojánek: ano, ke každé jmenovce" : "",
+    produkt().stojan ? `Stojánek: ${nazev(STOJAN_TVARY, stav.sj).toLowerCase()}${stav.sj === "n" ? " (2 ks)" : ""}, ke každé ${stav.p === "q" ? "cedulce" : "jmenovce"}` : "",
     stav.p === "c" ? (stav.uc === "s" ? "Uchycení: 2 dírky na šroubky (zápustné)" : "Uchycení: přibalit oboustrannou lepicí pásku") : "",
     priplatekKs() ? `Příplatky (materiál/magnet): ${priplatekKs()} Kč/ks` : "", stav.p === "d" ? "" : `Rámeček: ${p.ramecek}`, `Velikost: ${p.velikost}`,
     `Počet: ${stav.n} ks`,
