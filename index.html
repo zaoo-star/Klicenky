@@ -387,7 +387,12 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:block}
       <div class="podnadpis">Jas fotky</div>
       <div class="volby tri" id="fotoJas"></div>
       <div class="podnadpis">Jak ji vystavíte?</div>
-      <div class="volby" id="fotoDira" style="grid-template-columns:repeat(3,minmax(0,1fr))"></div>
+      <div class="volby" id="fotoDira" style="grid-template-columns:1fr 1fr"></div>
+      <div id="svickaBlok" class="skryt">
+        <div class="podnadpis" style="margin-top:14px">LED svíčka</div>
+        <div class="volby" id="svicka" style="grid-template-columns:1fr 1fr"></div>
+        <p class="pozn">Do stojánku se za fotku postaví LED čajová svíčka na baterku (⌀ 38 mm) – fotka se rozsvítí jako malá lampička.</p>
+      </div>
     </section>
 
     <section class="krok skladaci" id="k-text">
@@ -1080,7 +1085,7 @@ const PRODUKTY = [
   { id:"g", nazev:"Značka na skleničku", emoji:"🍷", titul:"🍷 Značky na skleničky (svatba, oslava)", text:"Jméno hosta", typ:"g", bezDiry:true, tl:3, bezZad:true, pozn:"Nasadí se na stopku skleničky, ať si hosté nepletou pití. Zadejte seznam hostů – každý dostane svou." },
   { id:"w", nazev:"Stojánek na mobil", emoji:"📱", titul:"📱 Stojánek na mobil se jménem", text:"Text na stojánku", typ:"w", bezZad:true, pozn:"Pro mobily do 15 mm tloušťky (i v obalu). Jméno nebo název firmy je zapuštěné vpředu – hezký reklamní dárek." },
   { id:"y", nazev:"Jmenné puzzle", emoji:"🧩", titul:"🧩 Puzzle se jménem pro děti", text:"Jméno dítěte", typ:"y", bezZad:true, pozn:"Destička s vykrojeným jménem a písmenka zvlášť na skládání. Písmena se tisknou velkým písmem (nejvýš 10)." },
-  { id:"v", nazev:"Visačka na dárek", emoji:"🎁", titul:"🎁 Navrhněte si visačku na dárek",  text:"Text na visačce", typ:"k", tl:2, pozn:"Tenká visačka s dírkou na mašličku." },
+  { id:"v", skryty:true, nazev:"Visačka na dárek", emoji:"🎁", titul:"🎁 Navrhněte si visačku na dárek",  text:"Text na visačce", typ:"k", tl:2, pozn:"Tenká visačka s dírkou na mašličku." },
 ];
 PRODUKTY.forEach(p => { if (!p.typ) p.typ = p.id; });
 // QR kód: jak ho zákazník použije (mění dírku, tloušťku, stojánek, magnet)
@@ -1112,7 +1117,8 @@ const FOTO_TVARY = [
   { id:"srdce", nazev:"Srdce", pomer:1.1 }, { id:"kruh", nazev:"Kolečko", pomer:1 }, { id:"oval", nazev:"Ovál", pomer:3 / 4 } ];
 const FOTO_VEL = [ { id:"m", nazev:"Malá", popis:"8 cm" }, { id:"s", nazev:"Střední", popis:"10 cm" }, { id:"l", nazev:"Velká", popis:"13 cm" } ];
 const FOTO_JAS = [ { id:"t", nazev:"Tmavší" }, { id:"n", nazev:"Normální" }, { id:"s", nazev:"Světlejší" } ];
-const FOTO_DIRA = [ { id:"1", nazev:"S ouškem", popis:"na pověšení do okna" }, { id:"s", nazev:"Se stojánkem", popis:"postaví se na parapet nebo stůl" }, { id:"0", nazev:"Bez ouška", popis:"do vlastního rámečku" } ];
+const FOTO_DIRA = [ { id:"1", nazev:"S ouškem", popis:"na pověšení do okna" }, { id:"s", nazev:"Se stojánkem", popis:"postaví se na parapet nebo stůl" }, { id:"l", nazev:"Se světlem", popis:"LED svíčka svítí zezadu" }, { id:"0", nazev:"Bez ouška", popis:"do vlastního rámečku" } ];
+const SVICKA = [ { id:"d", nazev:"Dodejte svíčku", popis:"cena po domluvě" }, { id:"v", nazev:"Mám vlastní", popis:"LED čajová svíčka ⌀ 38 mm" } ];
 const LITO = { min:0.8, max:3, okraj:3 };
 let fotoCache = { kod:null, d:null }, fotoHi = { kod:null, d:null }; // fotoHi = nahraná fotka v plném rozlišení (jen v tomto okně)
 function fotoData() { // jas fotky 0–1 (1 = světlá), z kódu ve stav.fo, jinak ukázkový obrázek
@@ -1476,7 +1482,7 @@ function prepocitejCenu() {
   $("cenaPozn").textContent = (odhad.sleva ? `Sleva pro ${kdo} ${odhad.sleva} %. `
       : slevaPro(zakaznik) && chybiKs ? `Sleva ${slevaPro(zakaznik)} % pro ${kdo} platí od ${minKs} ks – přidejte ještě ${chybiKs} ks. ` : "") + `Cena za ${n} ks.${ex} ` + POZN_CENA;
 }
-const stav = { sj:"l", wz:"m", ws:"v", wn:"1", wm:"r", pr:[], fo:"", ft:"sirka", fj:"n", fd:"1", px:0, py:0, ir:"j", ns:"dol", jm:"", p:"k", a:"0", l:"", ob:"", fs:"m", nn:"2", nd:"s", nr:"s", k:"", z:"0", t3:"", t:"Babička", t2:"", s:"obdelnik", f:"obla", o:"srdicko", op:"pred", b:"cervena", c:"bila", r:"0", v:"s", vs:"", vd:"w", qt:"u", qs:"", qh:"", qn:"", qx:"", qu:"s", q:"", uc:"p", mg:"v", mp:"", mv:"", rs:"polostin", rt:"18–25 °C", rz:"stredne", c3:"", n:1 };
+const stav = { sv:"d", sj:"l", wz:"m", ws:"v", wn:"1", wm:"r", pr:[], fo:"", ft:"sirka", fj:"n", fd:"1", px:0, py:0, ir:"j", ns:"dol", jm:"", p:"k", a:"0", l:"", ob:"", fs:"m", nn:"2", nd:"s", nr:"s", k:"", z:"0", t3:"", t:"Babička", t2:"", s:"obdelnik", f:"obla", o:"srdicko", op:"pred", b:"cervena", c:"bila", r:"0", v:"s", vs:"", vd:"w", qt:"u", qs:"", qh:"", qn:"", qx:"", qu:"s", q:"", uc:"p", mg:"v", mp:"", mv:"", rs:"polostin", rt:"18–25 °C", rz:"stredne", c3:"", n:1 };
 /* ---------- Odkaz na návrh (co nejkratší) ----------
    Do odkazu jde jen to, co se liší od výchozího nastavení, a ještě se to zkomprimuje. */
 const VYCHOZI = { ...stav };
@@ -1658,6 +1664,7 @@ vytvorVolby("uchyceni", UCHYCENI, "uc", p => `<span>${p.nazev}</span><span style
 vytvorVolby("fotoTvary", FOTO_TVARY, "ft", p => `<span>${p.nazev}</span>`);
 vytvorVolby("fotoVel", FOTO_VEL, "v", p => `<span>${p.nazev}</span><span style="font-size:.8rem;color:var(--tlumeny)">${p.popis}</span>`);
 vytvorVolby("fotoJas", FOTO_JAS, "fj", p => `<span>${p.nazev}</span>`);
+vytvorVolby("svicka", SVICKA, "sv", p => `<span>${p.nazev}</span><span style="font-size:.8rem;color:var(--tlumeny)">${p.popis}</span>`);
 vytvorVolby("fotoDira", FOTO_DIRA, "fd", p => `<span>${p.nazev}</span><span style="font-size:.8rem;color:var(--tlumeny)">${p.popis}</span>`);
 $("fotoSoubor").addEventListener("change", e => { const f = e.target.files && e.target.files[0]; if (f) nactiFotku(f); e.target.value = ""; });
 vytvorVolby("ikonaRezim", IKONA_REZIM, "ir", p => `<span>${p.nazev}</span><span style="font-size:.8rem;color:var(--tlumeny)">${p.popis}</span>`);
@@ -1716,7 +1723,7 @@ vytvorVolby("produkty", PRODUKTY.filter(p => !p.skryty), "p", p => `${NAHLEDY[p.
 });
 
 function oznac() {
-  const sady = { stojanTvary:"sj", mobilPro:"wz", mobilSklon:"ws", mobilNab:"wn", mobilOperka:"wm", qrTyp:"qt", qrPouziti:"qu", fotoTvary:"ft", fotoVel:"v", fotoJas:"fj", fotoDira:"fd", magnety:"mg", uchyceni:"uc", rSvetlo:"rs", rZalivka:"rz", barvyIkony:"c3", ikonaRezim:"ir", nozStyl:"ns", velPisma:"fs", nozPocet:"nn", nozDelka:"nd", nozRozestup:"nr", produkty:"p", oblouky:"a", zady:"z", tvary:"s", pisma:"f", ozdoby:"o", pozice:"op", barvyPodklad:"b", barvyNapis:"c", ramecky:"r", velikosti:"v" };
+  const sady = { svicka:"sv", stojanTvary:"sj", mobilPro:"wz", mobilSklon:"ws", mobilNab:"wn", mobilOperka:"wm", qrTyp:"qt", qrPouziti:"qu", fotoTvary:"ft", fotoVel:"v", fotoJas:"fj", fotoDira:"fd", magnety:"mg", uchyceni:"uc", rSvetlo:"rs", rZalivka:"rz", barvyIkony:"c3", ikonaRezim:"ir", nozStyl:"ns", velPisma:"fs", nozPocet:"nn", nozDelka:"nd", nozRozestup:"nr", produkty:"p", oblouky:"a", zady:"z", tvary:"s", pisma:"f", ozdoby:"o", pozice:"op", barvyPodklad:"b", barvyNapis:"c", ramecky:"r", velikosti:"v" };
   for (const [id, k] of Object.entries(sady))
     $(id).querySelectorAll(":scope > button:not(.kat)").forEach(b => b.setAttribute("aria-pressed", b.dataset.id === stav[k]));
   $("poziceBlok").classList.toggle("skryt", !stav.o);
@@ -1735,6 +1742,7 @@ function oznac() {
   { const cil = P === "q" ? $("k-qr") : $("k-tvar"), mb = $("magnetBlok"); if (mb.parentNode !== cil) cil.insertBefore(mb, cil.querySelector("#k-velikost") || cil.querySelector(".dalsi")); }
   $("k-rostlina").classList.toggle("skryt", P !== "r");
   $("uchyceniBlok").classList.toggle("skryt", !produkt(P).sroubky);
+  $("svickaBlok").classList.toggle("skryt", !(P === "f" && stav.fd === "l"));
   { // stojánek: u jmenovky v kroku Tvar, u QR v kroku QR kód, u stojánku na mobil v kroku Text
     const sb = $("stojanBlok"), ma = produkt(P).stojan, cil = P === "q" ? $("k-qr") : $("k-tvar");
     if (sb.parentNode !== cil) cil.insertBefore(sb, cil.querySelector(".dalsi"));
@@ -3497,7 +3505,7 @@ async function postav(presne, jeAktualni = () => true) {
   const skaluj = g => { g.scale(vk, vk, 1); const sit = g.userData.sit; if (sit) for (let i = 0; i < sit.v.length; i += 3) { sit.v[i] *= vk; sit.v[i + 1] *= vk; } };
   skaluj(gP); if (gN) skaluj(gN); if (gZ) skaluj(gZ); if (gM) skaluj(gM); if (gI) skaluj(gI); gE.forEach(x => skaluj(x.g));
   gP.computeBoundingBox();
-  if ((prod.stojan || (P === "f" && stav.fd === "s")) && !prazdny) gS = await stojanek(presne, T, gP.boundingBox, P === "f");
+  if ((prod.stojan || (P === "f" && (stav.fd === "s" || stav.fd === "l"))) && !prazdny) gS = await stojanek(presne, T, gP.boundingBox, P === "f");
   return { objemNavic, gE, gP, gN, gZ, gS, gM, gI, zmenseno, pocetMagnetu, qrDlouhy:!!(d0 && d0.qrDlouhy), T, P, chybi, tvary, vlastni, tvar, vyskaTextu, prazdny, otocit, qrModul, qrMalo };
 }
 /* Zápich do květináče: cedulka se špičkou, název nahoře a pod ním řádky s ikonkami péče.
@@ -3551,9 +3559,19 @@ async function stojanek(presne, T, bb, foto = false) {
     const sp = (T + 0.4) / 2, V = 10, H = 6, dno = V - H, L = Math.min(120, Math.max(50, sirka * 0.75));
     const prof = new CS([[[-15, 0], [15, 0], [sp + 3, V], [-sp - 3, V]]]).subtract(CS.square([2 * sp, H + 2]).translate([-sp, dno]));
     let m = prof.extrude(L).rotate([90, 0, 0]).rotate([0, 0, 90]).translate([-L / 2, 0, 0]);
-    const yMax = m.boundingBox().max[1], y0 = bb.min.y - 4 - yMax;
+    if (stav.fd === "l") { // se světlem: za zářezem deska s kroužkem na LED čajovou svíčku (⌀ 38 mm)
+      const Ls = Math.max(L, 58), yC = 8 + 21, ri = 20, ro = 22.5;
+      const zadni = new CS([[[-15, 0], [6, 0], [sp + 3, V], [-sp - 3, V]]]).subtract(CS.square([2 * sp, H + 2]).translate([-sp, dno]));
+      const lista = zadni.extrude(Ls).rotate([90, 0, 0]).rotate([0, 0, 90]).translate([-Ls / 2, 0, 0]);
+      const deska = new CS([zaoblenyObdelnik(-Ls / 2, -15, Ls, yC + ro + 4 + 15, 6).getPoints(8).map(p => [p.x, p.y])]).extrude(3);
+      const kruh = CS.circle(ro, 64).subtract(CS.circle(ri, 64)).extrude(9).translate([0, yC, 0]);
+      m = M.Manifold.union([lista, deska, kruh]);
+      m.yC = yC;
+    }
+    const yC = m.yC, yMax = m.boundingBox().max[1], y0 = bb.min.y - 4 - yMax;
     m = m.translate([cx, y0, 0]);
     const g = zManifoldu(m); g.computeBoundingBox(); g.userData.zarez = { x:cx, y:y0, z:dno, naklon:0 };
+    if (yC) g.userData.svicka = { x:cx, y:y0 + yC, z:3 };
     return g;
   }
   const sp = (T + 0.35) / 2, V = 8, H = 5, dno = V - H; // zářez: šířka podle tloušťky jmenovky + vůle, hloubka 5 mm
@@ -3739,7 +3757,7 @@ async function prekresli() {
   meshIkony = gI ? new THREE.Mesh(gI, mat(bI)) : null; if (meshIkony) skupina.add(meshIkony);
   meshStojan = gS ? new THREE.Mesh(gS, matP(stav.p === "f" ? (BARVY.find(b => b.id === "cerna") || bP) : bP)) : null; if (meshStojan) skupina.add(meshStojan);
   meshMagnet = gM ? new THREE.Mesh(gM, new THREE.MeshStandardMaterial({ color:0x666a70, metalness:0.7, roughness:0.35 })) : null; if (meshMagnet) skupina.add(meshMagnet);
-  meshPodklad = new THREE.Mesh(gP, gP.userData.lito ? new THREE.MeshStandardMaterial({ color:0x2a221a, roughness:0.9, metalness:0, emissive:0xffffff, emissiveMap:gP.userData.lito, map:gP.userData.lito }) : matP(bP)); skupina.add(meshPodklad);
+  meshPodklad = new THREE.Mesh(gP, gP.userData.lito ? new THREE.MeshStandardMaterial({ color:0x2a221a, roughness:0.9, metalness:0, emissive:stav.fd === "l" ? 0xffd9a0 : 0xffffff, emissiveMap:gP.userData.lito, map:gP.userData.lito }) : matP(bP)); skupina.add(meshPodklad);
   meshNapis = gN ? new THREE.Mesh(gN, mat(bN)) : null; if (meshNapis) skupina.add(meshNapis);
   meshZadni = gZ ? new THREE.Mesh(gZ, mat(bN)) : null; if (meshZadni) skupina.add(meshZadni);
   meshPrvky.forEach(m => { skupina.remove(m); m.geometry.dispose(); m.material.dispose(); });
@@ -3764,6 +3782,14 @@ async function prekresli() {
     meshStojan.rotation.set(-Math.PI / 2 + a, 0, 0); // u šikmého stojánku natočíme stojánek tak, aby byl zářez svisle…
     const S = new THREE.Vector3(z.x, z.y, z.z).applyEuler(meshStojan.rotation);
     meshStojan.position.set(z.x - S.x, bb.min.y - S.y, T / 2 - S.z); // dno zářezu = spodní hrana jmenovky
+    if (z.svicka || gS.userData.svicka) { // jen do náhledu: LED čajová svíčka za fotkou
+      const sv = gS.userData.svicka, sk = new THREE.Group();
+      const telo = new THREE.Mesh(new THREE.CylinderGeometry(19, 19, 16, 40).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color:0xf2f2f2, roughness:0.6 }));
+      telo.position.set(sv.x, sv.y, sv.z + 8);
+      const plamen = new THREE.Mesh(new THREE.SphereGeometry(4, 20, 14).scale(1, 1, 2.2), new THREE.MeshBasicMaterial({ color:0xffc46b }));
+      plamen.position.set(sv.x, sv.y, sv.z + 16 + 8);
+      sk.add(telo, plamen); meshStojan.add(sk);
+    }
     naklonNahledu = a; // …a celé to pak skloníme, aby stojánek stál rovně a jmenovka se opírala dozadu
     bc.min.y -= 4;
   }
@@ -4178,7 +4204,7 @@ function popisNavrhu() {
 }
 function radkyNavrhu() {
   if (stav.p === "f") return [ "Výrobek: Fotka ve světle (litofanie)", `Tvar: ${nazev(FOTO_TVARY, stav.ft)}`, `Velikost: ${nazev(FOTO_VEL, stav.v)} (${(rozmer[0]/10).toFixed(1)} × ${(rozmer[1]/10).toFixed(1)} cm)`.replace(/\./g, ","),
-    `Jas: ${nazev(FOTO_JAS, stav.fj).toLowerCase()}`, `Pověšení: ${stav.fd === "1" ? "s ouškem" : stav.fd === "s" ? "se stojánkem (černý)" : "bez ouška (do rámečku)"}`, `Počet: ${stav.n} ks`,
+    `Jas: ${nazev(FOTO_JAS, stav.fj).toLowerCase()}`, `Pověšení: ${stav.fd === "1" ? "s ouškem" : stav.fd === "s" ? "se stojánkem (černý)" : stav.fd === "l" ? `se světlem – stojánek na LED čajovou svíčku ⌀ 38 mm (${stav.sv === "v" ? "svíčku mám vlastní" : "prosím dodat svíčku, cena po domluvě"})` : "bez ouška (do rámečku)"}`, `Počet: ${stav.n} ks`,
     stav.fo ? "Fotku vám prosím pošlu i sem do Messengeru v plné kvalitě." : "Fotku vám pošlu do Messengeru." ];
   const p = popisNavrhu();
   return [
