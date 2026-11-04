@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Navrhněte si vlastní 3D výrobek – klíčenky, magnetky, cedulky, zápichy</title>
-<meta property="og:title" content="Navrhněte si vlastní 3D výrobek s vaším textem – 3D tisk">
-<meta property="og:description" content="Klíčenky, magnetky, cedulky na dveře, jmenovky na stůl, visačky, záložky a zápichy do dortu i květináče. Napište text, vyberte tvar a barvy – vytiskneme to na 3D tiskárně.">
+<meta property="og:title" content="Navrhněte si vlastní 3D výrobek se jménem – 3Dz">
+<meta property="og:description" content="Klíčenky, vánoční ozdoby, jmenovky, zápichy do dortu, magnetky a další – s vaším jménem. Cenu vidíte hned, objednáte přes Messenger.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://zaoo-star.github.io/Klicenky/nahled.png">
 <meta property="og:image:width" content="1200">
@@ -848,6 +848,44 @@ function obrysZFunkce(uvnitr, cx, cy, n = 180, rMax = 60) {
   }
   return new THREE.Shape(pts);
 }
+// Obrys libovolného (i nekonvexního) tvaru z funkce uvnitr(x, y): mřížka → hranice → vyhlazení → zjednodušení
+function obrysZMrizky(uvnitr, R, krok = 0.25) {
+  const n = Math.ceil(2 * R / krok) + 3, x0 = -R - krok, g = new Uint8Array(n * n);
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) g[j * n + i] = uvnitr(x0 + (i + 0.5) * krok, x0 + (j + 0.5) * krok) ? 1 : 0;
+  const v = (i, j) => i >= 0 && j >= 0 && i < n && j < n && g[j * n + i];
+  // buňky, které se dotýkají jen rohem, propojit (jinak by se obrys v tom místě rozpadl)
+  for (let zmena = true; zmena;) { zmena = false;
+    for (let j = 0; j < n - 1; j++) for (let i = 0; i < n - 1; i++) {
+      const a = v(i, j), b = v(i + 1, j), c = v(i, j + 1), d = v(i + 1, j + 1);
+      if ((a && d && !b && !c) || (b && c && !a && !d)) { g[j * n + i] = g[j * n + i + 1] = g[(j + 1) * n + i] = g[(j + 1) * n + i + 1] = 1; zmena = true; }
+    } }
+  const dalsi = new Map(); // orientované hrany okolo buněk „uvnitř“ (proti směru hodinových ručiček)
+  const k = (i, j) => j * (n + 1) + i;
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) if (v(i, j)) {
+    if (!v(i, j - 1)) dalsi.set(k(i, j), k(i + 1, j));
+    if (!v(i + 1, j)) dalsi.set(k(i + 1, j), k(i + 1, j + 1));
+    if (!v(i, j + 1)) dalsi.set(k(i + 1, j + 1), k(i, j + 1));
+    if (!v(i - 1, j)) dalsi.set(k(i, j + 1), k(i, j));
+  }
+  let nej = [];
+  const navst = new Set();
+  for (const z of dalsi.keys()) {
+    if (navst.has(z)) continue;
+    const smycka = []; let a = z;
+    while (!navst.has(a) && dalsi.has(a)) { navst.add(a); smycka.push(a); a = dalsi.get(a); }
+    if (smycka.length > nej.length) nej = smycka;
+  }
+  let pts = nej.map(q => [x0 + (q % (n + 1)) * krok, x0 + Math.floor(q / (n + 1)) * krok]);
+  for (let r = 0; r < 3; r++) pts = pts.map((p, i) => { const a = pts[(i - 1 + pts.length) % pts.length], b = pts[(i + 1) % pts.length]; return [(a[0] + 2 * p[0] + b[0]) / 4, (a[1] + 2 * p[1] + b[1]) / 4]; });
+  const tol = krok * 0.35, out = []; // zjednodušení: vynechat body, které leží skoro na přímce
+  for (const p of pts) {
+    if (out.length >= 2) { const a = out[out.length - 2], b = out[out.length - 1];
+      const dx = p[0] - a[0], dy = p[1] - a[1], L = Math.hypot(dx, dy) || 1;
+      if (Math.abs((b[0] - a[0]) * dy - (b[1] - a[1]) * dx) / L < tol) out.pop(); }
+    out.push(p);
+  }
+  return mnohouhelnik(out);
+}
 function mnohouhelnik(body) { return new THREE.Shape(body.map(([x, y]) => new V2(x, y))); }
 function zaoblenyObdelnik(x, y, w, h, r) {
   const s = new THREE.Shape();
@@ -1033,7 +1071,27 @@ TVARY.push(
       s:obrysZFunkce((x, y) => vTrojuhelniku(x, y, [0, 28], [-14, 10], [14, 10]) || vTrojuhelniku(x, y, [0, 16], [-20, -6], [20, -6]) || vTrojuhelniku(x, y, [0, 5], [-25, -21], [25, -21]) || (Math.abs(x) <= 5 && y >= -28 && y <= -20), 0, 0),
       otvor:[0, 19.5, 2.4], box:{ cx:0, cy:-11, w:30, h:11 } }) },
   { id:"vanocni-hvezda", nazev:"Vánoční hvězda", pro:"k", kat:"Vánoce", vanoce:true, f:() => ({ s:mnohouhelnik(hvezdaBody(0, 0, 30, 15)), otvor:[0, 22.5, 2.6], box:{ cx:0, cy:0, w:24, h:10 } }) },
+  { id:"vlocka", nazev:"Vločka", pro:"k", kat:"Vánoce", vanoce:true, f:() => ({
+      s:obrysZMrizky((x, y) => vVlocce(x, y, 33, 15, [[0.62, 11, 3], [0.84, 7, 2.6]]) || vKruhu(x, y, 0, 33, 5.4), 40),
+      otvor:[0, 33, 2.6], box:{ cx:0, cy:0, w:26, h:10 } }) },
+  { id:"vlocka2", nazev:"Vločka krystal", pro:"k", kat:"Vánoce", vanoce:true, f:() => ({
+      s:obrysZMrizky((x, y) => vVlocce(x, y, 32, 13.5, [[0.5, 7, 3.2], [0.68, 9, 3], [0.86, 5.5, 2.6]]) || vKruhu(x, y, 0, 32, 5.4), 40),
+      otvor:[0, 32, 2.6], box:{ cx:0, cy:0, w:23, h:9 } }) },
 );
+// Sněhová vločka: 6 ramen s větvičkami kolem středového šestiúhelníku na text
+function vVlocce(x, y, R, stred, vetve) {
+  const r = Math.hypot(x, y); if (r > R + 3.5) return false;
+  if (r <= stred) return true;
+  let f = (Math.atan2(y, x) - Math.PI / 2) % (Math.PI / 3); if (f < 0) f += Math.PI / 3; if (f > Math.PI / 6) f -= Math.PI / 3;
+  const u = r * Math.cos(f), v = Math.abs(r * Math.sin(f));
+  if (u >= 0 && u <= R && v <= 2.3) return true;              // rameno
+  if ((u - R) ** 2 + v * v <= 3.3 * 3.3) return true;          // kulatá špička
+  for (const [k, d, w] of vetve) {                             // větvičky šikmo ven: [kde na rameni, délka, šířka]
+    const ax = k * R, dx = Math.cos(Math.PI / 3), dy = Math.sin(Math.PI / 3), t = Math.max(0, Math.min(d, (u - ax) * dx + v * dy));
+    if ((u - ax - t * dx) ** 2 + (v - t * dy) ** 2 <= (w / 2) ** 2) return true;
+  }
+  return false;
+}
 // Záložky do knihy (30 × 150 mm, 2 mm, text vede podél záložky zdola nahoru)
 function vTrojuhelniku(x, y, [ax, ay], [bx, by], [cx, cy]) {
   const d1 = (x - bx) * (ay - by) - (ax - bx) * (y - by), d2 = (x - cx) * (by - cy) - (bx - cx) * (y - cy), d3 = (x - ax) * (cy - ay) - (cx - ax) * (y - ay);
@@ -1548,7 +1606,7 @@ function ikonaTvaru(t) {
 }
 // Kategorie v seznamech (tvary, ozdoby) – rozbalují se klepnutím
 const rozbalene = new Set(["Základní tvary", "Záložky", "Základní ozdoby"]);
-const OBLIBENE_VANOCE = ["koule","banka","zvonek","stromek","vanocni-hvezda","t-snowflake","t-gift","t-tree","kolecko","srdce","vlastni"];
+const OBLIBENE_VANOCE = ["koule","banka","zvonek","stromek","vanocni-hvezda","vlocka","vlocka2","t-gift","t-tree","kolecko","srdce","vlastni"];
 const OBLIBENE = { tvary:["obdelnik","srdce","kolecko","hvezda","kost","domecek","t-futbol","t-car","t-paw","vlastni"], pisma:["obla","klasik","tucne","psaci","rucni","komiks"] };
 const vsechno = { tvary:false, pisma:false, ozdoby:false };
 
