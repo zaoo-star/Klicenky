@@ -770,6 +770,7 @@ const NASTAVENI = {
     slevy: { firma:10, skola:20 },  // slevy v % podle typu zákazníka
     slevaOdKusu: 15,     // sleva platí až od tohoto počtu kusů
     specialni: 10,       // příplatek v Kč za kus za každý speciální materiál (hedvábný, mramor, dřevo, svítící)
+    zadni: 10,           // příplatek v Kč za kus, když je i na zadní straně nápis nebo QR kód (víc výměn barev a delší tisk)
     magnet: 0,           // cena za dodání a nalepení magnetu v Kč/ks (0 = cena po domluvě, nepočítá se)
     expres: 30,          // příplatek za expresní výrobu v %
     bezneDni: 5,         // za kolik pracovních dní běžně vyrobíte (ukazuje se zákazníkům „hotovo zhruba do…“)
@@ -1428,7 +1429,8 @@ let expres = false, termin = "", pocetMagnetuPosl = 1;
 function priplatekKs(st = stav) {
   const C = NASTAVENI.cena, bP = BARVY.find(b => b.id === st.b) || {}, bN = BARVY.find(b => b.id === st.c) || {};
   const maNapis = !!((st.t || "").trim() || (st.t2 || "").trim() || st.r === "1" || (st.z === "3" && (st.q || "").trim()));
-  return (bP.spec ? C.specialni || 0 : 0) + (maNapis && bN.spec && bN.id !== bP.id ? C.specialni || 0 : 0) + (produkt(st.p, st).magnet && st.mg === "d" ? C.magnet || 0 : 0);
+  const maZadni = st.p !== "d" && !produkt(st.p, st).bezZad && (st.z === "1" || (st.z === "2" && (st.t3 || "").trim()) || (st.z === "3" && (st.q || "").trim()));
+  return (bP.spec ? C.specialni || 0 : 0) + (maNapis && bN.spec && bN.id !== bP.id ? C.specialni || 0 : 0) + (produkt(st.p, st).magnet && st.mg === "d" ? C.magnet || 0 : 0) + (maZadni ? C.zadni || 0 : 0);
 }
 // expresní příplatek na celou objednávku
 const sExpres = kc => expres ? Math.ceil(kc * (1 + (NASTAVENI.cena.expres || 0) / 100) / (NASTAVENI.cena.zaokrouhlit || 1)) * (NASTAVENI.cena.zaokrouhlit || 1) : kc;
@@ -4232,7 +4234,7 @@ function radkyNavrhu() {
     produkt().magnet ? (stav.mg === "v" ? `Magnety: mám vlastní, ⌀ ${rozmerMagnetu().prumer} × ${rozmerMagnetu().vyska} mm, ${pocetMagnetuPosl} na kus (vlepím si je sám/sama)` : `Magnety: prosím dodat a nalepit (⌀ ${rozmerMagnetu().prumer} × ${rozmerMagnetu().vyska} mm, ${pocetMagnetuPosl} na kus) – cena po domluvě`) : "",
     produkt().stojan ? `Stojánek: ${nazev(STOJAN_TVARY, stav.sj).toLowerCase()}${stav.sj === "n" ? " (2 ks)" : ""}, ke každé ${stav.p === "q" ? "cedulce" : "jmenovce"}` : "",
     stav.p === "c" ? (stav.uc === "s" ? "Uchycení: 2 dírky na šroubky (zápustné)" : "Uchycení: přibalit oboustrannou lepicí pásku") : "",
-    priplatekKs() ? `Příplatky (materiál/magnet): ${priplatekKs()} Kč/ks` : "", stav.p === "d" ? "" : `Rámeček: ${p.ramecek}`, `Velikost: ${p.velikost}`,
+    priplatekKs() ? `Příplatky (materiál/magnet/zadní strana): ${priplatekKs()} Kč/ks` : "", stav.p === "d" ? "" : `Rámeček: ${p.ramecek}`, `Velikost: ${p.velikost}`,
     `Počet: ${stav.n} ks`,
     seznamJmen().length ? `Jména: ${seznamJmen().join(", ")}` : "",
   ].filter(Boolean);
