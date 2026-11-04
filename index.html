@@ -55,6 +55,18 @@ header p{margin:0;color:var(--tlumeny);font-size:.92rem;max-width:34em;text-wrap
 #scena{transition:height .25s ease}
 #nahled.male #scena{height:15vh;min-height:110px}
 body.krokVyrobek:not(.tiskRezim) #nahled{display:none}
+.znacka{position:relative}
+.mojeTl{margin-left:auto;border:1px solid var(--linka2);background:var(--karta2);color:var(--text);border-radius:999px;padding:7px 12px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.obnovaPruh{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:10px 10px 10px 14px;border-radius:var(--r);background:var(--akcent-svetly);border:1px solid var(--akcent-kruh);font-size:.88rem;line-height:1.3}
+.obnovaPruh span{flex:1;min-width:0}
+.obnovaPruh button{flex:none;border:1px solid var(--linka2);background:var(--karta);color:var(--text);border-radius:10px;padding:8px 10px;font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
+.obnovaPruh #obnovaZavrit{padding:8px 11px;background:transparent;border-color:transparent}
+.histObj{border:1px solid var(--linka);border-radius:var(--r);padding:12px;margin-bottom:12px;background:var(--karta2)}
+.histObj .hlava{display:flex;justify-content:space-between;gap:8px;font-weight:800;margin-bottom:8px}
+.histObj .hlava span{color:var(--ok);white-space:nowrap}
+.histObj .polozka{background:var(--karta);margin-bottom:6px}
+.histObj .hlavni{margin-top:6px}
+.odkazTl{display:block;margin:14px auto 0;background:none;border:0;color:var(--slaby);font:inherit;font-size:.85rem;text-decoration:underline;cursor:pointer}
 .filtrVyr{display:flex;gap:6px;overflow-x:auto;margin:2px 0 12px;padding:2px 0;scrollbar-width:none;min-width:0;max-width:100%;contain:inline-size}
 .filtrVyr::-webkit-scrollbar{display:none}
 @media (min-width:700px){.filtrVyr{flex-wrap:wrap;overflow:visible}}
@@ -299,7 +311,7 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
 <body>
 <div class="wrap">
   <header>
-    <div class="znacka"><i>3Dz</i><span>3D tisk na zakázku</span></div>
+    <div class="znacka"><i>3Dz</i><span>3D tisk na zakázku</span><button type="button" class="mojeTl skryt" id="mojeObjTl">📋 Moje objednávky</button></div>
     <h1 id="titul">Navrhněte si vlastní 3D výrobek</h1>
     <button type="button" id="akce" class="akce skryt"><span class="akceText"><b id="akceNadpis"></b><span id="akcePod"></span></span><span class="akceTl" id="akceTl"></span></button>
     <p class="kratce">Napište text, vyberte tvar a barvy – vytiskneme vám to na 3D tiskárně.</p>
@@ -307,6 +319,7 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
     <p class="uvodKroky">Vyberte výrobek → napište text → zvolte tvar a barvy → pošlete objednávku. <b id="uvodNazev"></b></p>
   </header>
 
+  <div class="obnovaPruh skryt" id="obnovaPruh"><span id="obnovaText"></span><button type="button" id="obnovaNovy">Začít nový</button><button type="button" id="obnovaZavrit" aria-label="Zavřít">✕</button></div>
   <div id="nahled">
     <button type="button" class="lupa" id="lupa" aria-label="Zvětšit náhled">🔍</button>
     <canvas id="scena" aria-label="Náhled – klepnutím zvětšíte"></canvas>
@@ -645,10 +658,19 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
     <button class="vedlejsi" id="shrnutiZpet">✏️ Ještě něco upravit</button>
   </section>
 
+  <section class="krok skryt" id="historie">
+    <h2>📋 Moje objednávky</h2>
+    <p class="pozn" style="margin:-4px 0 12px">Objednávky odeslané z tohoto telefonu (pamatuje si je jen tento prohlížeč). Klepnutím na <b>Objednat znovu</b> se vše vloží do košíku, můžete ještě upravit a odeslat.</p>
+    <div id="historieSeznam"></div>
+    <button class="vedlejsi" id="historieZpet">← Zpět k návrhu</button>
+    <button type="button" class="odkazTl" id="historieSmazat">Smazat historii z tohoto telefonu</button>
+  </section>
+
   <section class="krok hotovo skryt" id="dekujeme">
     <div class="velke">🎉</div>
     <h2>Děkujeme za objednávku!</h2>
     <p>Brzy se vám ozveme a domluvíme se na podrobnostech.</p>
+    <p class="pozn" id="dekujemeHist">Objednávku najdete i později nahoře pod <b>📋 Moje objednávky</b>.</p>
     <button class="vedlejsi" id="znovu">Navrhnout další</button>
   </section>
 
@@ -4187,7 +4209,8 @@ function zkontroluj() {
 function ukaz(id) {
   if (id === "dekujeme" && kosik.length) { kosik = []; ulozKosik(); prepocitejCenu(); } // objednávka odeslána → vysypat košík
   document.body.dataset.obr = id;
-  ["navrh", "dekujeme", "rucne", "shrnuti"].forEach(x => $(x).classList.toggle("skryt", x !== id));
+  if (id === "dekujeme") ulozDoHistorie();
+  ["navrh", "dekujeme", "rucne", "shrnuti", "historie"].forEach(x => $(x).classList.toggle("skryt", x !== id));
   $("nahled").classList.toggle("skryt", id !== "navrh");
   scrollTo({ top:0, behavior:"smooth" });
 }
@@ -4223,6 +4246,7 @@ async function posliMessenger() {
   if (NASTAVENI.firebase) ulozFirebase().catch(e => console.warn("Kopie objednávky do Firebase se neuložila", e));
   const t = textObjednavky();
   $("zpravaText").textContent = t;
+  ulozDoHistorie(); // zákazník často neklepne na „Zprávu jsem odeslal(a)“ – do historie ji dáme už teď
   const zkopirovano = await kopiruj(t);
   // text je zkopírovaný, otevře se chat s naší stránkou a stačí ho vložit
   // (sdílení přes nabídku telefonu nepoužíváme – Messenger v ní stránky často nenabízí)
@@ -4325,6 +4349,8 @@ async function ukazShrnuti(cil) {
     v("poznamka") ? `📝 ${esc(v("poznamka"))}` : "",
     `<span class="pozn">Odešle se ${cil === "messenger" || posilaMessenger() ? "zprávou přes Messenger" : NASTAVENI.firebase || NASTAVENI.emailSkript ? "nám rovnou" : "zpráva"} – ${NASTAVENI.nazev || "my"} se vám pak ozve.</span>`,
   ].filter(Boolean).join("<br>");
+  posledniShrnuti = { cena:C.zobrazit ? c.cena : null, ks:c.ks, polozky:kosik.length ? kosik.map(p => ({ ...p, st:rozdilSt(p.st) }))
+    : [{ st:rozdilSt(stav), popis:polozky[0].popis, detaily:polozky[0].detaily, nahled:polozky[0].nahled, ...aktualniPolozka() }] };
   $("shrnutiOdeslat").textContent = cil === "messenger" || posilaMessenger() ? "💬 Vše sedí – odeslat přes Messenger" : "✔ Vše sedí – odeslat objednávku";
   ukaz("shrnuti");
 }
@@ -4380,6 +4406,82 @@ $("kopOdkaz").onclick = async () => {
 $("otevritMsg").onclick = async () => { await kopiruj($("zpravaText").textContent); otevriMessenger($("zpravaText").textContent); };
 
 $("znovu").onclick = () => { $("poznamka").value = ""; stav.n = 1; oznac(); ukaz("navrh"); };
+
+/* ---------- Paměť v telefonu: rozdělaný návrh, kontakt, historie objednávek (jen localStorage tohoto prohlížeče) ---------- */
+const KLIC_NAVRH = "navrh3dz", KLIC_KONTAKT = "kontakt3dz", KLIC_HIST = "historie3dz";
+const cti = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || "null") ?? d; } catch { return d; } };
+const pis = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
+// rozdělaný návrh: ukládá se chvilku po každé změně
+let ulozNavrhCas = 0, pametZapnuta = false;
+function ulozNavrhPozdeji() {
+  if (!pametZapnuta || rezimTisk || davkaBezi) return;
+  clearTimeout(ulozNavrhCas);
+  ulozNavrhCas = setTimeout(() => {
+    const st = rozdilSt(stav);
+    if (!Object.keys(st).length && aktivniKrok.id === "k-produkt") return pis(KLIC_NAVRH, null);
+    if (!pis(KLIC_NAVRH, { st, krok:aktivniKrok.id, cas:Date.now() })) pis(KLIC_NAVRH, { st:{ ...st, l:"", ob:"", fo:"" }, krok:aktivniKrok.id, cas:Date.now() }); // plná paměť → bez obrázků
+  }, 700);
+}
+$("navrh").addEventListener("input", ulozNavrhPozdeji, true);
+$("navrh").addEventListener("click", () => setTimeout(ulozNavrhPozdeji, 50), true);
+$("lista").addEventListener("click", () => setTimeout(ulozNavrhPozdeji, 50), true);
+$("postup").addEventListener("click", () => setTimeout(ulozNavrhPozdeji, 50), true);
+const skryjObnovu = () => $("obnovaPruh").classList.add("skryt");
+$("obnovaZavrit").onclick = skryjObnovu;
+$("obnovaNovy").onclick = () => { pis(KLIC_NAVRH, null); nactiStav({}); skryjObnovu(); otevriKrok(kroky[0]); toast("Můžete začít nový návrh."); };
+// kontakt: vyplní se sám příště
+const KONTAKT_POLE = ["jmeno", "telefon", "organizace", "ico"];
+{ const k = cti(KLIC_KONTAKT, {}); KONTAKT_POLE.forEach(id => { if (k[id] && !$(id).value) $(id).value = k[id]; }); }
+KONTAKT_POLE.forEach(id => $(id).addEventListener("change", () => { const k = {}; KONTAKT_POLE.forEach(i => { const v = $(i).value.trim(); if (v) k[i] = v; }); pis(KLIC_KONTAKT, k); }));
+// historie objednávek
+let posledniShrnuti = null;
+function ulozDoHistorie() {
+  if (!posledniShrnuti) return;
+  const h = cti(KLIC_HIST, []);
+  h.unshift({ cas:Date.now(), ...posledniShrnuti });
+  posledniShrnuti = null;
+  while (h.length > 15) h.pop();
+  while (h.length && !pis(KLIC_HIST, h)) { if (h.length > 1) h.pop(); else { h[0].polozky.forEach(p => p.nahled = ""); if (!pis(KLIC_HIST, h)) break; } }
+  pis(KLIC_NAVRH, null); skryjObnovu();
+  obnovMojeTl();
+}
+function obnovMojeTl() { const n = cti(KLIC_HIST, []).length; $("mojeObjTl").classList.toggle("skryt", !n); $("mojeObjTl").textContent = `📋 Moje objednávky (${n})`; }
+function ukazHistorii() {
+  const h = cti(KLIC_HIST, []), el = $("historieSeznam"); el.innerHTML = "";
+  if (!h.length) el.innerHTML = '<p class="pozn">Zatím tu nic není.</p>';
+  h.forEach((o, i) => {
+    const d = document.createElement("div"); d.className = "histObj";
+    const datum = new Date(o.cas).toLocaleDateString("cs-CZ", { day:"numeric", month:"numeric", year:"numeric" });
+    d.innerHTML = `<div class="hlava"><b>${datum} · ${o.ks} ks</b>${o.cena != null ? `<span>${o.cena} Kč</span>` : ""}</div>` +
+      o.polozky.map(p => `<div class="polozka">${p.nahled ? `<img src="${p.nahled}" alt="">` : ""}<div class="txt"><b>${esc(p.popis)}</b><br>${p.ks} ks</div></div>`).join("");
+    const b = document.createElement("button"); b.type = "button"; b.className = "hlavni"; b.textContent = "🔁 Objednat znovu";
+    b.onclick = () => {
+      kosik = o.polozky.map(p => ({ ...p, st:{ ...VYCHOZI, ...p.st } })); ulozKosik();
+      nactiStav(kosik[kosik.length - 1].st); // rozpracovaný = poslední položka, takže se nepřidá dvakrát
+      ukaz("navrh"); otevriKrok($("objednavka"));
+      toast("Objednávka je v košíku – můžete ji upravit nebo rovnou odeslat.");
+      ulozNavrhPozdeji();
+    };
+    d.appendChild(b); el.appendChild(d);
+  });
+  ukaz("historie");
+}
+$("mojeObjTl").onclick = ukazHistorii;
+$("historieZpet").onclick = () => ukaz("navrh");
+$("historieSmazat").onclick = () => { pis(KLIC_HIST, null); obnovMojeTl(); ukaz("navrh"); toast("Historie je smazaná."); };
+obnovMojeTl();
+// po otevření: vrátit rozdělaný návrh (ne u odkazu na konkrétní návrh / objednávku a ne v režimu tisku)
+{
+  const u = !rezimTisk && !hashParams.get("n") && !hashParams.get("o") && !hashParams.get("d") ? cti(KLIC_NAVRH, null) : null;
+  if (u && u.st && Date.now() - u.cas < 60 * 864e5 && PRODUKTY.some(p => p.id === (u.st.p || VYCHOZI.p))) {
+    nactiStav(u.st);
+    const kr = $(u.krok);
+    if (kr && kroky.includes(kr) && !kr.classList.contains("skryt") || u.krok === "objednavka") otevriKrok(kr, false);
+    $("obnovaText").textContent = `📝 Pokračujete v rozdělaném návrhu: ${kratkyPopis().split(" – ")[0]}`;
+    $("obnovaPruh").classList.remove("skryt");
+  }
+  pametZapnuta = true;
+}
 </script>
 </body>
 </html>
