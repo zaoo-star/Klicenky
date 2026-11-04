@@ -55,12 +55,18 @@ header p{margin:0;color:var(--tlumeny);font-size:.92rem;max-width:34em;text-wrap
 #scena{transition:height .25s ease}
 #nahled.male #scena{height:15vh;min-height:110px}
 body.krokVyrobek:not(.tiskRezim) #nahled{display:none}
+.filtrVyr{display:flex;gap:6px;overflow-x:auto;margin:2px -4px 12px;padding:2px 4px;scrollbar-width:none}
+.filtrVyr::-webkit-scrollbar{display:none}
+@media (min-width:700px){.filtrVyr{flex-wrap:wrap;overflow:visible}}
+.filtrVyr button{flex:none;border:1px solid var(--linka2);background:var(--karta2);color:var(--text);border-radius:999px;padding:8px 14px;font:inherit;font-size:.9rem;font-weight:600;cursor:pointer}
+.filtrVyr button.on{background:var(--akcent);border-color:var(--akcent);color:#16100b}
 #k-velikost.bezVlastni #velikosti [data-id="x"],#k-velikost.bezVlastni .radekPocet,#k-velikost.bezVlastni #velInfo{display:none!important}
 #k-velikost.bezVlastni #velikosti{grid-template-columns:repeat(3,1fr)!important}
 #nahled.male .varovani{color:var(--chyba);font-size:.8rem;font-weight:700;text-align:center}
 .varovani:empty{display:none}
 .varovani{color:var(--chyba);font-size:.85rem;font-weight:700;text-align:center;margin-top:6px}
 .tip{display:none}
+.nahledStitek{position:absolute;left:12px;top:16px;font-size:.78rem;font-weight:600;color:#fff;background:rgba(0,0,0,.55);border-radius:10px;padding:5px 9px;pointer-events:none;width:max-content;max-width:calc(100% - 84px)}
 #nahled.male{background:var(--pozadi);box-shadow:0 12px 18px -14px rgba(0,0,0,.9)}
 #nahled.zvetseno #scena{height:68vh;min-height:300px;max-height:none}
 #nahled.zvetseno{box-shadow:0 14px 24px -16px rgba(0,0,0,.9)}
@@ -302,6 +308,7 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
   <div id="nahled">
     <button type="button" class="lupa" id="lupa" aria-label="Zvětšit náhled">🔍</button>
     <canvas id="scena" aria-label="Náhled – klepnutím zvětšíte"></canvas>
+    <div class="nahledStitek skryt" id="nahledStitek"></div>
     <div class="tip" id="tipNahled">Načítám náhled…</div>
     <div class="varovani" id="malyText"></div>
   </div>
@@ -310,6 +317,7 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
     <nav id="postup" aria-label="Postup"></nav>
     <section class="krok skladaci" id="k-produkt">
       <h2><span class="cislo">1</span><span class="nadpis">Co chcete vyrobit?<span class="souhrn"></span></span></h2>
+      <div class="filtrVyr" id="produktFiltr" role="tablist" aria-label="Druh výrobku"></div>
       <div class="volby tri" id="produkty"></div>
       <div class="podnadpis" style="margin-top:20px">Nebo začněte hotovým nápadem</div>
       <div class="napady" id="napady"></div>
@@ -686,7 +694,8 @@ const NASTAVENI = {
     expres: 30,          // příplatek za expresní výrobu v %
     bezneDni: 5,         // za kolik pracovních dní běžně vyrobíte (ukazuje se zákazníkům „hotovo zhruba do…“)
     // NEJNIŽŠÍ CENA ZA 1 KUS podle výrobku (Kč) – když vyjde výpočet z času tisku nižší, použije se tahle
-    minKus: { k:30, z:40, d:60, m:40, c:90, j:25, r:45, b:50, koule:120, p:50, n:50, u:60, f:180, v:20 },
+    minKus: { k:30, z:40, d:60, m:40, c:90, j:25, r:45, b:50, koule:120, p:50, n:50, u:60, f:180, v:20,
+              q:50, e:40, o:40, l:35, h:120, t:15, g:15, w:90, y:60 },
   },
   // SEZÓNNÍ AKCE – pruh nahoře; po datu „do“ sám zmizí (zobrazit:false = vypnout)
   akce: { zobrazit:true, text:"🎄 Vánoční ozdoby se jménem", podtext:"Objednávky do 15. 12., ať je stihneme před Vánoci.", tlacitko:"Navrhnout ozdobu", produkt:"b", do:"2026-12-15" },
@@ -1094,7 +1103,7 @@ function nactiFotku(soubor) {
 function litofanie(M, presne) {
   const F = fotoData(), tv = FOTO_TVARY.find(t => t.id === stav.ft) || FOTO_TVARY[0];
   const L = { m:80, s:100, l:130 }[stav.v] || 100, W = tv.pomer >= 1 ? L : L * tv.pomer, H = tv.pomer >= 1 ? L / tv.pomer : L;
-  const krok = presne ? 0.4 : 0.6;
+  const krok = presne ? 0.4 : 1;
   const pa = F.w / F.h, ar = W / H; let sx0 = 0, sy0 = 0, sw = F.w, sh = F.h;
   if (pa > ar) { sw = F.h * ar; sx0 = (F.w - sw) / 2; } else { sh = F.w / ar; sy0 = (F.h - sh) / 2; }
   const jas = { t:-0.1, n:0, s:0.1 }[stav.fj] || 0;
@@ -1344,6 +1353,9 @@ function objem(g) {
   return Math.abs(v / 6);
 }
 // nejnižší cena za kus podle výrobku (kulatá baňka má vlastní)
+// objednávka odchází zprávou přes Messenger (Firebase jen ukládá kopii)
+const pocetJmenText = n => n + (n < 5 ? " jména" : " jmen");
+function posilaMessenger() { return !!NASTAVENI.messenger && !NASTAVENI.emailSkript && (!NASTAVENI.firebase || !!NASTAVENI.firebaseJenKopie); }
 function obnovHotovo() { const el = $("hotovoDo"); if (el) el.innerHTML = `📅 Hotovo zhruba <b>${hotovoText()}</b>${expres ? " (expres)" : ""} – přesný termín potvrdíme ve zprávě.`; }
 function minKus(st = stav) {
   const M = NASTAVENI.cena.minKus || {}, t = TVARY.find(x => x.id === st.s) || {};
@@ -1837,6 +1849,30 @@ function obnovEditor() {
   svg.addEventListener("pointerup", konec); svg.addEventListener("pointercancel", konec);
 }
 
+/* ---------- Filtr výrobků podle příležitosti (22 dlaždic je na mobilu dlouhý seznam) ---------- */
+{
+  const SKUPINY = [
+    { n:"Vše", ids:null },
+    { n:"🎁 Dárky", ids:"kzbvfnwyupl" },
+    { n:"🎉 Oslavy a svatby", ids:"djgbvlyeo" },
+    { n:"🏠 Domácnost", ids:"chmtprfqe" },
+    { n:"🧸 Děti a zvířata", ids:"ynlzko" },
+    { n:"🏢 Firmy a školy", ids:"qcjmplkt" },
+  ];
+  const el = $("produktFiltr");
+  let akt = 0;
+  const filtruj = () => {
+    [...el.children].forEach((b, i) => { b.classList.toggle("on", i === akt); b.setAttribute("aria-selected", i === akt); });
+    const ids = SKUPINY[akt].ids;
+    $("produkty").querySelectorAll("button.volba").forEach(b => b.classList.toggle("skryt", !!ids && !ids.includes(b.dataset.id) && b.dataset.id !== stav.p));
+  };
+  SKUPINY.forEach((g, i) => {
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "tab"); b.textContent = g.n;
+    b.onclick = () => { akt = i; filtruj(); b.scrollIntoView({ inline:"center", block:"nearest", behavior:"smooth" }); };
+    el.appendChild(b);
+  });
+  filtruj();
+}
 /* ---------- Průvodce po krocích: vždy jen jeden krok, dole lišta Zpět / Pokračovat ---------- */
 const kroky = [...document.querySelectorAll(".krok.skladaci")];
 const KRATCE = { "k-qr":"QR kód", "k-foto":"Fotka", "k-produkt":"Výrobek", "k-text":"Text", "k-tvar":"Tvar", "k-rostlina":"Péče", "k-barvy":"Barvy", "k-nozicky":"Nožičky", "k-dalsi":"Doladit", "objednavka":"Odeslat" };
@@ -1850,6 +1886,7 @@ function otevriKrok(el, posun = true) {
   document.body.classList.toggle("krokVyrobek", el.id === "k-produkt"); // výrobky mají vlastní náhledy, velký náhled tu jen zabírá místo
   obnovPruvodce();
   if (el.id === "k-tvar") umistiIkonaRezim();
+  if (el.id === "objednavka") try { obnovKosik(); } catch {}
   if (posun) requestAnimationFrame(() => {
     // stránku posuneme tak, aby byl vidět náhled a začátek kroku
     const y = Math.max(0, $("navrh").getBoundingClientRect().top + scrollY - (window.vyskaMalehoNahledu?.() || $("nahled").offsetHeight) - 4);
@@ -1900,7 +1937,7 @@ function souhrny() {
   const q = t => t ? `„${t}“` : "";
   const S = {
     "k-produkt": nz(PRODUKTY, stav.p),
-    "k-text": (seznamJmen().length > 1 ? `${seznamJmen().length} jmen (${seznamJmen().slice(0, 3).join(", ")}${seznamJmen().length > 3 ? "…" : ""})` : [q(stav.t.trim()), q(stav.t2.trim())].filter(Boolean).join(" + ") || "bez textu") + ", písmo " + nz(PISMA, stav.f).toLowerCase(),
+    "k-text": (seznamJmen().length > 1 ? `${pocetJmenText(seznamJmen().length)} (${seznamJmen().slice(0, 3).join(", ")}${seznamJmen().length > 3 ? "…" : ""})` : [q(stav.t.trim()), q(stav.t2.trim())].filter(Boolean).join(" + ") || "bez textu") + ", písmo " + nz(PISMA, stav.f).toLowerCase(),
     "k-zada": stav.z === "2" ? (q(stav.t3.trim()) || "jiný text") : nz(ZADY, stav.z),
     "k-tvar": nz(TVARY, stav.s) + ((TVARY.find(t => t.id === stav.s) || {}).ikona && typ() === "k" ? (stav.ir === "c" ? " – celá ve tvaru ikony" : " – s jmenovkou") : "") + (produkt().magnet ? (stav.mg === "v" ? ", vlastní magnety" : ", magnety dodáme") : produkt().sroubky ? (stav.uc === "s" ? ", na šroubky" : ", na pásku") : ""),
     "k-nozicky": `${stav.ns === "zad" ? "z boku, bodce vzadu" : "shora"} – ${nz(NOZ_POCET, stav.nn).toLowerCase()}, ${cmNohy()} cm`,
@@ -2927,7 +2964,8 @@ function puzzleJmeno(M, fonty, presne, k) {
   const sirka = b.max[0] - b.min[0] + 14;
   if (sirka > 228) { const f = 228 / sirka; for (let i = 0; i < pismena.length; i++) pismena[i] = pismena[i].scale([f, f]); vse = M.CrossSection.union(pismena); b = vse.bounds(); m *= f; }
   const deska = M.CrossSection.square([b.max[0] - b.min[0] + 14, b.max[1] - b.min[1] + 14]).translate([b.min[0] - 7, b.min[1] - 7]).offset(-6, "Round", 2, 16).offset(6, "Round", 2, 16);
-  const P = deska.extrude(7).subtract(vse.offset(0.2, "Round", 2, 16).extrude(5).translate([0, 0, 2.5]));
+  // kapsa = písmena + 0,2 mm vůle; +0,5/−0,3 slije místa, kde se kapsy jen dotýkají (jinak by v desce zůstaly nulové stěny)
+  const P = deska.extrude(7).subtract(vse.offset(0.5, "Round", 2, 16).offset(-0.3, "Round", 2, 16).simplify(0.01).extrude(5).translate([0, 0, 2.5]));
   let N = M.Manifold.union(pismena.map(c => c.offset(-0.15, "Round", 2, 16).simplify(0.01).extrude(4.4)));
   N = presne ? N.translate([0, (b.min[1] - 7) - (b.max[1] + 4), 0]) : N.translate([0, 0, 2.55]);
   return { P, N, T:7, vt:28 * k, objemNavic:objemM(N), chybi };
@@ -3000,7 +3038,7 @@ async function postav(presne, jeAktualni = () => true) {
       const p = gP.attributes.position, uv = new Float32Array(p.count * 2);
       for (let i = 0; i < p.count; i++) { uv[i * 2] = (p.getX(i) - x0) / sw; uv[i * 2 + 1] = (p.getY(i) - y0) / sh; }
       gP.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
-      const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+      const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
       gP.userData.lito = tex;
     }
   } else if (SPEC3D.includes(P)) {
@@ -3543,8 +3581,12 @@ async function prekresli() {
     meshStojan.position.set(0, bb.min.y - 3, T / 2 + yS);
     bc.min.y -= 3;
   }
-  skupina.position.set(-(bc.min.x + bc.max.x) / 2, -(bc.min.y + bc.max.y) / 2, -T / 2);
-  rozmerModelu = [bc.max.x - bc.min.x, bc.max.y - bc.min.y]; zamerKameru();
+  // dlouhou záložku ukážeme naležato – v širokém náhledu je pak text velký a čte se zleva doprava
+  const nalezato = P === "z" && !rezimTisk && bc.max.y - bc.min.y > 2 * (bc.max.x - bc.min.x);
+  const sx = (bc.min.x + bc.max.x) / 2, sy = (bc.min.y + bc.max.y) / 2;
+  skupina.rotation.z = nalezato ? -Math.PI / 2 : 0;
+  if (nalezato) skupina.position.set(-sy, sx, -T / 2); else skupina.position.set(-sx, -sy, -T / 2);
+  rozmerModelu = nalezato ? [bc.max.y - bc.min.y, bc.max.x - bc.min.x] : [bc.max.x - bc.min.x, bc.max.y - bc.min.y]; zamerKameru();
   obnovOdkaz();
   // texty a upozornění
   const varovani = [];
@@ -3586,6 +3628,8 @@ async function prekresli() {
     : tvar.vlastni && typ(P) === "k" && !vlastni ? "Nakreslete tvar dole na ploše ✏️"
     : `Náhled můžete otočit prstem • velikost asi ${cm(sirka)} × ${cm(vyska)} cm`;
   if (tvar.vlastni && typ(P) === "k") prekresliPlatno(vlastni);
+  { const st = $("nahledStitek"), zr = (P === "e" || P === "o") && !rezimTisk; // razítko a vykrajovátko mají písmena zrcadlově
+    st.textContent = zr ? "↔ Písmena jsou zrcadlově – na cukroví se otisknou správně" : ""; st.classList.toggle("skryt", !zr); }
   if (rezimTisk) aktualizujTiskInfo(r);
   if (!manifoldSlib) setTimeout(() => manifold().catch(() => {}), 1500); // připravit přesné výpočty dopředu
 }
@@ -3832,7 +3876,7 @@ try { kosik = JSON.parse(localStorage.getItem("kosik3dz") || "[]"); } catch { ko
 const ulozKosik = () => { try { localStorage.setItem("kosik3dz", JSON.stringify(kosik)); } catch {} obnovKosik(); obnovOdkazObjednavky(); };
 function kratkyPopis(st = stav) {
   const prod = nazev(PRODUKTY, st.p), jm = (st.jm || "").split("\n").map(x => x.trim()).filter(Boolean);
-  const text = jm.length > 1 ? `${jm.length} jmen (${jm.slice(0, 3).join(", ")}${jm.length > 3 ? "…" : ""})` : `„${(st.t || "").trim()}“`;
+  const text = jm.length > 1 ? `${pocetJmenText(jm.length)} (${jm.slice(0, 3).join(", ")}${jm.length > 3 ? "…" : ""})` : `„${(st.t || "").trim()}“`;
   const tvar = st.p === "d" ? (st.ns === "zad" ? "z boku" : "shora") : st.p === "q" ? `${nazev(QR_TYP, st.qt)}, ${nazev(QR_POUZITI, st.qu).toLowerCase()}` : st.p === "r" ? [nazev(R_SVETLO, st.rs), (st.rt || "").trim(), nazev(R_ZALIVKA, st.rz)].filter(x => x && x !== "Neuvádět").join(", ") : st.s === "vlastni" ? "vlastní tvar" : nazev(TVARY, st.s);
   return `${prod} ${text} – ${tvar}, ${nazev(BARVY, st.b).toLowerCase()}${st.p === "d" || st.c ? " / " + nazev(BARVY, st.c).toLowerCase() : ""}${st.z === "3" && (st.q || "").trim() && st.p !== "d" && !produkt(st.p).bezZad ? ", zezadu QR kód" : ""}`;
 }
@@ -3867,6 +3911,7 @@ function aktualniPolozka() { const C = NASTAVENI.cena; return { minuty:odhad.min
 const klicNavrhu = st => { const d = rozdilSt(st); delete d.n; delete d.jm; return JSON.stringify(d); };
 const jeRozpracovany = () => kosik.length > 0 && !davkaBezi && kosik.every(p => klicNavrhu({ ...VYCHOZI, ...p.st }) !== klicNavrhu(stav));
 const zahrnoutRozpracovany = () => jeRozpracovany() && $("pridatAkt").checked;
+$("pridatAkt").addEventListener("change", () => obnovKosik());
 function obnovRozpracovany() {
   const r = jeRozpracovany();
   $("rozpracovanyBlok").classList.toggle("skryt", !r);
@@ -3890,8 +3935,9 @@ function obnovKosik() {
   $("pocetNadpis").textContent = "Kolik kusů?";
   $("doKosiku").textContent = n ? "🛒 Přidat i tento návrh do košíku" : "🛒 Přidat do košíku a navrhnout další věc";
   $("odeslat").dataset.pocet = n;
-  const zakl = NASTAVENI.firebase || NASTAVENI.emailSkript ? "✔ Odeslat objednávku" : NASTAVENI.messenger ? "💬 Odeslat přes Messenger" : "✔ Odeslat objednávku";
-  $("odeslat").textContent = n ? `${zakl} (${n} ${n === 1 ? "věc" : n < 5 ? "věci" : "věcí"})` : zakl;
+  const zakl = posilaMessenger() ? "💬 Odeslat přes Messenger" : "✔ Odeslat objednávku";
+  let celkem = n; try { if (n && zahrnoutRozpracovany()) celkem++; } catch {} // i rozpracovaný návrh, pokud se přidá
+  $("odeslat").textContent = n ? `${zakl} (${celkem} ${celkem === 1 ? "věc" : celkem < 5 ? "věci" : "věcí"})` : zakl;
 }
 // načtení uloženého návrhu zpět do návrháře
 function nactiStav(st) {
@@ -3929,13 +3975,14 @@ $("doKosiku").onclick = async () => {
 $("kosikPlovouci").onclick = () => otevriKrok($("objednavka"));
 obnovKosik(); obnovOdkazObjednavky();
 
+const TVAR_SPEC = { e:"kulaté razítko", o:"podle písmen jména", l:"kulatá medaile s ouškem", t:"štítek se zaoblenými rohy", g:"štítek s kroužkem na stopku", w:"stojánek", y:"destička s vyjímacími písmeny" };
 function popisNavrhu() {
   const d = stav.p === "d";
   return {
     vyrobek: nazev(PRODUKTY, stav.p),
     text: stav.t.trim(), druhyRadek: stav.t2.trim(),
     vedeniTextu: stav.p === "z" ? "rovně" : nazev(OBLOUKY, stav.a).toLowerCase(),
-    tvar: d ? "podle textu" : stav.p === "q" ? "cedulka s QR kódem" : stav.p === "r" ? "cedulka se špičkou" : stav.s === "vlastni" ? "vlastní (nakreslený zákazníkem – viz odkaz)" : nazev(TVARY, stav.s) + ((TVARY.find(t => t.id === stav.s) || {}).ikona ? (stav.ir === "c" ? " (celá ve tvaru ikony)" : " (ikona + jmenovka)") : ""), pismo: nazev(PISMA, stav.f),
+    tvar: d ? "podle textu" : stav.p === "q" ? "cedulka s QR kódem" : stav.p === "r" ? "cedulka se špičkou" : TVAR_SPEC[stav.p] ? TVAR_SPEC[stav.p] : stav.s === "vlastni" ? "vlastní (nakreslený zákazníkem – viz odkaz)" : nazev(TVARY, stav.s) + ((TVARY.find(t => t.id === stav.s) || {}).ikona ? (stav.ir === "c" ? " (celá ve tvaru ikony)" : " (ikona + jmenovka)") : ""), pismo: nazev(PISMA, stav.f),
     ozdoba: stav.o ? nazev(OZDOBY, stav.o) + " – " + nazev(POZICE, stav.op).toLowerCase() : "bez ozdoby",
     barvaKlicenky: nazev(BARVY, stav.b), barvaPisma: nazev(BARVY, stav.c),
     zadniStrana: d || produkt().bezZad ? "–" : stav.z === "3" ? `QR kód „${stav.q.trim()}“` : stav.z === "2" ? (stav.t3.trim() ? `text „${stav.t3.trim()}“` : "prázdná") : stav.z === "1" ? "stejný nápis jako vpředu" : "prázdná",
@@ -4015,10 +4062,15 @@ function textObjednavky() {
   ].filter(Boolean).join("\n");
 }
 function zkontroluj() {
-  if (stav.p === "q" && !qrObsah()) { $("formChyba").textContent = "Ještě napište, co má QR kód otevřít (krok QR kód)."; return false; }
-  if (zakaznik !== "o" && !$("organizace").value.trim()) { $("formChyba").textContent = zakaznik === "skola" ? "Prosím napište název školy." : "Prosím napište název firmy."; $("organizace").focus(); return false; }
-  if (!$("jmeno").value.trim()) { $("formChyba").textContent = "Prosím napište své jméno."; $("jmeno").focus(); return false; }
-  if (!$("telefon").value.trim()) { $("formChyba").textContent = "Prosím napište telefon nebo e-mail, ať se vám můžeme ozvat."; $("telefon").focus(); return false; }
+  if (stav.p === "q" && !qrObsah()) {
+    $("formChyba").textContent = "Ještě napište, co má QR kód otevřít (krok QR kód).";
+    ukaz("navrh"); otevriKrok($("k-qr")); toast("Ještě napište, co má QR kód otevřít 👇");
+    setTimeout(() => { const f = [...$("k-qr").querySelectorAll("input:not([type=hidden]),textarea")].find(x => x.offsetParent); if (f) f.focus({ preventScroll:true }); }, 450);
+    return false;
+  }
+  if (zakaznik !== "o" && !$("organizace").value.trim()) { $("formChyba").textContent = zakaznik === "skola" ? "Prosím napište název školy." : "Prosím napište název firmy."; $("organizace").focus(); toast($("formChyba").textContent); $(document.activeElement.id || "jmeno").scrollIntoView({ block:"center", behavior:"smooth" }); return false; }
+  if (!$("jmeno").value.trim()) { $("formChyba").textContent = "Prosím napište své jméno."; $("jmeno").focus(); toast($("formChyba").textContent); $(document.activeElement.id || "jmeno").scrollIntoView({ block:"center", behavior:"smooth" }); return false; }
+  if (!$("telefon").value.trim()) { $("formChyba").textContent = "Prosím napište telefon nebo e-mail, ať se vám můžeme ozvat."; $("telefon").focus(); toast($("formChyba").textContent); $(document.activeElement.id || "jmeno").scrollIntoView({ block:"center", behavior:"smooth" }); return false; }
   $("formChyba").textContent = ""; return true;
 }
 function ukaz(id) {
@@ -4113,7 +4165,7 @@ async function ulozFirebase() {
   for (const k in data) if (data[k] === undefined || (typeof data[k] === "number" && !isFinite(data[k]))) delete data[k]; // Firestore nebere undefined ani NaN
   await addDoc(collection(db, "objednavky_klicenek"), data);
 }
-const jenMessenger = NASTAVENI.messenger && !NASTAVENI.emailSkript && (!NASTAVENI.firebase || NASTAVENI.firebaseJenKopie);
+const jenMessenger = posilaMessenger();
 if (NASTAVENI.messenger && !jenMessenger) $("messenger").classList.remove("skryt");
 if (jenMessenger) $("odeslat").textContent = "💬 Odeslat přes Messenger";
 obnovKosik();
@@ -4147,7 +4199,7 @@ async function ukazShrnuti(cil) {
     <div class="polozka" style="align-items:flex-start">
       <img src="${p.nahled}" alt="">
       <div class="txt"><b>${polozky.length > 1 ? (i + 1) + ". " : ""}${esc(p.popis)}</b> – <b>${p.ks} ks</b>
-        <details><summary style="color:var(--akcent-tmavy);font-weight:700;cursor:pointer">Podrobnosti</summary>${(p.detaily || []).filter(r => !/^Počet:/.test(r)).map(r => esc(r)).join("<br>")}</details>
+        <details><summary style="color:var(--akcent-text);font-weight:700;cursor:pointer">Podrobnosti</summary>${(p.detaily || []).filter(r => !/^Počet:/.test(r)).map(r => esc(r)).join("<br>")}</details>
       </div>
     </div>`).join("");
   const C = NASTAVENI.cena, c = kosik.length ? cenaPolozek(kosik) : { cena:odhad.cena, kc:odhad.bezSlevy, sleva:odhad.sleva, ks:stav.n };
@@ -4160,8 +4212,9 @@ async function ukazShrnuti(cil) {
     termin ? `📅 Potřebuji do: <b>${new Date(termin).toLocaleDateString("cs-CZ")}</b>` : `📅 Hotovo zhruba <b>${hotovoText()}</b>`,
     expres ? "⚡ Expresní výroba" : "",
     v("poznamka") ? `📝 ${esc(v("poznamka"))}` : "",
-    `<span class="pozn">Odešle se ${NASTAVENI.firebase || NASTAVENI.emailSkript ? (cil === "messenger" ? "přes Messenger" : "nám rovnou") : NASTAVENI.messenger ? "přes Messenger" : "zpráva"} – ${NASTAVENI.nazev || "my"} se vám pak ozve.</span>`,
+    `<span class="pozn">Odešle se ${cil === "messenger" || posilaMessenger() ? "zprávou přes Messenger" : NASTAVENI.firebase || NASTAVENI.emailSkript ? "nám rovnou" : "zpráva"} – ${NASTAVENI.nazev || "my"} se vám pak ozve.</span>`,
   ].filter(Boolean).join("<br>");
+  $("shrnutiOdeslat").textContent = cil === "messenger" || posilaMessenger() ? "💬 Vše sedí – odeslat přes Messenger" : "✔ Vše sedí – odeslat objednávku";
   ukaz("shrnuti");
 }
 $("shrnutiZpet").onclick = () => { ukaz("navrh"); setTimeout(() => otevriKrok($("objednavka")), 50); };
@@ -4182,7 +4235,7 @@ async function odeslatObjednavku() {
       console.error(e);
       $("formChyba").textContent = "Odeslání se nepovedlo. Zkuste to prosím znovu" + (NASTAVENI.messenger ? " nebo použijte Messenger níže." : ".");
     }
-    $("odeslat").disabled = false; $("odeslat").textContent = "✔ Odeslat objednávku";
+    $("odeslat").disabled = false; obnovKosik();
   } else if (NASTAVENI.messenger) {
     posliMessenger();
   } else if (NASTAVENI.email) {
