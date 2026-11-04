@@ -774,6 +774,8 @@ const NASTAVENI = {
     magnet: 0,           // cena za dodání a nalepení magnetu v Kč/ks (0 = cena po domluvě, nepočítá se)
     expres: 30,          // příplatek za expresní výrobu v %
     bezneDni: 5,         // za kolik pracovních dní běžně vyrobíte (ukazuje se zákazníkům „hotovo zhruba do…“)
+    // MNOŽSTEVNÍ CENA: kolik % nejnižší ceny stojí každý další kus (od kolikátého kusu). Čas tisku se počítá zvlášť a přesně.
+    mnozstvi: [ { od:2, proc:80 }, { od:5, proc:65 }, { od:10, proc:55 }, { od:20, proc:45 } ],
     // NEJNIŽŠÍ CENA ZA 1 KUS podle výrobku (Kč) – když vyjde výpočet z času tisku nižší, použije se tahle
     minKus: { k:30, z:40, d:60, m:40, c:90, j:25, r:45, b:50, koule:120, p:50, n:50, u:60, f:180, v:20,
               q:50, e:40, o:40, l:35, h:120, t:15, g:15, w:90, y:60 },
@@ -1511,13 +1513,20 @@ function minKus(st = stav) {
   const M = NASTAVENI.cena.minKus || {}, t = TVARY.find(x => x.id === st.s) || {};
   return (st.p === "b" && t.koule ? M.koule : M[st.p]) || 0;
 }
+// nejnižší cena za n kusů: první kus plně, další podle množstevní tabulky
+function minZaKusy(n, st = stav) {
+  const m = minKus(st), T = (NASTAVENI.cena.mnozstvi || []).slice().sort((a, b) => a.od - b.od);
+  let s = 0;
+  for (let i = 1; i <= n; i++) { let p = 100; for (const r of T) if (i >= r.od) p = r.proc; s += m * p / 100; }
+  return s;
+}
 function prepocitejCenu() {
   const C = NASTAVENI.cena, n = stav.n;
   odhad.gramy = odhad.objem / 1000 * 1.24;                       // PLA ≈ 1,24 g/cm³
   odhad.minuty = C.start + n * odhad.objem / C.rychlost / 60 + odhad.vymeny * C.vymena;
   odhad.kcNavic = priplatekKs() * n;
   let kc = odhad.minuty / 60 * C.hodina + n * odhad.gramy * C.gram + C.priplatek + odhad.kcNavic;
-  kc = Math.max(kc, n * minKus() + C.priplatek + odhad.kcNavic);
+  kc = Math.max(kc, minZaKusy(n) + C.priplatek + odhad.kcNavic);
   kc = sExpres(Math.max(C.minimum, Math.ceil(kc / (C.zaokrouhlit || 1)) * (C.zaokrouhlit || 1)));
   odhad.bezSlevy = kc;
   const minKs = C.slevaOdKusu || 0, chybiKs = Math.max(0, minKs - n);
@@ -1540,7 +1549,14 @@ function prepocitejCenu() {
   const min = Math.round(odhad.minuty);
   const kdo = zakaznik === "skola" ? "školy" : "firmy";
   $("cenaPozn").textContent = (odhad.sleva ? `Sleva pro ${kdo} ${odhad.sleva} %. `
-      : slevaPro(zakaznik) && chybiKs ? `Sleva ${slevaPro(zakaznik)} % pro ${kdo} platí od ${minKs} ks – přidejte ještě ${chybiKs} ks. ` : "") + `Cena za ${n} ks.${ex} ` + POZN_CENA;
+      : slevaPro(zakaznik) && chybiKs ? `Sleva ${slevaPro(zakaznik)} % pro ${kdo} platí od ${minKs} ks – přidejte ještě ${chybiKs} ks. ` : "") +
+    (n > 1 ? `Cena za ${n} ks – vychází ${Math.round(odhad.cena / n)} Kč/ks.${ex} ` : `Cena za 1 ks.${ex} ${mnozstviTip()}`) + POZN_CENA;
+}
+// tip pro zákazníka: kolik vyjde kus při větším počtu
+function mnozstviTip() {
+  const T = NASTAVENI.cena.mnozstvi || [], m = minKus(); if (!T.length || !m) return "";
+  const n = 5, kus = Math.ceil((minZaKusy(n) + priplatekKs() * n) / n);
+  return kus < m ? `Víc kusů = levnější kus (při ${n} ks asi ${kus} Kč/ks). ` : "";
 }
 const stav = { sv:"d", sj:"l", wz:"m", ws:"v", wn:"1", wm:"r", pr:[], fo:"", ft:"sirka", fj:"n", fd:"1", px:0, py:0, ir:"j", ns:"dol", jm:"", p:"k", a:"0", l:"", ob:"", fs:"m", nn:"2", nd:"s", nr:"s", k:"", z:"0", t3:"", t:"Babička", t2:"", s:"obdelnik", f:"obla", o:"srdicko", op:"pred", b:"cervena", c:"bila", r:"0", v:"s", vs:"", vd:"w", qt:"u", qs:"", qh:"", qn:"", qx:"", qu:"s", q:"", uc:"p", mg:"v", mp:"", mv:"", rs:"polostin", rt:"18–25 °C", rz:"stredne", c3:"", n:1 };
 /* ---------- Odkaz na návrh (co nejkratší) ----------
@@ -4164,7 +4180,7 @@ function malyNahled() {
 async function pridatDoKosiku() {
   const C = NASTAVENI.cena;
   kosik.push({ st:{ ...stav }, popis:kratkyPopis(), detaily:radkyNavrhu(), nahled:await malyNahled(),
-               minuty:odhad.minuty - C.start, gramy:odhad.gramy * stav.n, ks:stav.n, kcNavic:priplatekKs() * stav.n, minKc:minKus() * stav.n });
+               minuty:odhad.minuty - C.start, gramy:odhad.gramy * stav.n, ks:stav.n, kcNavic:priplatekKs() * stav.n, minKc:minZaKusy(stav.n) });
   ulozKosik();
 }
 // cena celé objednávky (start tiskárny se počítá jen jednou)
@@ -4178,7 +4194,7 @@ function cenaPolozek(polozky) {
   const minKs = C.slevaOdKusu || 0, sleva = ks >= minKs ? slevaPro(zakaznik) : 0;
   return { kc, cena:sleva ? Math.round(kc * (1 - sleva / 100)) : kc, sleva, ks, minuty, chybiKs:Math.max(0, minKs - ks) };
 }
-function aktualniPolozka() { const C = NASTAVENI.cena; return { minuty:odhad.minuty - C.start, gramy:odhad.gramy * stav.n, ks:stav.n, kcNavic:priplatekKs() * stav.n, minKc:minKus() * stav.n }; }
+function aktualniPolozka() { const C = NASTAVENI.cena; return { minuty:odhad.minuty - C.start, gramy:odhad.gramy * stav.n, ks:stav.n, kcNavic:priplatekKs() * stav.n, minKc:minZaKusy(stav.n) }; }
 // rozpracovaný návrh, který ještě není v košíku (přidá se při odeslání, pokud ho zákazník neodškrtne)
 const klicNavrhu = st => { const d = rozdilSt(st); delete d.n; delete d.jm; return JSON.stringify(d); };
 const jeRozpracovany = () => kosik.length > 0 && !davkaBezi && kosik.every(p => klicNavrhu({ ...VYCHOZI, ...p.st }) !== klicNavrhu(stav));
