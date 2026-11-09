@@ -4043,7 +4043,8 @@ async function prekresli() {
     bc.min.y -= 4;
   }
   // „Ve skutečnosti“: pravítko + prostředí (dort, lednice, dveře, stůl), jen v náhledu
-  if (kulisa) { skupina.remove(kulisa); kulisa.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } }); kulisa = null; }
+  if (kulisa) { skupina.remove(kulisa); const k = kulisa; kulisa = null;
+    k.traverse(o => { if (o.geometry) o.geometry.dispose(); [].concat(o.material || []).forEach(m => { if (m.map) m.map.dispose(); m.dispose(); }); }); }
   if (veSkutecnosti && !rezimTisk) { kulisa = postavKulisu(P, bc, T, gS); skupina.add(kulisa); }
   // dlouhou záložku ukážeme naležato – v širokém náhledu je pak text velký a čte se zleva doprava
   const nalezato = P === "z" && !rezimTisk && bc.max.y - bc.min.y > 2 * (bc.max.x - bc.min.x);
