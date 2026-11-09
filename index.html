@@ -1595,6 +1595,39 @@ const hashParams = new URLSearchParams(location.hash.slice(1));
 if (!BARVY.some(b => b.id === stav.b)) stav.b = VYCHOZI.b = BARVY[0].id;
 if (!BARVY.some(b => b.id === stav.c)) stav.c = VYCHOZI.c = (BARVY[1] || BARVY[0]).id;
 const rezimTisk = hashParams.has("t") || hashParams.has("tisk");
+if (hashParams.get("f") && NASTAVENI.firebase) { // krátký odkaz: objednávka uložená ve Firebase (čte jen majitel)
+  const V = "10.12.2";
+  const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
+  const { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-auth.js`);
+  const { getFirestore, doc, getDoc } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
+  const app = initializeApp(NASTAVENI.firebase), auth = getAuth(app), db = getFirestore(app);
+  const okno = document.createElement("div");
+  okno.style.cssText = "position:fixed;inset:0;z-index:99;background:#0c0c0f;color:#f4f4f5;display:grid;place-items:center;padding:24px;font:16px/1.45 system-ui,sans-serif;text-align:center";
+  okno.innerHTML = `<div style="max-width:340px"><div style="font-size:2.4rem">🔒</div><h2 style="margin:8px 0">Objednávka 3Dz</h2><p id="fText" style="color:#a1a1aa">Načítám…</p>
+    <button id="fPrihl" style="display:none;margin:14px auto 0;padding:14px 22px;border:0;border-radius:14px;background:#ff6b1a;color:#16100b;font:700 1rem system-ui;cursor:pointer">Přihlásit se Googlem</button>
+    <button id="fDal" style="display:none;margin:12px auto 0;padding:10px 16px;border:1px solid #333;border-radius:12px;background:none;color:#ddd;font:inherit;cursor:pointer">Pokračovat do návrháře</button></div>`;
+  document.body.appendChild(okno);
+  const txt = t => okno.querySelector("#fText").textContent = t;
+  const odkaz = await new Promise(hotovo => {
+    okno.querySelector("#fDal").onclick = () => hotovo("");
+    okno.querySelector("#fPrihl").onclick = async () => {
+      const p = new GoogleAuthProvider();
+      try { await signInWithPopup(auth, p); } catch (e) { if (/popup|not-supported/.test(e.code || "")) await signInWithRedirect(auth, p); else txt("Přihlášení se nepovedlo (" + (e.code || e.message) + ")."); }
+    };
+    onAuthStateChanged(auth, async u => {
+      if (!u) { txt("Tuto objednávku si může otevřít jen 3Dz. Přihlaste se Google účtem, kterým se přihlašujete do přehledu objednávek."); okno.querySelector("#fPrihl").style.display = "block"; okno.querySelector("#fDal").style.display = "block"; return; }
+      txt("Načítám objednávku…"); okno.querySelector("#fPrihl").style.display = "none";
+      try {
+        const d = await getDoc(doc(db, "objednavky_klicenek", hashParams.get("f")));
+        if (!d.exists()) { txt("Objednávka zatím není uložená – zkuste to za chvilku znovu (obnovte stránku)."); okno.querySelector("#fDal").style.display = "block"; return; }
+        hotovo(d.data().odkazObjednavky || d.data().odkaz || "");
+      } catch (e) { txt(`Účet ${u.email} k objednávkám nemá přístup.`); okno.querySelector("#fDal").style.display = "block"; }
+    });
+  });
+  okno.remove();
+  const h = new URLSearchParams((odkaz.split("#")[1] || ""));
+  if (h.get("o")) hashParams.set("o", h.get("o")); else if (h.get("n")) hashParams.set("n", h.get("n"));
+}
 if (hashParams.get("o")) { // odkaz na celou objednávku (víc položek)
   try { objednavkaOdkaz = (await nactiNavrh(hashParams.get("o"))).map(d => ({ ...VYCHOZI, ...d })); Object.assign(stav, objednavkaOdkaz[0]); }
   catch (e) { console.error("Objednávku z odkazu nejde načíst", e); }
@@ -4346,7 +4379,7 @@ function textObjednavky() {
       ...zakaznikRadky.filter(Boolean),
       "",
       "👉 Odkaz na celou objednávku:",
-      odkazObjednavky()
+      odkazDoZpravy(odkazObjednavky())
     ].filter((x, i, a) => x !== "" || a[i - 1] !== "").join("\n");
   }
   return [
@@ -4357,9 +4390,14 @@ function textObjednavky() {
     ...zakaznikRadky,
     "",
     "👉 Odkaz na návrh:",
-    odkazNavrhu()
+    odkazDoZpravy(odkazNavrhu())
   ].filter(Boolean).join("\n");
 }
+// Dlouhý odkaz (s obrázkem, logem, fotkou…) Messenger ořízne. Objednávka se proto uloží do Firebase
+// a do zprávy jde krátký odkaz #f=ID – otevře ji jen majitel přihlášený Googlem.
+let objId = "";
+const noveObjId = () => { const a = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"; return Array.from(crypto.getRandomValues(new Uint8Array(16)), b => a[b % a.length]).join(""); };
+const odkazDoZpravy = dlouhy => objId && dlouhy.length > 900 ? `${zakladOdkazu()}#f=${objId}&t` : dlouhy;
 function zkontroluj() {
   if (stav.p === "q" && !qrObsah()) {
     $("formChyba").textContent = "Ještě napište, co má QR kód otevřít (krok QR kód).";
@@ -4409,7 +4447,13 @@ const otevriMessenger = text => window.open(adresaMessengeru(text), "_blank");
 function ukazOdkaz() { $("odkazPole").value = odkazNavrhu(); }
 function postup(kroky) { ukazOdkaz(); $("rucnePostup").innerHTML = kroky.map(k => `<li>${k}</li>`).join(""); }
 async function posliMessenger() {
-  if (NASTAVENI.firebase) ulozFirebase().catch(e => console.warn("Kopie objednávky do Firebase se neuložila", e));
+  objId = NASTAVENI.firebase ? noveObjId() : "";
+  if (NASTAVENI.firebase) { // počkáme, až je objednávka uložená – jinak by krátký odkaz nikam nevedl
+    $("odeslat").disabled = true;
+    try { await Promise.race([ulozFirebase(), new Promise((_, ne) => setTimeout(() => ne(new Error("vypršel čas")), 6000))]); }
+    catch (e) { console.warn("Kopie objednávky do Firebase se neuložila", e); objId = ""; } // → do zprávy půjde dlouhý odkaz
+    $("odeslat").disabled = false;
+  }
   const t = textObjednavky();
   $("zpravaText").textContent = t;
   ulozDoHistorie(); // zákazník často neklepne na „Zprávu jsem odeslal(a)“ – do historie ji dáme už teď
@@ -4454,7 +4498,7 @@ async function posliEmailem() {
 }
 async function ulozFirebase() {
   const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-  const { getFirestore, collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+  const { getFirestore, collection, addDoc, doc, setDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
   const db = getFirestore(initializeApp(NASTAVENI.firebase));
   const data = {
     ...popisNavrhu(), pocet: stav.n, polozky: kosik.map(p => ({ popis:p.popis, ks:p.ks })), odkazObjednavky: kosik.length ? odkazObjednavky() : "", orientacniCena: odhad.cena, cenaBezSlevy: odhad.bezSlevy, slevaProcent: odhad.sleva,
@@ -4464,7 +4508,8 @@ async function ulozFirebase() {
     stav: "nová", vytvoreno: serverTimestamp()
   };
   for (const k in data) if (data[k] === undefined || (typeof data[k] === "number" && !isFinite(data[k]))) delete data[k]; // Firestore nebere undefined ani NaN
-  await addDoc(collection(db, "objednavky_klicenek"), data);
+  if (objId) await setDoc(doc(db, "objednavky_klicenek", objId), data);
+  else await addDoc(collection(db, "objednavky_klicenek"), data);
 }
 const jenMessenger = posilaMessenger();
 if (NASTAVENI.messenger && !jenMessenger) $("messenger").classList.remove("skryt");
