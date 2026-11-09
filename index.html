@@ -651,10 +651,12 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:block}
         <p class="pozn" id="cenaPozn"></p>
       </div>
 
+      <div id="kontaktBlok"><!-- u objednávky přes Messenger se nevyplňuje – zákazník píše ze svého FB účtu -->
       <label class="pole" for="jmeno">Vaše jméno</label>
       <input type="text" id="jmeno" autocomplete="name">
       <label class="pole" for="telefon">Telefon nebo e-mail</label>
       <input type="tel" id="telefon" autocomplete="tel">
+      </div>
       <label class="pole" for="poznamka">Poznámka <span style="font-weight:400;color:var(--slaby)">(nepovinné)</span></label>
       <textarea id="poznamka" placeholder="Např. přání k barvám, balení…"></textarea>
       <label class="pole" for="termin">Do kdy to potřebujete? <span style="font-weight:400;color:var(--slaby)">(nepovinné)</span></label>
@@ -4360,8 +4362,8 @@ function radkyNavrhu() {
 function textObjednavky() {
   const zakaznikRadky = [
     zakaznik !== "o" ? `Objednává: ${zakaznik === "skola" ? "škola" : "firma"} – ${$("organizace").value.trim()}${$("ico").value.trim() ? ", IČO " + $("ico").value.trim() : ""}` : "",
-    `Jméno: ${$("jmeno").value.trim()}`,
-    `Kontakt: ${$("telefon").value.trim()}`,
+    $("jmeno").value.trim() ? `Jméno: ${$("jmeno").value.trim()}` : "",
+    $("telefon").value.trim() ? `Kontakt: ${$("telefon").value.trim()}` : "",
     $("poznamka").value.trim() ? `Poznámka: ${$("poznamka").value.trim()}` : "",
     termin ? `Potřebuji do: ${new Date(termin).toLocaleDateString("cs-CZ")}` : "",
     expres ? `⚡ Expresní výroba (+${NASTAVENI.cena.expres} %)` : "",
@@ -4406,8 +4408,8 @@ function zkontroluj() {
     return false;
   }
   if (zakaznik !== "o" && !$("organizace").value.trim()) { $("formChyba").textContent = zakaznik === "skola" ? "Prosím napište název školy." : "Prosím napište název firmy."; $("organizace").focus(); toast($("formChyba").textContent); $(document.activeElement.id || "jmeno").scrollIntoView({ block:"center", behavior:"smooth" }); return false; }
-  if (!$("jmeno").value.trim()) { $("formChyba").textContent = "Prosím napište své jméno."; $("jmeno").focus(); toast($("formChyba").textContent); $(document.activeElement.id || "jmeno").scrollIntoView({ block:"center", behavior:"smooth" }); return false; }
-  if (!$("telefon").value.trim()) { $("formChyba").textContent = "Prosím napište telefon nebo e-mail, ať se vám můžeme ozvat."; $("telefon").focus(); toast($("formChyba").textContent); $(document.activeElement.id || "jmeno").scrollIntoView({ block:"center", behavior:"smooth" }); return false; }
+  if (!posilaMessenger() && !$("jmeno").value.trim()) { $("formChyba").textContent = "Prosím napište své jméno."; $("jmeno").focus(); toast($("formChyba").textContent); $(document.activeElement.id || "jmeno").scrollIntoView({ block:"center", behavior:"smooth" }); return false; }
+  if (!posilaMessenger() && !$("telefon").value.trim()) { $("formChyba").textContent = "Prosím napište telefon nebo e-mail, ať se vám můžeme ozvat."; $("telefon").focus(); toast($("formChyba").textContent); $(document.activeElement.id || "jmeno").scrollIntoView({ block:"center", behavior:"smooth" }); return false; }
   $("formChyba").textContent = ""; return true;
 }
 function ukaz(id) {
@@ -4512,6 +4514,7 @@ async function ulozFirebase() {
   else await addDoc(collection(db, "objednavky_klicenek"), data);
 }
 const jenMessenger = posilaMessenger();
+if (jenMessenger) $("kontaktBlok").classList.add("skryt");
 if (NASTAVENI.messenger && !jenMessenger) $("messenger").classList.remove("skryt");
 if (jenMessenger) $("odeslat").textContent = "💬 Odeslat přes Messenger";
 obnovKosik();
@@ -4554,7 +4557,7 @@ async function ukazShrnuti(cil) {
   const v = id => $(id).value.trim();
   $("shrnutiKontakt").innerHTML = [
     zakaznik !== "o" ? `🏢 ${zakaznik === "skola" ? "Škola" : "Firma"}: <b>${esc(v("organizace"))}</b>${v("ico") ? ", IČO " + esc(v("ico")) : ""}` : "",
-    `👤 <b>${esc(v("jmeno"))}</b>`, `📞 ${esc(v("telefon"))}`,
+    v("jmeno") ? `👤 <b>${esc(v("jmeno"))}</b>` : "", v("telefon") ? `📞 ${esc(v("telefon"))}` : "",
     termin ? `📅 Potřebuji do: <b>${new Date(termin).toLocaleDateString("cs-CZ")}</b>` : `📅 Hotovo zhruba <b>${hotovoText()}</b>`,
     expres ? "⚡ Expresní výroba" : "",
     v("poznamka") ? `📝 ${esc(v("poznamka"))}` : "",
