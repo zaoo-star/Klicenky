@@ -2719,19 +2719,30 @@ function zpracujObrazek() {
   for (let y = 0; y < H; y++) okraj.push(y * W, y * W + W - 1);
   const med = c => { const a = okraj.map(i => px[i * 4 + c]).sort((x, y) => x - y); return a[a.length >> 1]; };
   const bg = [med(0), med(1), med(2)];
+  const barDist = (i, j) => Math.hypot(px[i * 4] - px[j * 4], px[i * 4 + 1] - px[j * 4 + 1], px[i * 4 + 2] - px[j * 4 + 2]);
   const jeObr = i => px[i * 4 + 3] >= 128 && (pruhl > W * H * 0.05 ||
-    Math.hypot(px[i * 4] - bg[0], px[i * 4 + 1] - bg[1], px[i * 4 + 2] - bg[2]) > 55);
-  let sil = new Uint8Array(W * H).map((_, i) => jeObr(i) ? 1 : 0);
-  const minVel = W * H * 0.004;
-  let { lab, vel } = oznacKusy(sil, W, H); sil = sil.map((v, i) => v && vel[lab[i]] >= minVel ? 1 : 0);
+    Math.hypot(px[i * 4] - bg[0], px[i * 4 + 1] - bg[1], px[i * 4 + 2] - bg[2]) > 32); // citlivěji – i světlé tenké ručičky
+  let fig = new Uint8Array(W * H).map((_, i) => jeObr(i) ? 1 : 0);
+  let { lab, vel } = oznacKusy(fig, W, H); fig = fig.map((v, i) => v && vel[lab[i]] >= W * H * 0.0006 ? 1 : 0); // jen šum pryč
+  fig = vyplnDiry(fig, W, H);
+  // silueta = postavička + bílý okraj kolem (jako u nálepky): tenké ručičky a ouška pak drží a dají se vytisknout
+  const okr = Math.max(3, Math.round(Math.max(W, H) * 0.028));
+  let sil = rozsir(fig, W, H, okr, 1);
+  ({ lab, vel } = oznacKusy(sil, W, H));
+  { let nej = 0; for (let k = 1; k < vel.length; k++) if (vel[k] > (vel[nej] || 0)) nej = k; // hlavní kus + větší samostatné kusy
+    sil = sil.map((v, i) => v && (lab[i] === nej || vel[lab[i]] >= W * H * 0.02) ? 1 : 0); }
   sil = vyplnDiry(sil, W, H);
   sil = zuz(rozsir(sil, W, H, 2, 1), W, H, 2, 1); // uhladit
-  // kresba: tmavé čáry uvnitř + obrys postavy
-  const tl = Math.max(2, Math.round(Math.max(W, H) * 0.012));
-  const vnitrek = zuz(sil, W, H, tl, 1);
-  let lin = sil.map((v, i) => v && (!vnitrek[i] || (0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]) < 90) ? 1 : 0);
-  lin = rozsir(lin, W, H, 0.6, 1);
-  ({ lab, vel } = oznacKusy(lin, W, H)); lin = lin.map((v, i) => v && sil[i] && vel[lab[i]] >= W * H * 0.0004 ? 1 : 0);
+  fig = fig.map((v, i) => v && sil[i] ? 1 : 0);
+  // kresba: obrys postavičky + hranice mezi barvami (šaty, tvář, oči…) + tmavé čáry
+  const hr = new Uint8Array(W * H);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x; if (!fig[i]) continue;
+    const ok = (j, jx, jy) => jx >= 0 && jy >= 0 && jx < W && jy < H && (!fig[j] || barDist(i, j) > 48);
+    if (ok(i + 1, x + 1, y) || ok(i - 1, x - 1, y) || ok(i + W, x, y + 1) || ok(i - W, x, y - 1)) hr[i] = 1;
+    else if (0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2] < 90) hr[i] = 1; }
+  const tl = Math.max(1.2, Math.max(W, H) * 0.0065); // tloušťka čáry (≈ 0,5 mm i u malé ozdoby)
+  let lin = rozsir(hr, W, H, tl, 1).map((v, i) => v && sil[i] ? 1 : 0);
+  ({ lab, vel } = oznacKusy(lin, W, H)); lin = lin.map((v, i) => v && vel[lab[i]] >= W * H * 0.0003 ? 1 : 0);
   const smS = vsechnySmycky(sil, W, H, 1).map(s => vyhladSmycku(s, 3, 0.6));
   const smL = vsechnySmycky(lin, W, H, 1).map(s => vyhladSmycku(s, 2, 0.5));
   const b = new THREE.Box2(); smS.forEach(s => s.forEach(p => b.expandByPoint(p)));
