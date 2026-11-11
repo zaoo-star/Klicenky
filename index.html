@@ -340,6 +340,22 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:block}
 #produkty .volba .pt small{font-size:.66rem;font-weight:500;color:#8a8a94;line-height:1.3}
 #produkty .volba .pt em{font-style:normal;font-size:.68rem;font-weight:700;color:var(--ok);margin-top:2px}
 @media (min-width:640px){#produkty.volby.tri{grid-template-columns:1fr 1fr}}
+
+/* ===================== Počítač: náhled vlevo (velký, drží na místě), kroky vpravo ===================== */
+@media (min-width:1100px){
+  .wrap{max-width:1240px;display:grid;grid-template-columns:minmax(0,1fr) 540px;column-gap:28px;align-items:start}
+  .wrap > *{grid-column:1 / -1}
+  #nahled{grid-column:1;grid-row:3 / span 30;position:sticky;top:14px;margin:0;border-radius:26px;overflow:hidden;border:1px solid var(--linka)}
+  #nahled #scena,#nahled.male #scena,body.krokVyrobek #scena{height:calc(100vh - var(--lista) - 120px);min-height:380px;max-height:none}
+  #nahled.male .zpetTl{display:grid}
+  #nahled.male .tip{display:block}
+  #navrh,#shrnuti,#historie,#dekujeme,#rucne,#tisk{grid-column:2;grid-row:3 / span 30}
+  #postup{margin:0;border-radius:26px 26px 0 0}
+  .kicker,#navrh > .krok.otevreno{margin-left:0;margin-right:0}
+  #navrh > .krok.otevreno{border-radius:0 0 26px 26px;min-height:0}
+  #produkty.volby.tri{grid-template-columns:1fr}
+  #lista .vnitrek{max-width:540px;margin-left:auto;margin-right:max(0px,calc((100vw - 1240px) / 2))}
+}
 </style>
 <script type="importmap">
 {"imports":{
