@@ -356,6 +356,53 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:block}
   #produkty.volby.tri{grid-template-columns:1fr}
   #lista .vnitrek{max-width:540px;margin-left:auto;margin-right:max(0px,calc((100vw - 1240px) / 2))}
 }
+
+/* ===================== Vzhled A „Studio 2.0“ ===================== */
+.znacka{gap:11px;margin:2px 0 8px}
+.znacka i{width:40px;height:40px;border-radius:13px;background:linear-gradient(135deg,#ff8a3d,#ff5a1a);box-shadow:0 8px 20px -6px rgba(255,107,26,.7)}
+.znTxt{display:flex;flex-direction:column;line-height:1.25;min-width:0} .znTxt b{font-size:.95rem;color:var(--text);font-weight:700} .znTxt small{font-size:.72rem;font-weight:500;color:var(--tlumeny)}
+.mojeTl{border-radius:13px;padding:9px 11px;background:#18181d;border-color:#26262d}
+.krokKicker,.kicker{display:none}
+/* kroky jako pojmenované pilulky */
+#postup{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:22px 16px 6px;scroll-behavior:smooth}
+#postup::-webkit-scrollbar{display:none}
+#postup button,#postup button.hotovy,#postup button.aktivni{flex:none;flex-direction:row;align-items:center;gap:7px;font-size:.78rem;font-weight:600;padding:5px 12px 5px 5px;border-radius:99px;background:#1b1b21;color:#9a9aa5;min-width:0;overflow:visible}
+#postup button::before{display:none}
+#postup button i{font-style:normal;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.7rem;font-weight:800;background:#2a2a32}
+#postup button.hotovy{color:#ffb38a} #postup button.hotovy i{background:#3a2216;color:#ff8a3d}
+#postup button.aktivni{background:var(--akcent);color:#140a04;box-shadow:0 6px 16px -8px rgba(255,107,26,.9)} #postup button.aktivni i{background:#140a04;color:#ff8a3d}
+#navrh > .krok h2{font-size:1.3rem;margin:6px 0 14px}
+/* výrobky jako karty ve dvou sloupcích */
+#produkty.volby.tri{grid-template-columns:1fr 1fr;gap:10px}
+#produkty .volba{flex-direction:column;align-items:stretch;text-align:left;gap:8px;padding:8px 8px 11px;min-height:0;border-radius:20px;background:#141418;border-color:#222228}
+#produkty .volba img{width:100%;height:92px;object-fit:contain;padding:8px;border-radius:15px;background:radial-gradient(70% 70% at 50% 40%,#2a2a32,#17171c)}
+#produkty .volba .pt{padding:0 4px} #produkty .volba .pt b{font-size:.84rem} #produkty .volba .pt small{display:none} #produkty .volba .pt em{color:#ffa066;font-size:.74rem}
+#produkty .volba[aria-pressed=true]{background:linear-gradient(#1c130d,#141418)}
+@media (min-width:640px){#produkty.volby.tri{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:1100px){#produkty.volby.tri{grid-template-columns:1fr 1fr}}
+/* písma: ukázka na vlastním textu */
+#pisma .volba .ukazka{font-size:1.25rem;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+#pisma .volba > span:last-child{font-size:.72rem;font-weight:600;color:var(--tlumeny)}
+/* barvy: přepínač a kolečka */
+.seg{display:flex;padding:4px;border-radius:15px;background:#1b1b21;margin:0 0 14px}
+.seg button{flex:1;border:0;background:none;color:var(--tlumeny);font:inherit;font-size:.85rem;font-weight:600;padding:9px 0;border-radius:11px;cursor:pointer}
+.seg button.on{background:#2c2c34;color:var(--text)}
+.segSkryt{display:none!important}
+#k-barvy .podnadpis{margin-top:4px}
+.barvy{grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:12px 4px}
+.barva,.barva[aria-pressed=true]{border:0;background:none!important;box-shadow:none!important;padding:2px 0;font-size:.68rem;font-weight:600;color:#b4b4bd;gap:5px}
+.barva span.kruh{width:46px;height:46px;transition:box-shadow .15s}
+.barva[aria-pressed=true] span.kruh{box-shadow:0 0 0 3px var(--karta),0 0 0 5.5px var(--akcent)}
+.barva[aria-pressed=true]{color:var(--text)}
+.barva[aria-pressed=true]::after{display:none}
+/* náhled: nástroje ve sloupci */
+.lupa,.zpetTl button{background:rgba(255,255,255,.07)!important;border:1px solid rgba(255,255,255,.1)!important;border-radius:13px!important}
+/* plovoucí spodní lišta */
+#lista{left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));padding:8px;border-radius:24px;background:rgba(24,24,29,.84);border:1px solid #2a2a31;box-shadow:0 18px 40px -12px rgba(0,0,0,.85)}
+#lZpet{width:52px;height:52px;border-radius:17px;border:0;background:#24242b}
+#lDal{min-height:52px;border-radius:17px;background:linear-gradient(135deg,#ff8a3d,#ff5a1a);color:#140a04;box-shadow:0 10px 24px -8px rgba(255,107,26,.8)}
+#lKrok{font-weight:600}
+@media (min-width:1100px){#lista{left:auto;right:max(10px,calc((100vw - 1240px) / 2 + 14px));width:540px} #lista .vnitrek{margin:0;max-width:none}}
 </style>
 <script type="importmap">
 {"imports":{
@@ -370,7 +417,7 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:block}
 <body>
 <div class="wrap">
   <header>
-    <div class="znacka"><i>3Dz</i><span>3D tisk na zakázku</span><button type="button" class="mojeTl skryt" id="mojeObjTl">📋 Moje objednávky</button></div>
+    <div class="znacka"><i>3Dz</i><span class="znTxt"><b>Navrhněte si 3D výrobek</b><small>3D tisk na zakázku · vytiskneme do týdne</small></span><button type="button" class="mojeTl skryt" id="mojeObjTl">📋 Moje objednávky</button></div>
     <h1 id="titul">Navrhněte si vlastní 3D výrobek</h1>
     <button type="button" id="akce" class="akce skryt"><span class="akceText"><b id="akceNadpis"></b><span id="akcePod"></span></span><span class="akceTl" id="akceTl"></span></button>
     <p class="kratce">Napište text, vyberte tvar a barvy – vytiskneme vám to na 3D tiskárně.</p>
@@ -531,6 +578,7 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:block}
 
     <section class="krok skladaci" id="k-barvy">
       <h2><span class="cislo">4</span><span class="nadpis">Barvy<span class="souhrn"></span></span></h2>
+      <div class="seg skryt" id="barvySeg" role="tablist"></div>
       <div class="podnadpis" id="barvaPodkladNadpis">Barva podkladu</div>
       <div class="barvy" id="barvyPodklad"></div>
       <div id="dvoubarevne">
@@ -1760,10 +1808,29 @@ vytvorVolby("tvary", TVARY, "s", p => ikonaTvaru(p) + `<span>${p.nazev}</span>`)
 { const b = document.createElement("button"); b.type = "button"; b.className = "vsechny"; b.id = "vsechnyOzdoby"; $("ozdoby").after(b); }
 for (const [id, tl] of [["tvary", "vsechnyTvary"], ["pisma", "vsechnaPisma"], ["ozdoby", "vsechnyOzdoby"]]) $(tl).onclick = () => { vsechno[id] = !vsechno[id]; kategorie(); };
 vytvorVolby("pisma", PISMA, "f", p => `<span class="ukazka" style="font-family:'K-${p.id}'">Abč</span><span>${p.nazev}</span>`);
+// ukázka písma rovnou na textu zákazníka (zkráceně)
+function obnovUkazkyPisma() {
+  const t = ((stav.t || "").split("\n")[0].trim() || "Abč").slice(0, 10);
+  $("pisma").querySelectorAll(".ukazka").forEach(u => { if (u.textContent !== t) u.textContent = t; });
+}
+$("text").addEventListener("input", () => setTimeout(obnovUkazkyPisma, 0));
 vytvorVolby("ozdoby", OZDOBY, "o", p => `${p.svg ? miniIkona(p.svg, "width:40px;height:34px") : `<span class="emoji">${p.emoji}</span>`}<span>${p.nazev}</span>`);
 vytvorVolby("pozice", POZICE, "op", p => `<span>${p.nazev}</span>`);
 vytvorVolby("rSvetlo", R_SVETLO, "rs", p => (p.ikona ? miniIkona(p.ikona, "width:40px;height:34px") : "") + `<span>${p.nazev}</span>`);
 vytvorVolby("rZalivka", R_ZALIVKA, "rz", p => (p.kapky ? `<span>${miniIkona("droplet", "width:16px;height:22px").repeat(p.kapky)}</span>` : "") + `<span>${p.nazev}</span>`);
+let barvySegAkt = 0, barvySegPodpis = "";
+const barvySegKlic = () => [$("barvyPodklad"), $("dvoubarevne"), $("barvyIkonBlok")].map(e => e.classList.contains("skryt") ? 0 : 1).join("") + barvySegAkt;
+function obnovBarvySeg() {
+  const sk = [ { el:[$("barvaPodkladNadpis"), $("barvyPodklad")], n:"Podklad" }, { el:[$("dvoubarevne")], n:"Písmo" }, { el:[$("barvyIkonBlok")], n:"Ikonky" } ]
+    .filter(x => !x.el.some(e => e.classList.contains("skryt")));
+  const seg = $("barvySeg"); barvySegPodpis = barvySegKlic();
+  if (sk.length < 2) { seg.classList.add("skryt"); document.querySelectorAll("#k-barvy .segSkryt").forEach(e => e.classList.remove("segSkryt")); return; }
+  if (barvySegAkt >= sk.length) barvySegAkt = 0;
+  seg.classList.remove("skryt");
+  seg.innerHTML = sk.map((x, i) => `<button type="button" role="tab" class="${i === barvySegAkt ? "on" : ""}" data-i="${i}">${x.n}</button>`).join("");
+  sk.forEach((x, i) => x.el.forEach(e => e.classList.toggle("segSkryt", i !== barvySegAkt)));
+  seg.querySelectorAll("button").forEach(b => b.onclick = () => { barvySegAkt = +b.dataset.i; obnovBarvySeg(); });
+}
 const kruhBarvy = p => `<span class="kruh" style="background:${p.css || p.hex}"></span>${p.nazev}`;
 vytvorVolby("barvyPodklad", BARVY, "b", kruhBarvy);
 vytvorVolby("barvyNapis", BARVY, "c", kruhBarvy);
@@ -1864,6 +1931,7 @@ function oznac() {
   for (const [id, k] of Object.entries(sady))
     $(id).querySelectorAll(":scope > button:not(.kat)").forEach(b => b.setAttribute("aria-pressed", b.dataset.id === stav[k]));
   $("poziceBlok").classList.toggle("skryt", !stav.o);
+  obnovUkazkyPisma();
   $("kresleni").classList.toggle("skryt", stav.s !== "vlastni");
   $("zadaTextBlok").classList.toggle("skryt", stav.z !== "2");
   $("produktPozn").textContent = produkt(stav.p).pozn || "";
@@ -2153,19 +2221,22 @@ function obnovPruvodce() {
   $("postup").innerHTML = "";
   v.forEach((k, j) => {
     const b = document.createElement("button");
-    b.type = "button"; b.textContent = KRATCE[k.id] || "";
+    b.type = "button"; b.innerHTML = `<i>${j < i ? "✓" : j + 1}</i>${KRATCE[k.id] || ""}`;
     b.className = j < i ? "hotovy" : j === i ? "aktivni" : "";
     if (j === i) b.setAttribute("aria-current", "step");
     b.onclick = () => otevriKrok(k);
     $("postup").appendChild(b);
   });
-  const ak = $("postup").children[i]; if (ak) $("postup").scrollLeft = ak.offsetLeft - ($("postup").clientWidth - ak.offsetWidth) / 2;
-  $("lKrok").textContent = `Krok ${i + 1} z ${v.length}`;
+  const ak = $("postup").children[i];
+  if (ak) { const po = $("postup"), r1 = po.getBoundingClientRect(), r2 = ak.getBoundingClientRect();
+    po.scrollLeft = Math.max(0, po.scrollLeft + (r2.left - r1.left) - (po.clientWidth - ak.offsetWidth) / 2); }
+  $("lKrok").textContent = produkt().nazev;
   $("krokKicker").textContent = `Krok ${i + 1} ze ${v.length} · ${KRATCE[aktivniKrok.id] || ""}`;
   $("lZpet").disabled = i === 0;
   $("lista").classList.toggle("posledni", posledni);
   if (posledni) { $("lDal").innerHTML = /Messenger/.test($("odeslat").textContent) ? IKONA_MSG + "Odeslat objednávku" : IKONA_OK + "Odeslat objednávku"; $("lDal").disabled = $("odeslat").disabled; }
-  else { $("lDal").disabled = false; $("lDal").innerHTML = (v[i + 1].id === "objednavka" ? "K objednávce" : "Pokračovat") + IKONA_DAL; }
+  else { $("lDal").disabled = false; $("lDal").innerHTML = (v[i + 1].id === "objednavka" ? "K objednávce" : i === 0 ? "Pokračovat" : "Dál: " + (KRATCE[v[i + 1].id] || "")) + IKONA_DAL; }
+  if (barvySegPodpis !== barvySegKlic()) obnovBarvySeg();
   ikonizuj($("lista"));
 }
 const IKONA_MSG = `<svg class="ik" viewBox="0 0 24 24">${LUCIDE["💬"]}</svg>`, IKONA_OK = `<svg class="ik" viewBox="0 0 24 24">${LUCIDE["✔"]}</svg>`;
