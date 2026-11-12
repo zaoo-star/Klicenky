@@ -61,8 +61,9 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:none}
 .zpetTl{position:absolute;right:14px;top:66px;display:grid;grid-template-columns:repeat(2,40px);gap:6px;z-index:3}
 .zpetTl button{width:40px;height:36px;font-size:1.05rem!important;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(20,20,24,.6);color:#fff;font-size:1.25rem;cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .zpetTl button:disabled{opacity:.3;cursor:default}
-.zpetTl #rozlozTl{grid-column:1/-1;justify-self:end;width:auto;font-size:.78rem!important;font-weight:800;font-family:inherit;padding:0 8px;white-space:nowrap}
-.zpetTl #rozlozTl.skryt{display:none}
+#rozlozTl{position:absolute;left:14px;top:12px;z-index:3;height:40px;padding:0 14px;border-radius:13px;border:1px solid rgba(255,255,255,.18);background:rgba(20,20,24,.65);color:#fff;font-family:inherit;font-size:.9rem;font-weight:800;white-space:nowrap;cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+#rozlozTl[aria-pressed=true]{background:var(--akcent);border-color:var(--akcent);color:#140a04}
+#rozlozTl.skryt,body.tiskRezim #rozlozTl,#nahled.male #rozlozTl{display:none}
 .zpetTl button[aria-pressed=true]{background:var(--akcent);border-color:var(--akcent)}
 body.tiskRezim .zpetTl,#nahled.male .zpetTl{display:none}
 .obnovaPruh{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:10px 10px 10px 14px;border-radius:var(--r);background:var(--akcent-svetly);border:1px solid var(--akcent-kruh);font-size:.88rem;line-height:1.3}
@@ -442,7 +443,7 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:block}
   <div class="obnovaPruh skryt" id="obnovaPruh"><span id="obnovaText"></span><button type="button" id="obnovaNovy">Začít nový</button><button type="button" id="obnovaZavrit" aria-label="Zavřít">✕</button></div>
   <div id="nahled">
     <button type="button" class="lupa" id="lupa" aria-label="Zvětšit náhled">🔍</button>
-    <div class="zpetTl"><button type="button" id="zpet" aria-label="Zpět" title="Zpět" disabled>↶</button><button type="button" id="znovu2" aria-label="Znovu" title="Znovu" disabled>↷</button><button type="button" id="skutecnost" aria-label="Velikost ve skutečnosti" title="Velikost ve skutečnosti" aria-pressed="false">📏</button><button type="button" id="posunPrstem" aria-label="Posunout text prstem" title="Posunout text prstem" aria-pressed="false">✋</button><button type="button" id="rozlozTl" class="skryt" aria-pressed="false"></button></div>
+    <div class="zpetTl"><button type="button" id="zpet" aria-label="Zpět" title="Zpět" disabled>↶</button><button type="button" id="znovu2" aria-label="Znovu" title="Znovu" disabled>↷</button><button type="button" id="skutecnost" aria-label="Velikost ve skutečnosti" title="Velikost ve skutečnosti" aria-pressed="false">📏</button><button type="button" id="posunPrstem" aria-label="Posunout text prstem" title="Posunout text prstem" aria-pressed="false">✋</button></div><button type="button" id="rozlozTl" class="skryt" aria-pressed="false"></button>
     <canvas id="scena" aria-label="Náhled – klepnutím zvětšíte"></canvas>
     <div class="nahledStitek skryt" id="nahledStitek"></div>
     <div class="tip" id="tipNahled">Načítám náhled…</div>
@@ -4581,7 +4582,7 @@ async function prekresli() {
   if (nalezato) skupina.position.set(-sy, sx, -T / 2); else skupina.position.set(-sx, -sy, -T / 2);
   rozmerModelu = nalezato ? [bc.max.y - bc.min.y, bc.max.x - bc.min.x] : [bc.max.x - bc.min.x, bc.max.y - bc.min.y];
   if (kulisa) rozmerModelu = rozmerModelu.map(x => x * 1.35);
-  if (rozlozeno && P === "y") rozmerModelu = rozmerModelu.map(x => x * 1.25);
+  if (rozlozeno && P === "y") rozmerModelu = rozmerModelu.map(x => x * 1.5);
   if (["ub", "tz", "sv", "kb", "vk"].includes(P)) rozmerModelu = rozmerModelu.map(x => Math.max(x, T * 0.9) * (P === "kb" ? 1.35 : 1.12)); // prostorové výrobky: počítat i s hloubkou
   zamerKameru();
   obnovOdkaz();
