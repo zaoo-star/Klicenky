@@ -12,14 +12,8 @@
 <meta property="og:image:height" content="630">
 <meta name="description" content="Klíčenky, magnetky, cedulky na dveře, jmenovky na stůl, visačky, záložky a zápichy do dortu i květináče s vaším textem. Vytiskneme na 3D tiskárně.">
 <style>
-/* ===== Vzhled 3Dz – tmavý, jedna oranžová, písmo Plus Jakarta Sans, ikony Lucide =====
+/* ===== Vzhled 3Dz – původně tmavý; dole je přepsaný na světlý styl „Phantom“ jako úvodka (písmo Source Sans Pro v /assets/fonts) =====
    Písmo i tlačítka zůstávají velké kvůli starším zákazníkům. */
-@font-face{font-family:"Jakarta";font-weight:500;font-display:swap;src:url(https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-ext-500-normal.woff2)format("woff2");unicode-range:U+0100-024F}
-@font-face{font-family:"Jakarta";font-weight:500;font-display:swap;src:url(https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-500-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
-@font-face{font-family:"Jakarta";font-weight:700;font-display:swap;src:url(https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-ext-700-normal.woff2)format("woff2");unicode-range:U+0100-024F}
-@font-face{font-family:"Jakarta";font-weight:700;font-display:swap;src:url(https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-700-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
-@font-face{font-family:"Jakarta";font-weight:800;font-display:swap;src:url(https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-ext-800-normal.woff2)format("woff2");unicode-range:U+0100-024F}
-@font-face{font-family:"Jakarta";font-weight:800;font-display:swap;src:url(https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-800-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
 :root{
   color-scheme:dark;
   --pozadi:#0b0b0d; --karta:#141418; --karta2:#1b1b20; --pole:#101013; --linka:#27272e; --linka2:#3a3a43;
@@ -418,6 +412,127 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:block}
 .ladeni label{display:flex;flex-direction:column;gap:6px;font-size:.85rem;font-weight:600}
 .ladeni label span{display:flex;justify-content:space-between} .ladeni output{color:var(--akcent-text);font-weight:700}
 .ladeni input[type=range]{width:100%;accent-color:var(--akcent);height:28px}
+
+/* ===================== Vzhled „Phantom“ (stejně jako úvodka 3dz.cz): světlý, písmo Source Sans Pro, barevné dlaždice =====================
+   Písmo i tlačítka zůstávají velké kvůli starším zákazníkům. */
+@font-face{font-family:"SSP";font-weight:400;font-display:swap;src:url(../assets/fonts/source-sans-pro-latin-400-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC,U+2122}
+@font-face{font-family:"SSP";font-weight:400;font-display:swap;src:url(../assets/fonts/source-sans-pro-latin-ext-400-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"SSP";font-weight:700;font-display:swap;src:url(../assets/fonts/source-sans-pro-latin-700-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC,U+2122}
+@font-face{font-family:"SSP";font-weight:700;font-display:swap;src:url(../assets/fonts/source-sans-pro-latin-ext-700-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"SSP";font-weight:900;font-display:swap;src:url(../assets/fonts/source-sans-pro-latin-900-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC,U+2122}
+@font-face{font-family:"SSP";font-weight:900;font-display:swap;src:url(../assets/fonts/source-sans-pro-latin-ext-900-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+:root{
+  color-scheme:light;
+  --pozadi:#ffffff; --karta:#ffffff; --karta2:#f6f6f6; --pole:#ffffff; --linka:#e2e2e2; --linka2:#c9c9c9;
+  --text:#585858; --tlumeny:#6f6f6f; --slaby:#8a8a8a;
+  --akcent:#d63f6c; --akcent-text:#c2335f; --akcent-svetly:rgba(242,132,158,.14); --akcent-kruh:rgba(242,132,158,.4);
+  --ok:#1d7f46; --chyba:#c62828;
+  --r-velky:6px; --r:4px; --r-maly:4px;
+  --t1:#f2849e; --t2:#7ecaf6; --t3:#7bd0c1; --t4:#c75b9b; --t5:#ae85ca; --t6:#8499e7;
+}
+html{background:#fff}
+body{font-family:"SSP","Source Sans Pro",Helvetica,Arial,sans-serif;font-weight:400;background:#fff;color:var(--text)}
+h1,h2,b,strong{color:#585858}
+/* hlavička jako na úvodce */
+.znacka i{background:#585858;color:#fff;border-radius:4px;box-shadow:none;font-weight:900}
+.znLogo{text-decoration:none;display:flex}
+.znTxt b{font-weight:900;font-size:.95rem} .znTxt small{color:var(--tlumeny)}
+.mojeTl{background:#fff;border:1px solid var(--linka2);border-radius:4px;color:var(--text)}
+.akce{border-radius:4px;border:0;background:var(--t1);color:#fff}
+.akce b{color:#fff} .akce .akceText span{color:#fff}
+.akce .akceTl{background:#fff;color:#c2335f;border-radius:4px}
+/* 3D náhled */
+#scena{background:radial-gradient(60% 55% at 50% 60%,rgba(242,132,158,.18),rgba(242,132,158,0) 70%),radial-gradient(90% 80% at 50% 30%,#fbfbfb,#e6e6e6)}
+#nahled,#nahled.male{background:#fff}
+#nahled.male,#nahled.zvetseno{box-shadow:0 10px 16px -14px rgba(0,0,0,.35)}
+.lupa,.zpetTl button{background:rgba(255,255,255,.9)!important;border:1px solid #d6d6d6!important;border-radius:4px!important;color:#585858!important;-webkit-backdrop-filter:none;backdrop-filter:none}
+#rozlozTl{background:rgba(255,255,255,.92);border:1px solid #d6d6d6;color:#585858;border-radius:4px}
+#rozlozTl[aria-pressed=true],.zpetTl button[aria-pressed=true]{background:var(--akcent)!important;border-color:var(--akcent)!important;color:#fff!important}
+#nahled .tip{background:rgba(255,255,255,.9);color:#585858;border:1px solid #dcdcdc;font-weight:700}
+.nahledStitek{background:rgba(88,88,88,.85);border-radius:4px}
+/* panel s kroky */
+#postup{background:#fff;border-top:1px solid var(--linka);border-radius:0}
+#postup button,#postup button.hotovy,#postup button.aktivni{background:#f2f2f2;color:#6f6f6f;border-radius:4px;font-weight:700}
+#postup button i{background:#e0e0e0;color:#585858;border-radius:3px}
+#postup button.hotovy{color:var(--akcent-text)} #postup button.hotovy i{background:#fbe0e7;color:var(--akcent-text)}
+#postup button.aktivni{background:#585858;color:#fff;box-shadow:none} #postup button.aktivni i{background:#fff;color:#585858}
+#navrh > .krok.otevreno{background:#fff}
+#navrh > .krok h2{font-weight:900;letter-spacing:-.01em}
+.cislo{background:#eee;color:#585858;border-radius:4px}
+#navrh > .krok.otevreno .cislo{background:var(--akcent);color:#fff;box-shadow:none}
+.podnadpis,#produkty .skupina,.barvyKat{text-transform:uppercase;letter-spacing:.18em;font-weight:900;font-size:.72rem;color:#585858}
+.kat{background:#f2f2f2;color:#585858;border-radius:4px}
+/* dlaždice voleb */
+.volba{background:#fff;border:1.5px solid var(--linka);color:#585858;border-radius:4px}
+@media (hover:hover){.volba:hover,.barva:hover{border-color:var(--linka2);background:#f6f6f6}}
+.volba[aria-pressed=true]{border-color:var(--akcent);background:#fdf1f4;box-shadow:0 0 0 1px var(--akcent) inset}
+.volba[aria-pressed=true]::after,.barva[aria-pressed=true]::after{background:var(--akcent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/13px no-repeat}
+/* výrobky: barevná dlaždice s renderem jako na úvodce */
+#produkty .volba{background:#fff;border:1.5px solid var(--linka);border-radius:4px;padding:0 0 11px;gap:9px;overflow:visible}
+#produkty .volba img{height:104px;padding:10px;border-radius:3px 3px 0 0;background:var(--t1);filter:none}
+#produkty button.volba:nth-of-type(6n+2) img{background:var(--t2)}
+#produkty button.volba:nth-of-type(6n+3) img{background:var(--t3)}
+#produkty button.volba:nth-of-type(6n+4) img{background:var(--t4)}
+#produkty button.volba:nth-of-type(6n+5) img{background:var(--t5)}
+#produkty button.volba:nth-of-type(6n) img{background:var(--t6)}
+#produkty .volba .pt{padding:0 10px}
+#produkty .volba .pt b{font-weight:900;font-size:.88rem}
+#produkty .volba .pt small{color:var(--tlumeny);font-size:.72rem}
+#produkty .volba .pt em{color:var(--akcent-text)}
+#produkty .volba[aria-pressed=true]{background:#fdf1f4;border-color:var(--akcent)}
+.filtrVyr button{background:#fff;border-color:var(--linka2);color:#585858;border-radius:4px}
+.filtrVyr button.on{background:#585858;border-color:#585858;color:#fff}
+/* barvy */
+.seg{background:#f0f0f0;border-radius:4px}
+.seg button{border-radius:3px;color:#6f6f6f;font-weight:700}
+.seg button.on{background:#fff;color:#585858;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.barva,.barva[aria-pressed=true]{color:#6f6f6f}
+.barva[aria-pressed=true]{color:#585858}
+.barva span.kruh{box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),inset 0 -6px 10px rgba(0,0,0,.18),inset 0 6px 8px rgba(255,255,255,.3)}
+.barva[aria-pressed=true] span.kruh{box-shadow:0 0 0 3px #fff,0 0 0 5.5px var(--akcent)}
+/* pole */
+input[type=text],input[type=tel],input[type=date],textarea{border-radius:4px;border:2px solid var(--linka2);color:#585858;font-weight:700}
+input::placeholder,textarea::placeholder{color:#9a9a9a;font-weight:400}
+input:focus,textarea:focus{border-color:var(--akcent);box-shadow:0 0 0 4px var(--akcent-kruh)}
+label{color:var(--tlumeny)} label.pole{color:#585858}
+/* tlačítka */
+.hlavni,.dalsi{background:var(--akcent);color:#fff;border-radius:4px;box-shadow:none;font-weight:900}
+.pridat{border-radius:4px;border-color:var(--akcent);color:var(--akcent-text);font-weight:900}
+.vedlejsi{background:#fff;border:2px solid #585858;color:#585858;border-radius:4px;font-weight:900}
+@media (hover:hover){.vedlejsi:hover,.pridat:hover{background:#f6f6f6}}
+.vsechny{border-radius:4px;color:#6f6f6f}
+.pocet button{background:#fff;border:2px solid var(--linka2);color:#585858;border-radius:4px}
+.pocet output{color:#585858}
+.cena{border-radius:4px;background:#eef8f2;border-color:#bfe3cd}
+.odkazRadek button{background:#585858;color:#fff;border-radius:4px}
+.polozka{background:#fff;border-radius:4px}
+.polozka img{background:#f2f2f2;border-radius:3px}
+.polozka button{background:#fff;color:#585858;border-radius:4px}
+.histObj{background:#f6f6f6;border-radius:4px}
+.plovouci{background:#fff;color:#585858;border:1px solid var(--linka2);box-shadow:0 10px 24px -10px rgba(0,0,0,.35)}
+.plovouci b{background:var(--akcent);color:#fff}
+.toast{background:#585858;color:#fff;border-radius:4px;box-shadow:0 14px 30px -10px rgba(0,0,0,.4)}
+.obnovaPruh{border-radius:4px;background:#fdf1f4;border-color:#f6c3d0}
+.obnovaPruh button{background:#fff;color:#585858;border-radius:4px}
+.zaskrt{border-radius:4px}
+.hotovoDo{border-radius:4px}
+#tisk{background:#f1f6ff;border-color:#7aa7f0}
+#tvary > #ikonaRezimBlok,#tvary > #ikonaRezimBlok::before{background:#fdf1f4;border-color:#f2a6ba}
+.ladeni{background:#f6f6f6;border-radius:4px}
+.editorPlocha{background:radial-gradient(85% 75% at 50% 40%,#fbfbfb,#e6e6e6);border-radius:4px}
+#editorSvg .obrys{stroke:rgba(0,0,0,.15)}
+#editorSvg .prvek.vybrany{fill:var(--akcent);filter:drop-shadow(0 0 2px var(--akcent))}
+#editorSvg .dira{fill:#ececec}
+.edRada button,.edIkony button{background:#fff;color:#585858;border-radius:4px}
+.jmRadek button{background:#fff;color:#585858;border-radius:4px}
+.napad{background:#fff;border-radius:4px}
+/* spodní lišta */
+#lista{background:rgba(255,255,255,.95);border:1px solid #dedede;border-radius:6px;box-shadow:0 14px 34px -12px rgba(0,0,0,.35)}
+#lZpet{background:#f2f2f2;color:#585858;border-radius:4px}
+#lDal{background:var(--akcent);color:#fff;border-radius:4px;box-shadow:none;font-weight:900}
+#lKrok{color:var(--tlumeny)} #lCena{color:#585858;font-weight:900}
+@media (min-width:1100px){#nahled{border-radius:6px} #postup{border-radius:6px 6px 0 0} #navrh > .krok.otevreno{border-radius:0 0 6px 6px}}
+.paticka a{color:#8a8a8a!important}
 </style>
 <script type="importmap">
 {"imports":{
@@ -432,7 +547,7 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:block}
 <body>
 <div class="wrap">
   <header>
-    <div class="znacka"><i>3Dz</i><span class="znTxt"><b>Navrhněte si 3D výrobek</b><small>3D tisk na zakázku · vytiskneme do týdne</small></span><button type="button" class="mojeTl skryt" id="mojeObjTl">📋 Moje objednávky</button></div>
+    <div class="znacka"><a href="/" class="znLogo" aria-label="3Dz – úvodní stránka"><i>3Dz</i></a><span class="znTxt"><b>Navrhněte si 3D výrobek</b><small>3D tisk na zakázku · vytiskneme do týdne</small></span><button type="button" class="mojeTl skryt" id="mojeObjTl">📋 Moje objednávky</button></div>
     <h1 id="titul">Navrhněte si vlastní 3D výrobek</h1>
     <button type="button" id="akce" class="akce skryt"><span class="akceText"><b id="akceNadpis"></b><span id="akcePod"></span></span><span class="akceTl" id="akceTl"></span></button>
     <p class="kratce">Napište text, vyberte tvar a barvy – vytiskneme vám to na 3D tiskárně.</p>
