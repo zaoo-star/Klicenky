@@ -280,16 +280,18 @@ details[open] > summary::before{transform:rotate(90deg)}
 #lZpet{flex:0 0 auto;width:56px;height:56px;display:grid;place-items:center;border-radius:var(--r);border:1.5px solid var(--linka2);background:var(--karta2);color:var(--text);cursor:pointer}
 #lZpet svg.ik{margin:0;width:1.3em;height:1.3em}
 #lZpet:disabled{opacity:.3}
-#lInfo{flex:1 0 auto;min-width:64px;display:flex;flex-direction:column;line-height:1.2}
+#lInfo{flex:1 1 0;min-width:0;display:flex;flex-direction:column;line-height:1.2}
 #lKrok{font-size:.75rem;font-weight:700;color:var(--tlumeny);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #lCena{font-size:1.15rem;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
 #lCena:empty{display:none}
-#lDal{flex:0 1 auto;min-width:0;overflow:hidden;min-height:56px;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 20px;border:0;border-radius:var(--r);background:var(--akcent);color:#0b0b0d;font-family:inherit;font-size:1.1rem;font-weight:800;cursor:pointer;box-shadow:0 8px 24px -10px rgba(255,107,26,.9);white-space:nowrap;transition:transform .1s,filter .15s}
+#lDal{flex:0 0 auto;max-width:64%;white-space:nowrap;min-width:0;overflow:hidden;min-height:56px;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 20px;border:0;border-radius:var(--r);background:var(--akcent);color:#0b0b0d;font-family:inherit;font-size:1.1rem;font-weight:800;cursor:pointer;box-shadow:0 8px 24px -10px rgba(255,107,26,.9);white-space:nowrap;transition:transform .1s,filter .15s}
 #lDal:active{transform:scale(.97)}
 #lDal svg.ik{margin:0 0 0 2px}
 #lDal:disabled{opacity:.55}
 #lista.posledni #lInfo{display:none}
-#lista.posledni #lDal{flex:1;min-width:0}
+#lista.posledni #lDal{flex:1;min-width:0;max-width:none;padding:0 10px}
+@media (max-width:400px){#lista.posledni #lDal{font-size:1rem}}
+@media (max-width:340px){#lista.posledni #lDal{font-size:.85rem;padding:0 8px}}
 #lista.posledni #lDal svg.ik{margin:0 .4em 0 0}
 body[data-obr]:not([data-obr=navrh]) #lista{display:none}
 body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
@@ -303,6 +305,8 @@ body[data-obr]:not([data-obr=navrh]) .wrap{padding-bottom:60px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media (min-width:760px){header h1{font-size:2rem}}
 @media (max-width:360px){#lDal{padding:0 14px;font-size:1rem}}
+#lDal .dalPred{font-weight:700;opacity:.8}
+@media (max-width:340px){#lDal .dalPred{display:none}#lDal{font-size:.95rem;padding:0 12px}}
 
 /* ===================== Vzhled B „Studio“: velký náhled nahoře, kroky jako vysouvací panel ===================== */
 header{padding:12px 4px 4px}
@@ -2296,7 +2300,7 @@ function obnovPruvodce() {
   $("lZpet").disabled = i === 0;
   $("lista").classList.toggle("posledni", posledni);
   if (posledni) { $("lDal").innerHTML = /Messenger/.test($("odeslat").textContent) ? IKONA_MSG + "Odeslat objednávku" : IKONA_OK + "Odeslat objednávku"; $("lDal").disabled = $("odeslat").disabled; }
-  else { $("lDal").disabled = false; $("lDal").innerHTML = (v[i + 1].id === "objednavka" ? "K objednávce" : i === 0 ? "Pokračovat" : "Dál: " + (KRATCE[v[i + 1].id] || "")) + IKONA_DAL; }
+  else { $("lDal").disabled = false; $("lDal").innerHTML = (v[i + 1].id === "objednavka" ? "K objednávce" : i === 0 ? "Pokračovat" : '<span class="dalPred">Dál:</span>' + (KRATCE[v[i + 1].id] || "")) + IKONA_DAL; }
   if (barvySegPodpis !== barvySegKlic()) obnovBarvySeg();
   ikonizuj($("lista"));
 }
