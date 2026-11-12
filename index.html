@@ -3584,6 +3584,8 @@ const objemM = m => { try { return typeof m.volume === "function" ? m.volume() :
 const csZTv = (M, tv, seg = 10) => M.CrossSection.union(tv.map(t => new M.CrossSection([t, ...t.holes].map(c => c.getPoints(seg).map(p => [p.x, p.y])), "EvenOdd")));
 const tvaryZCs = cs => smyckyNaTvary(cs.toPolygons().map(p => p.map(([x, y]) => new V2(x, y)))).sort((a, b) => Math.abs(THREE.ShapeUtils.area(b.getPoints(1))) - Math.abs(THREE.ShapeUtils.area(a.getPoints(1))));
 function csTextu(M, tvary, sirka, vyska) { // text vystředěný v 0,0, vejde se do sirka × vyska (mm)
+  // velikost písma: menší zmenší obojí, větší jen výšku (šířka zůstává hranicí, ať text nepřeteče)
+  const fk = (VEL_PISMA.find(v => v.id === stav.fs) || { k:1 }).k; sirka *= Math.min(fk, 1); vyska *= fk;
   const b = obalka(tvary), bw = b.max.x - b.min.x || 1, bh = b.max.y - b.min.y || 1, m = Math.min(sirka / bw, vyska / bh);
   return { cs:csZTv(M, tvary).translate([-(b.min.x + b.max.x) / 2, -(b.min.y + b.max.y) / 2]).scale([m, m]), m };
 }
@@ -4101,9 +4103,10 @@ function inicialyAJmena(M, fonty, fontyI, presne, k) {
   const dily = [];
   jm.slice(0, 2).forEach((txt, i) => {
     let cs = jmenoDil(txt); if (!cs) return;
-    const b = cs.bounds(), m = Math.min(Wi * (jm.length > 1 ? 0.92 : 1.0) / (b.max[0] - b.min[0]), Hi * (jm.length > 1 ? 0.34 : 0.42) / (b.max[1] - b.min[1]));
+    const fk = (VEL_PISMA.find(v => v.id === stav.fs) || { k:1 }).k; // jména smí přesahovat písmena
+    const b = cs.bounds(), m = fk * Math.min(Wi * (jm.length > 1 ? 0.92 : 1.0) / (b.max[0] - b.min[0]), Hi * (jm.length > 1 ? 0.34 : 0.42) / (b.max[1] - b.min[1]));
     cs = cs.translate([-(b.min[0] + b.max[0]) / 2, -(b.min[1] + b.max[1]) / 2]).scale([m, m]);
-    const y = jm.length > 1 ? (i ? -Hi * 0.17 : Hi * 0.2) : 0, xo = jm.length > 1 ? (i ? Wi * 0.05 : -Wi * 0.05) : 0;
+    const y = jm.length > 1 ? (i ? -Hi * 0.17 : Hi * 0.2) * Math.max(1, fk) : 0, /* větší písmo → řádky víc od sebe */ xo = jm.length > 1 ? (i ? Wi * 0.05 : -Wi * 0.05) : 0;
     dily.push(cs.translate([xo, y]));
   });
   let P = I.extrude(D);
