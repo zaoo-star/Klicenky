@@ -1265,7 +1265,7 @@ const PRODUKTY = [
   { id:"nz", nazev:"Nápis na zeď", emoji:"🏡", titul:"🏡 Nápis na zeď (Domov, jméno, rodina)", text:"Nápis", bezZad:true, pozn:"Vystouplá písmena druhou barvou. Zezadu skryté dírky na šroubky a/nebo vybrání na oboustrannou pásku (přibalíme)." },
   { id:"vk", nazev:"Věšák na klíče", emoji:"🔑", titul:"🔑 Věšák na klíče s nápisem", text:"Nápis na věšáku", bezZad:true, pozn:"Destička s nápisem a háčky na klíče. Na zeď na šroubky (skryté dírky vzadu) nebo na oboustrannou pásku." },
   { id:"kb", nazev:"Krabička se jménem", emoji:"🎁", titul:"🎁 Krabička se jménem na víčku", text:"Text na víčku", bezZad:true, pozn:"Krabička s nasazovacím víčkem – na šperky, drobnosti nebo jako dárkové balení. Jméno je zapuštěné ve víčku druhou barvou." },
-  { id:"sv", nazev:"Svícen se jménem", emoji:"🕯️", titul:"🕯️ Svícen se jménem (na LED svíčku)", text:"Jméno na svícnu", bezZad:true, pozn:"Jen na LED čajovou svíčku ⌀ 38 mm – svíčku dodáme za příplatek po domluvě. Jméno a hvězdičky prosvítají. Jednobarevný je ze světlého filamentu (levnější), dvoubarevný má tmavé tělo a světlé písmo." },
+  { id:"sv", skryty:true, nazev:"Svícen se jménem", emoji:"🕯️", titul:"🕯️ Svícen se jménem (na LED svíčku)", text:"Jméno na svícnu", bezZad:true, pozn:"Jen na LED čajovou svíčku ⌀ 38 mm – svíčku dodáme za příplatek po domluvě. Jméno a hvězdičky prosvítají. Jednobarevný je ze světlého filamentu (levnější), dvoubarevný má tmavé tělo a světlé písmo." },
   { id:"tz", nazev:"Stojánek na tužky", emoji:"✏️", titul:"✏️ Stojánek na tužky se jménem", text:"Jméno", bezZad:true, pozn:"Kelímek na tužky a pastelky do pokojíčku nebo do kanceláře, jméno zapuštěné vpředu druhou barvou." },
   { id:"v", skryty:true, nazev:"Visačka na dárek", emoji:"🎁", titul:"🎁 Navrhněte si visačku na dárek",  text:"Text na visačce", typ:"k", tl:2, pozn:"Tenká visačka s dírkou na mašličku." },
 ];
@@ -1989,7 +1989,7 @@ vytvorVolby("produkty", PRODUKTY.filter(p => !p.skryty), "p", p => `${NAHLEDY[p.
 
 // nabídka výrobků rozdělená do skupin s nadpisem (bez filtrů – všechno je vidět)
 const SKUPINY_VYROBKU = [ ["🎁 Dárky se jménem", ["k", "z", "m", "p", "kb", "tz", "w", "y", "n", "u", "f"]], ["🎄 Vánoce a pečení", ["b", "e", "o"]],
-  ["🥂 Svatba a oslava", ["d", "j", "g", "ub", "sb", "l"]], ["🏡 Domov", ["c", "h", "nz", "vk", "sv", "r", "q"]] ];
+  ["🥂 Svatba a oslava", ["d", "j", "g", "ub", "sb", "l"]], ["🏡 Domov", ["c", "h", "nz", "vk", "r", "q"]] ];
 { const el = $("produkty"), zbyle = new Set([...el.querySelectorAll(":scope > button")].map(b => b.dataset.id));
   for (const [nadpis, ids] of SKUPINY_VYROBKU) {
     const h = document.createElement("div"); h.className = "skupina"; h.textContent = nadpis; el.appendChild(h);
@@ -3630,7 +3630,7 @@ function krouzekUbrousek(M, blok, presne, k) {
   const Ri = 22 * k, st = 3, R = Ri + st, H = 30 * k;
   let P = new M.CrossSection([zaoblenyObdelnik(Ri, 0, st, H, 1.2).getPoints(8).map(p => [p.x, p.y])]).revolve(200);
   let N = null, vt = 0, h = 0;
-  const n = napisNaValci(M, blok, R, H / 2, R * 1.5, H - 9, 0.8);
+  const n = napisNaValci(M, blok, R, H / 2, R * 1.5, Math.min(H - 9, 15 * k), 0.8);
   if (n) { P = P.subtract(n.D); vt = n.vt; h = n.h; if (stav.c !== stav.b) N = n.N; } // stejná barva → jméno jen vyryté
   const r = { P, N, vt, vymeny:N ? vymenyNaVysku(h) : 0 };
   return presne ? { ...r, T:H } : doNahledu(M, r, [-90, 0, 0]);
@@ -3705,11 +3705,14 @@ function sablona(M, blok, k) {
       rez = rez.subtract(CS.union(mosty));
     }
     deska = deska.subtract(rez);
+    // tenké proužky (pod 0,8 mm) by se při tisku nebo mytí ulomily → pryč; zůstat musí jeden kus
+    const cista = deska.offset(-0.4, "Round", 2, 12).offset(0.4, "Round", 2, 12).decompose().sort((a, b) => b.area() - a.area())[0];
+    if (cista && cista.area() > deska.area() * 0.6) deska = cista;
   }
   return { P:deska.extrude(tl), N:null, T:tl, vt, vymeny:0 };
 }
 // Na zeď: zezadu „klíčové dírky“ na šroubky a/nebo mělká vybrání na oboustrannou pásku
-const ZED_KLIC = { hlava:4.6, krk:2.4, delka:10, spodni:1.8, horni:3.8 }; // mm
+const ZED_KLIC = { hlava:4.6, krk:2.4, delka:10, spodni:1.8, horni:4.4 }; // mm
 function zedUchyceni(M, sil, T) {
   const CS = M.CrossSection, b = sil.bounds(), W = b.max[0] - b.min[0], cy0 = (b.min[1] + b.max[1]) / 2;
   const vnitrek = sil.offset(-2.2, "Round", 2, 16), pozn = [];
@@ -3757,7 +3760,28 @@ function napisNaZed(M, blok, k) {
   let sil;
   if (stav.nt === "d") { const b = t.cs.bounds(), m = 9; sil = new CS([zaoblenyObdelnik(b.min[0] - m, b.min[1] - m, b.max[0] - b.min[0] + 2 * m, b.max[1] - b.min[1] + 2 * m, 10).getPoints(10).map(p => [p.x, p.y])]); }
   else sil = t.cs.offset(4, "Round", 2, 16).offset(7, "Round", 2, 16).offset(-7, "Round", 2, 16);
-  { const kusy = sil.decompose(); if (kusy.length > 1) { kusy.sort((a, b) => b.area() - a.area()); sil = CS.union([kusy[0], ...kusy.slice(1).filter(x => x.area() > 30)]); } }
+  // podklad musí být z jednoho kusu: mezery mezi slovy (a oddělené tečky) spojí pásek, který je schovaný pod úrovní písmen
+  for (let pokus = 0; pokus < 6; pokus++) {
+    const kusy = sil.decompose(); if (kusy.length <= 1) break;
+    kusy.sort((a, b) => a.bounds().min[0] - b.bounds().min[0]);
+    const mosty = [];
+    for (let i = 0; i + 1 < kusy.length; i++) {
+      const A = kusy[i].bounds(), B = kusy[i + 1].bounds(), y0 = Math.max(A.min[1], B.min[1]), y1 = Math.min(A.max[1], B.max[1]), hm = 9;
+      const xa = Math.min(A.max[0], B.max[0]), xb = Math.max(A.min[0], B.min[0]);
+      if (y1 - y0 < 4 || xb < xa - 1) { // nad sebou (tečka, háček, druhý řádek) → svislý pásek mezi středy
+        const cx = (Math.max(A.min[0], B.min[0]) + Math.min(A.max[0], B.max[0])) / 2, ya = Math.min((A.min[1] + A.max[1]) / 2, (B.min[1] + B.max[1]) / 2), yb = Math.max((A.min[1] + A.max[1]) / 2, (B.min[1] + B.max[1]) / 2);
+        mosty.push(CS.square([hm, yb - ya]).translate([cx - hm / 2, ya])); continue;
+      }
+      let nej = null;
+      for (let y = y0 + 1; y <= y1 - hm - 1; y += 2) { // výška, kde pásek na obou stranách opravdu dosedne na materiál
+        const m = CS.square([xb - xa + 8, hm]).translate([xa - 4, y]);
+        if (m.intersect(kusy[i]).area() > 12 && m.intersect(kusy[i + 1]).area() > 12 && (!nej || Math.abs(y + hm / 2 - (y0 + y1) / 2) < Math.abs(nej.y + hm / 2 - (y0 + y1) / 2))) nej = { m, y };
+      }
+      mosty.push(nej ? nej.m : CS.square([(B.min[0] + B.max[0]) / 2 - (A.min[0] + A.max[0]) / 2, hm]).translate([(A.min[0] + A.max[0]) / 2, (y0 + y1) / 2 - hm / 2]));
+    }
+    sil = CS.union([sil, ...mosty]).offset(3, "Round", 2, 16).offset(-3, "Round", 2, 16);
+  }
+  if (sil.decompose().length > 1) { const b = t.cs.bounds(), m = 9; sil = new CS([zaoblenyObdelnik(b.min[0] - m, b.min[1] - m, b.max[0] - b.min[0] + 2 * m, b.max[1] - b.min[1] + 2 * m, 10).getPoints(10).map(p => [p.x, p.y])]); }
   let P = sil.extrude(T);
   const u = zedUchyceni(M, sil, T);
   if (u.dira) P = P.subtract(u.dira);
@@ -4587,7 +4611,7 @@ async function prekresli() {
   if (zmenseno) dalsiVar.push("ℹ️ Víc se na tiskárnu nevejde – výrobek jsme zmenšili na největší možnou velikost.");
   $("malyText").textContent = varovani.length > (chybi.length ? 1 : 0) ? "⚠ Text je moc malý na tisk – víc v kroku Text." : dalsiVar.join(" ");
   const cm = x => (x / 10).toFixed(1).replace(".", ",");
-  $("tipNahled").textContent = prazdny ? "Napište text, ze kterého zápich uděláme ✏️"
+  $("tipNahled").textContent = prazdny ? (P === "d" ? "Napište text, ze kterého zápich uděláme ✏️" : "Napište text ✏️")
     : tvar.vlastni && typ(P) === "k" && !vlastni ? "Nakreslete tvar dole na ploše ✏️"
     : `Náhled můžete otočit prstem • velikost asi ${cm(sirka)} × ${cm(vyska)} cm`;
   if (tvar.vlastni && typ(P) === "k") prekresliPlatno(vlastni);
@@ -4850,8 +4874,8 @@ function kratkyPopis(st = stav) {
   const prod = nazev(PRODUKTY, st.p), jm = (st.jm || "").split("\n").map(x => x.trim()).filter(Boolean);
   const text = jm.length > 1 ? `${pocetJmenText(jm.length)} (${jm.slice(0, 3).join(", ")}${jm.length > 3 ? "…" : ""})` : `„${(st.t || "").trim()}“`;
   const tvar = st.p === "d" ? (st.ns === "zad" ? "z boku" : "shora") : st.p === "q" ? `${nazev(QR_TYP, st.qt)}, ${nazev(QR_POUZITI, st.qu).toLowerCase()}` : st.p === "r" ? [nazev(R_SVETLO, st.rs), (st.rt || "").trim(), nazev(R_ZALIVKA, st.rz)].filter(x => x && x !== "Neuvádět").join(", ") : st.p === "nz" ? nazev(NAPIS_STYL, st.nt).toLowerCase() : st.p === "vk" ? nazev(VESAK_HACKY, st.vh) : st.p === "kb" ? nazev(KRAB_TVARY, st.kt).toLowerCase() : st.p === "sv" ? nazev(SVICEN_VZOR, st.sz).toLowerCase()
-    : SPEC3D.includes(st.p) ? "velikost " + nazev(VELIKOSTI, st.v).toLowerCase() : st.s === "vlastni" ? "vlastní tvar" : nazev(TVARY, st.s);
-  return `${prod} ${text} – ${tvar}, ${nazev(BARVY, st.b).toLowerCase()}${(st.p === "d" || st.c) && st.p !== "sb" && !(st.p === "sv" && st.sd !== "2") ? " / " + nazev(BARVY, st.c).toLowerCase() : ""}${st.z === "3" && (st.q || "").trim() && st.p !== "d" && !produkt(st.p).bezZad ? ", zezadu QR kód" : ""}`;
+    : SPEC3D.includes(st.p) ? "velikost " + nazev(VELIKOSTI, st.v).toLowerCase() : ["g", "l", "t"].includes(st.p) ? "" : st.s === "vlastni" ? "vlastní tvar" : nazev(TVARY, st.s);
+  return `${prod} ${text} – ${tvar ? tvar + ", " : ""}${nazev(BARVY, st.b).toLowerCase()}${(st.p === "d" || st.c) && st.p !== "sb" && !(st.p === "sv" && st.sd !== "2") ? " / " + nazev(BARVY, st.c).toLowerCase() : ""}${st.z === "3" && (st.q || "").trim() && st.p !== "d" && !produkt(st.p).bezZad ? ", zezadu QR kód" : ""}`;
 }
 function toast(t) { const el = $("toast"); el.textContent = t; el.classList.add("videt"); clearTimeout(toast.c); toast.c = setTimeout(() => el.classList.remove("videt"), 2600); }
 function malyNahled() {
