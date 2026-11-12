@@ -4790,15 +4790,26 @@ function texturaBarvy(b) {
 }
 // náhled fuzzy skin: boky (kolmo na směr tisku) dostanou drobné náhodné hrbolky, horní plochy zůstanou hladké
 function plysovyNahled(mat, nahoru) {
-  mat.roughness = 0.95; mat.metalness = 0;
+  // jemné plynulé hrbolky (hladký šum, dvě vrstvy) – jako opravdový fuzzy skin, ne „třpytky“
+  mat.roughness = 0.97; mat.metalness = 0;
   mat.onBeforeCompile = sh => {
     sh.uniforms.fzUp = { value:new THREE.Vector3(...nahoru) };
-    sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nvarying vec3 vFzP; varying vec3 vFzN;")
-      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvFzP = position; vFzN = normal;");
-    sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\nvarying vec3 vFzP; varying vec3 vFzN; uniform vec3 fzUp;\nfloat fzH(vec3 p){ return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453); }")
-      .replace("#include <normal_fragment_maps>", "#include <normal_fragment_maps>\n{ float w = 1.0 - smoothstep(0.35, 0.6, abs(dot(normalize(vFzN), fzUp))); vec3 q = floor(vFzP * 2.5); vec3 r = vec3(fzH(q), fzH(q + 17.1), fzH(q + 31.7)) - 0.5; normal = normalize(normal + w * 1.1 * r); }");
+    sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nvarying vec3 vFzP; varying vec3 vFzN; varying mat3 vFzM;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvFzP = position; vFzN = normal; vFzM = mat3(modelViewMatrix);");
+    sh.fragmentShader = sh.fragmentShader.replace("#include <common>", `#include <common>
+varying vec3 vFzP; varying vec3 vFzN; varying mat3 vFzM; uniform vec3 fzUp;
+float fzH(vec3 p){ return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453); }
+float fzS(vec3 p){ vec3 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(fzH(i), fzH(i + vec3(1,0,0)), f.x), mix(fzH(i + vec3(0,1,0)), fzH(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(fzH(i + vec3(0,0,1)), fzH(i + vec3(1,0,1)), f.x), mix(fzH(i + vec3(0,1,1)), fzH(i + vec3(1,1,1)), f.x), f.y), f.z); }
+vec3 fzG(vec3 p){ float e = 0.15, c = fzS(p); return vec3(fzS(p + vec3(e,0,0)) - c, fzS(p + vec3(0,e,0)) - c, fzS(p + vec3(0,0,e)) - c) / e; }`)
+      .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
+{ float w = 1.0 - smoothstep(0.35, 0.6, abs(dot(normalize(vFzN), fzUp)));
+  vec3 g = fzG(vFzP * 1.3) * 0.6 + fzG(vFzP * 2.9) * 0.4;
+  vec3 gv = vFzM * g;
+  normal = normalize(normal - w * 0.5 * gv); }`);
   };
-  mat.customProgramCacheKey = () => "fz" + nahoru.join(",");
+  mat.customProgramCacheKey = () => "fz2" + nahoru.join(",");
   mat.needsUpdate = true;
 }
 async function prekresli() {
