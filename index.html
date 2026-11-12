@@ -61,6 +61,8 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:none}
 .zpetTl{position:absolute;right:14px;top:66px;display:grid;grid-template-columns:repeat(2,40px);gap:6px;z-index:3}
 .zpetTl button{width:40px;height:36px;font-size:1.05rem!important;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(20,20,24,.6);color:#fff;font-size:1.25rem;cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .zpetTl button:disabled{opacity:.3;cursor:default}
+.zpetTl #rozlozTl{grid-column:1/-1;justify-self:end;width:auto;font-size:.78rem!important;font-weight:800;font-family:inherit;padding:0 8px;white-space:nowrap}
+.zpetTl #rozlozTl.skryt{display:none}
 .zpetTl button[aria-pressed=true]{background:var(--akcent);border-color:var(--akcent)}
 body.tiskRezim .zpetTl,#nahled.male .zpetTl{display:none}
 .obnovaPruh{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:10px 10px 10px 14px;border-radius:var(--r);background:var(--akcent-svetly);border:1px solid var(--akcent-kruh);font-size:.88rem;line-height:1.3}
@@ -440,7 +442,7 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:block}
   <div class="obnovaPruh skryt" id="obnovaPruh"><span id="obnovaText"></span><button type="button" id="obnovaNovy">Začít nový</button><button type="button" id="obnovaZavrit" aria-label="Zavřít">✕</button></div>
   <div id="nahled">
     <button type="button" class="lupa" id="lupa" aria-label="Zvětšit náhled">🔍</button>
-    <div class="zpetTl"><button type="button" id="zpet" aria-label="Zpět" title="Zpět" disabled>↶</button><button type="button" id="znovu2" aria-label="Znovu" title="Znovu" disabled>↷</button><button type="button" id="skutecnost" aria-label="Velikost ve skutečnosti" title="Velikost ve skutečnosti" aria-pressed="false">📏</button><button type="button" id="posunPrstem" aria-label="Posunout text prstem" title="Posunout text prstem" aria-pressed="false">✋</button></div>
+    <div class="zpetTl"><button type="button" id="zpet" aria-label="Zpět" title="Zpět" disabled>↶</button><button type="button" id="znovu2" aria-label="Znovu" title="Znovu" disabled>↷</button><button type="button" id="skutecnost" aria-label="Velikost ve skutečnosti" title="Velikost ve skutečnosti" aria-pressed="false">📏</button><button type="button" id="posunPrstem" aria-label="Posunout text prstem" title="Posunout text prstem" aria-pressed="false">✋</button><button type="button" id="rozlozTl" class="skryt" aria-pressed="false"></button></div>
     <canvas id="scena" aria-label="Náhled – klepnutím zvětšíte"></canvas>
     <div class="nahledStitek skryt" id="nahledStitek"></div>
     <div class="tip" id="tipNahled">Načítám náhled…</div>
@@ -1687,6 +1689,9 @@ function mnozstviTip() {
 }
 const dekSmycky = t => (t || "").split("|").map(x => x.split(" ").map(p => { const [a, b] = p.split(",").map(Number); return new V2(a, b); })).filter(x => x.length > 2 && !isNaN(x[0].x));
 let obrCache = { kod:null, v:null }, obrObraz = null;
+// výrobky z více dílů: v náhledu jde přepnout „sestavené“ / „otevřené“ (jen náhled, do návrhu se neukládá)
+let rozlozeno = false;
+const ROZLOZ = { kb:["📦 Otevřít", "📦 Zavřít"], y:["🧩 Vyndat písmena", "🧩 Složit"] };
 const stav = { sd:"1", zu:"o", nt:"t", vh:"4", kt:"o", sz:"h", ov:100, orot:0, od:3, ot:3, ok:2, cr:"", oc:"1", sv:"d", sj:"l", wz:"m", ws:"v", wn:"1", wm:"r", pr:[], fo:"", ft:"sirka", fj:"n", fd:"1", px:0, py:0, ir:"j", ns:"dol", jm:"", p:"k", a:"0", l:"", ob:"", fs:"m", nn:"2", nd:"s", nr:"s", k:"", z:"0", t3:"", t:"Babička", t2:"", s:"obdelnik", f:"obla", o:"srdicko", op:"pred", b:"cervena", c:"bila", r:"0", v:"s", vs:"", vd:"w", qt:"u", qs:"", qh:"", qn:"", qx:"", qu:"s", q:"", uc:"p", mg:"v", mp:"", mv:"", rs:"polostin", rt:"18–25 °C", rz:"stredne", c3:"", n:1 };
 /* ---------- Odkaz na návrh (co nejkratší) ----------
    Do odkazu jde jen to, co se liší od výchozího nastavení, a ještě se to zkomprimuje. */
@@ -2045,6 +2050,7 @@ function oznac() {
   $("magnetBlok").classList.toggle("skryt", !produkt(P).magnet);
   $("magnetRozmer").classList.toggle("skryt", stav.mg !== "v");
   obnovSadu();
+  { const r = ROZLOZ[P], t = $("rozlozTl"); t.classList.toggle("skryt", !r); if (!r && rozlozeno) rozlozeno = false; if (r) t.textContent = r[rozlozeno ? 1 : 0]; t.setAttribute("aria-pressed", rozlozeno); }
   // seznam jmen: u jmenovek přímo v kroku Text, jinak v Dalších možnostech
   { const obal = $("jmenaObal"), cil = ["j", "t", "g", "l", "ub", "kb"].includes(P) ? $("jmenaTextMisto") : $("jmenaMisto"); if (obal.parentNode !== cil) cil.appendChild(obal); }
   $("barvyIkonBlok").classList.toggle("skryt", P !== "r");
@@ -3597,7 +3603,7 @@ function puzzleJmeno(M, fonty, presne, k) {
   // kapsa = písmena + 0,2 mm vůle; +0,5/−0,3 slije místa, kde se kapsy jen dotýkají (jinak by v desce zůstaly nulové stěny)
   const P = deska.extrude(7).subtract(vse.offset(0.5, "Round", 2, 16).offset(-0.3, "Round", 2, 16).simplify(0.01).extrude(5).translate([0, 0, 2.5]));
   let N = M.Manifold.union(pismena.map(c => c.offset(-0.15, "Round", 2, 16).simplify(0.01).extrude(4.4)));
-  N = presne ? N.translate([0, (b.min[1] - 7) - (b.max[1] + 4), 0]) : N.translate([0, 0, 2.55]);
+  N = presne || rozlozeno ? N.translate([0, (b.min[1] - 7) - (b.max[1] + 4), 0]) : N.translate([0, 0, 2.55]);
   return { P, N, T:7, vt:28 * k, objemNavic:objemM(N), chybi };
 }
 /* ---------- NOVÉ VÝROBKY: kroužek na ubrousky, šablona, nápis na zeď, věšák, krabička, svícen, stojánek na tužky ---------- */
@@ -3832,8 +3838,11 @@ function krabicka(M, blok, presne, k) {
     const b = O.bounds(), dx = b.max[0] - b.min[0] + 8, ot = m => m.mirror([0, 0, 1]).translate([dx, 0, vic]);
     return { P:box, N:N && ot(N), E:[{ m:ot(viko), c:stav.b }], T:H, vt, vymeny:N ? 5 : 0 };
   }
-  const nahore = m => m.translate([0, 0, H]);
-  return doNahledu(M, { P:box, N:N && nahore(N), E:[{ m:nahore(viko), c:stav.b }], vt, vymeny:N ? 5 : 0 }, [-38, 0, 0]);
+  const yp = O.bounds().max[1];
+  const nahore = rozlozeno // otevřená: víčko odklopené o 105° kolem zadní hrany
+    ? m => m.translate([0, -yp, 0]).rotate([-105, 0, 0]).translate([0, yp, H])
+    : m => m.translate([0, 0, H]);
+  return doNahledu(M, { P:box, N:N && nahore(N), E:[{ m:nahore(viko), c:stav.b }], vt, vymeny:N ? 5 : 0 }, [rozlozeno ? -52 : -38, 0, 0]);
 }
 // Štítek na kořenky: všechny štítky v sadě stejně velké, text se přizpůsobí
 function stitekDetail(ram) {
@@ -4541,6 +4550,7 @@ async function prekresli() {
   const bb = gP.boundingBox, sirka = bb.max.x - bb.min.x, vyska = bb.max.y - bb.min.y;
   rozmer = [sirka, vyska]; souhrny();
   const bc = bb.clone();
+  if (rozlozeno && ROZLOZ[P]) [gN, ...(gE || []).map(x => x.g)].forEach(g => { if (g) { g.computeBoundingBox(); bc.union(g.boundingBox); } }); // otevřené: do záběru i víčko / písmena
   let naklonNahledu = 0;
   kameraShora = !!gS || ["ub", "tz", "sv", "vk"].includes(P);
   if (gS) { // náhled jmenovky „sestavené“: stojánek dole, jmenovka zasunutá do zářezu (pro tisk zůstávají díly zvlášť naležato)
@@ -4571,6 +4581,7 @@ async function prekresli() {
   if (nalezato) skupina.position.set(-sy, sx, -T / 2); else skupina.position.set(-sx, -sy, -T / 2);
   rozmerModelu = nalezato ? [bc.max.y - bc.min.y, bc.max.x - bc.min.x] : [bc.max.x - bc.min.x, bc.max.y - bc.min.y];
   if (kulisa) rozmerModelu = rozmerModelu.map(x => x * 1.35);
+  if (rozlozeno && P === "y") rozmerModelu = rozmerModelu.map(x => x * 1.25);
   if (["ub", "tz", "sv", "kb", "vk"].includes(P)) rozmerModelu = rozmerModelu.map(x => Math.max(x, T * 0.9) * (P === "kb" ? 1.35 : 1.12)); // prostorové výrobky: počítat i s hloubkou
   zamerKameru();
   obnovOdkaz();
@@ -5357,6 +5368,7 @@ $("zpet").onclick = () => skocNaZmenu(zmenaIdx - 1);
   canvas.addEventListener("pointerup", konec); canvas.addEventListener("pointercancel", konec);
   document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#lista, #postup")) vypni(); }, true);
 }
+$("rozlozTl").onclick = () => { rozlozeno = !rozlozeno; const r = ROZLOZ[stav.p]; if (r) $("rozlozTl").textContent = r[rozlozeno ? 1 : 0]; $("rozlozTl").setAttribute("aria-pressed", rozlozeno); houpani = true; prekresli(); };
 $("skutecnost").onclick = () => { veSkutecnosti = !veSkutecnosti; $("skutecnost").setAttribute("aria-pressed", veSkutecnosti); prekresli();
   if (veSkutecnosti) toast("📏 Pravítko ukazuje skutečnou velikost v centimetrech."); };
 $("znovu2").onclick = () => skocNaZmenu(zmenaIdx + 1);
