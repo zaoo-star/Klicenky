@@ -552,7 +552,7 @@ body.krokVyrobek:not(.tiskRezim) #nahled{display:block}
         <div id="nzStylBlok"><div class="podnadpis" style="margin-top:16px">Podklad</div><div class="volby" id="napisStyl" style="grid-template-columns:1fr 1fr"></div></div>
         <div id="vhBlok"><div class="podnadpis" style="margin-top:16px">Kolik háčků?</div><div class="volby tri" id="vesakHacky"></div></div>
         <div id="zuBlok"><div class="podnadpis" style="margin-top:16px">Jak se připevní na zeď?</div><div class="volby" id="zedUchyceni" style="grid-template-columns:1fr 1fr 1fr"></div></div>
-        <div id="ktBlok"><div class="podnadpis" style="margin-top:16px">Tvar krabičky</div><div class="volby tri" id="krabTvar"></div></div>
+        <div id="ktBlok"><div class="podnadpis" style="margin-top:16px">Tvar krabičky</div><div class="volby" id="krabTvar" style="grid-template-columns:1fr 1fr 1fr 1fr"></div></div>
         <div id="sdBlok"><div class="podnadpis" style="margin-top:16px">Provedení</div><div class="volby" id="svicenBarvy" style="grid-template-columns:1fr 1fr"></div></div>
         <div id="szBlok"><div class="podnadpis" style="margin-top:16px">Vzor</div><div class="volby" id="svicenVzor" style="grid-template-columns:1fr 1fr"></div></div>
       </div>
@@ -1488,7 +1488,8 @@ const MOBIL_PRO = [ { id:"m", nazev:"Mobil", popis:"do 15 mm i s obalem" }, { id
 const MOBIL_SKLON = [ { id:"v", nazev:"Strmější", popis:"na video, hovory" }, { id:"c", nazev:"Plošší", popis:"na čtení, recepty" } ];
 const MOBIL_NAB = [ { id:"1", nazev:"S výřezem", popis:"nabíjení ve stojánku" }, { id:"0", nazev:"Bez výřezu", popis:"" } ];
 const MOBIL_OPERKA = [ { id:"r", nazev:"Rovná" }, { id:"s", nazev:"Srdce" }, { id:"k", nazev:"Kočičí uši" }, { id:"m", nazev:"Mráček" } ];
-const KRAB_TVARY = [ { id:"o", nazev:"Obdélník" }, { id:"c", nazev:"Kulatá" }, { id:"s", nazev:"Srdce" } ];
+const KRAB_TVARY = [ { id:"o", nazev:"Obdélník" }, { id:"q", nazev:"Čtverec" }, { id:"c", nazev:"Kulatá" }, { id:"v", nazev:"Ovál" },
+  { id:"s", nazev:"Srdce" }, { id:"h", nazev:"Hvězda" }, { id:"x", nazev:"Šestiúhelník" }, { id:"d", nazev:"Domeček" } ];
 const ZED_UCHYCENI = [ { id:"o", nazev:"Páska i šroubky", popis:"vyberete si na místě" }, { id:"p", nazev:"Oboustranná páska", popis:"vybrání vzadu, pásku přibalíme" }, { id:"s", nazev:"Na šroubky", popis:"skryté dírky vzadu" } ];
 const NAPIS_STYL = [ { id:"t", nazev:"Ve tvaru nápisu", popis:"podklad kopíruje písmena" }, { id:"d", nazev:"Na destičce", popis:"zaoblený obdélník" } ];
 const VESAK_HACKY = [ { id:"3", nazev:"3 háčky" }, { id:"4", nazev:"4 háčky" }, { id:"5", nazev:"5 háčků" } ];
@@ -1925,7 +1926,10 @@ vytvorVolby("magnety", MAGNETY, "mg", p => `<span>${p.nazev}</span><span style="
   vytvorVolby("stojanTvary", STOJAN_TVARY, "sj", h); vytvorVolby("mobilPro", MOBIL_PRO, "wz", h); vytvorVolby("mobilSklon", MOBIL_SKLON, "ws", h);
   vytvorVolby("mobilNab", MOBIL_NAB, "wn", h); vytvorVolby("mobilOperka", MOBIL_OPERKA, "wm", h);
   vytvorVolby("napisStyl", NAPIS_STYL, "nt", h); vytvorVolby("vesakHacky", VESAK_HACKY, "vh", h); vytvorVolby("zedUchyceni", ZED_UCHYCENI, "zu", h);
-  vytvorVolby("krabTvar", KRAB_TVARY, "kt", h); vytvorVolby("svicenVzor", SVICEN_VZOR, "sz", h);
+  { const IK = { o:'<rect x="3" y="7" width="26" height="18" rx="3"/>', q:'<rect x="6" y="6" width="20" height="20" rx="3"/>', c:'<circle cx="16" cy="16" r="11"/>', v:'<ellipse cx="16" cy="16" rx="13" ry="9"/>',
+      s:'<path d="M16 27C6 20 3 15 3 10.5 3 6.5 6 4 9.5 4c3 0 5 2 6.5 4.5C17.5 6 19.5 4 22.5 4 26 4 29 6.5 29 10.5 29 15 26 20 16 27z"/>', h:'<path d="M16 3l3.6 7.6 8.2 1-6 5.7 1.6 8.2L16 21.6l-7.4 3.9 1.6-8.2-6-5.7 8.2-1z"/>',
+      x:'<path d="M9.5 5h13l6.5 11-6.5 11h-13L3 16z"/>', d:'<path d="M5 14L16 4l11 10v13H5z"/>' };
+  vytvorVolby("krabTvar", KRAB_TVARY, "kt", p => `<svg viewBox="0 0 32 32" width="30" height="30" fill="currentColor" style="opacity:.85">${IK[p.id] || ""}</svg><span style="font-size:.78rem">${p.nazev}</span>`); } vytvorVolby("svicenVzor", SVICEN_VZOR, "sz", h);
   vytvorVolby("svicenBarvy", SVICEN_BARVY, "sd", h, p => { // jednobarevný = světlý filament, dvoubarevný = tmavé tělo a bílé písmo
     if (p.id === "2") { if (stav.b === "bila" || stav.b === stav.c) { stav.b = "cerna"; stav.c = "bila"; } } else if (["cerna", "tmmodra"].includes(stav.b)) stav.b = "bila"; }); }
 vytvorVolby("uchyceni", UCHYCENI, "uc", p => `<span>${p.nazev}</span><span style="font-size:.8rem;color:var(--tlumeny)">${p.popis}</span>`);
@@ -3824,7 +3828,15 @@ function krabicka(M, blok, presne, k) {
   else if (stav.kt === "s") {
     let h = new CS([srdcovyObrys(0, 0, 1).getPoints(40).map(p => [p.x, p.y])], "NonZero"); const b = h.bounds(), f = 95 * k / (b.max[0] - b.min[0]);
     O = h.translate([-(b.min[0] + b.max[0]) / 2, -(b.min[1] + b.max[1]) / 2]).scale([f, f]); tw = 56 * k; th = 26 * k; ty = 6 * k;
-  } else { O = new CS([zaoblenyObdelnik(-50 * k, -32 * k, 100 * k, 64 * k, 8).getPoints(10).map(p => [p.x, p.y])]); tw = 78 * k; th = 40 * k; }
+  } else if (stav.kt === "q") { O = new CS([zaoblenyObdelnik(-40 * k, -40 * k, 80 * k, 80 * k, 8).getPoints(10).map(p => [p.x, p.y])]); tw = 62 * k; th = 40 * k; }
+  else if (stav.kt === "v") { O = CS.circle(1, 160).scale([52 * k, 34 * k]); tw = 70 * k; th = 34 * k; }
+  else if (stav.kt === "x") { const b = []; for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3; b.push([46 * k * Math.cos(a), 46 * k * Math.sin(a)]); }
+    O = new CS([b]).offset(-3, "Round", 2, 16).offset(3, "Round", 2, 16); tw = 58 * k; th = 34 * k; }
+  else if (stav.kt === "h") { const b = []; for (let i = 0; i < 10; i++) { const a = Math.PI / 2 + i * Math.PI / 5, r = (i % 2 ? 26 : 52) * k; b.push([r * Math.cos(a), r * Math.sin(a)]); }
+    O = new CS([b]).offset(-5, "Round", 2, 16).offset(5, "Round", 2, 16); tw = 40 * k; th = 22 * k; ty = -2 * k; }
+  else if (stav.kt === "d") { const w = 44 * k, hs = 30 * k, hr = 30 * k;
+    O = new CS([[[-w, -hs], [w, -hs], [w, hs], [0, hs + hr], [-w, hs]]]).offset(-5, "Round", 2, 16).offset(5, "Round", 2, 16); tw = 64 * k; th = 36 * k; ty = -2 * k; }
+  else { O = new CS([zaoblenyObdelnik(-50 * k, -32 * k, 100 * k, 64 * k, 8).getPoints(10).map(p => [p.x, p.y])]); tw = 78 * k; th = 40 * k; }
   const dutina = O.offset(-st - 3, "Round", 2, 16).offset(3, "Round", 2, 16); // zaoblená dutina (u srdce bez ostrého zářezu)
   const box = O.extrude(H).subtract(dutina.extrude(H).translate([0, 0, dno]));
   const vnitrni = dutina.offset(-vule, "Round", 2, 16);
@@ -3837,7 +3849,8 @@ function krabicka(M, blok, presne, k) {
   }
   if (presne) { // vedle sebe: víčko otočené nápisem dolů (límec nahoru)
     const b = O.bounds(), dx = b.max[0] - b.min[0] + 8, ot = m => m.mirror([0, 0, 1]).translate([dx, 0, vic]);
-    return { P:box, N:N && ot(N), E:[{ m:ot(viko), c:stav.b }], T:H, vt, vymeny:N ? 5 : 0 };
+    const cist = m => { try { return m.simplify(0.001); } catch { return m; } }; // pryč s nulovými trojúhelníky (rohy po zaoblení)
+    return { P:cist(box), N:N && ot(N), E:[{ m:cist(ot(viko)), c:stav.b }], T:H, vt, vymeny:N ? 5 : 0 };
   }
   const yp = O.bounds().max[1];
   const nahore = rozlozeno // otevřená: víčko odklopené o 105° kolem zadní hrany
