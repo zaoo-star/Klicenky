@@ -1,27 +1,27 @@
-# 3Dz – design (úvodní stránka 3dz.cz)
+# 3Dz – design úvodní stránky (3dz.cz)
 
-Směr: **cyberpunk** – tmavá noc, neonová žlutá a azurová, šikmo seříznuté rohy, jemná mřížka a řádkování obrazovky. Nadpisy technickým písmem, běžný text čitelným bezpatkovým písmem (kvůli starším zákazníkům).
-Nestaví na příkladech z reálných webů (UXKIN nebyl připojený) – rozhodnuto podle přání majitele.
+Úvodní stránka (`index.html`) stojí na šabloně **Phantom od HTML5 UP** (licence CC BY 3.0, `assets/LICENSE-html5up.txt`).
+Odkaz „Design: HTML5 UP“ v patičce musí zůstat.
 
 ## Barvy
-| token | hodnota | role |
-|---|---|---|
-| `--noc` | #07070c | pozadí |
-| `--panel` / `--panel2` | #0e0e17 / #151522 | karty |
-| `--text` | #eef1f7 | hlavní text |
-| `--slaby` | #a2a8bd | vedlejší text (kontrast 8:1) |
-| `--zluta` | #f5e400 | hlavní akce: tlačítka, logo, zvýraznění; text na ní #0a0a0a |
-| `--azur` | #00e5ff | linky, rámečky, záře, sekundární tlačítko |
-| `--magenta` | #ff2e88 | jediný doplněk: štítek „Připravujeme“, nadtitulek |
+- Text a tlačítka: `#585858` (šablona), pozadí bílé, patička `#f6f6f6`.
+- Dlaždice (barva pod renderem výrobku):
+  - style1 `#f2849e` (zápichy, Vlastní návrh)
+  - style2 `#7ecaf6`, style3 `#7bd0c1`, style4 `#c75b9b`, style5 `#ae85ca`, style6 `#8499e7`
+- E-shop (připravujeme): šedá `#585858`.
 
 ## Písmo
-- Nadpisy, tlačítka, štítky: **Chakra Petch 700** (vlastní soubory `/fonts`, celá čeština), často verzálkami.
-- Text: **Plus Jakarta Sans 500 / 800**, základ 18 px.
+- Source Sans Pro 300/700/900, uložené lokálně v `assets/fonts` (latin + latin-ext kvůli češtině).
+- Nadpisy dlaždic: 900, velká písmena, s prostrkáním (ze šablony).
 
-## Tvar a efekty
-- Rohy šikmo seříznuté (`clip-path`, 18 px karty / 12 px tlačítka), žádné zaoblení.
-- Rámeček karty = 2px přechod azurová → magenta. Záře jen u azurových linek a při najetí.
-- Nadpis H1: posun azurová/magenta 2 px (chromatická aberace), nic víc.
+## Dlaždice
+- Místo fotek jsou průhledné rendery z návrháře (`img/*.webp`). Leží na plné barvě, text je pod nimi.
+- Až budou fotky, stačí vyměnit `src` u obrázků.
+- Popisky jsou vidět vždy, ne jen při najetí myší (kvůli mobilům a starším zákazníkům).
 
-## Obrázky
-- Rendery výrobků z návrháře (`/img`), u vlastního návrhu hlavně zápichy na dort.
+## Struktura
+1. Výběr: velká dlaždice **Vlastní návrh** (zápichy) + **E-shop** se štítkem Připravujeme.
+2. „Co si můžete navrhnout“: 6 dlaždic s odkazy rovnou na výrobek v návrháři.
+3. Patička: kontakt přes Messenger.
+
+Návrhář (`/navrh/`) má vlastní tmavý styl s oranžovým akcentem a je na téhle stránce nezávislý.
