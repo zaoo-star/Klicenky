@@ -71,6 +71,21 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
   .tiles article.velka > .image{aspect-ratio:1/1}
 }
 #footer .kontakt p{max-width:30em}
+/* úvod s obrázkem na pozadí */
+.uvod{position:relative;color:#fff;background:#0b0b1e url(img/pozadi-800.webp) center/cover no-repeat;padding-bottom:4em;margin-bottom:3em}
+@media (min-width:801px){.uvod{background-image:url(img/pozadi-1408.webp)}}
+.uvod:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,24,.45) 0%,rgba(8,8,24,.62) 55%,rgba(8,8,24,.82) 100%);pointer-events:none}
+.uvod > *{position:relative}
+.uvod #header .logo,.uvod h1,.uvod p{color:#fff}
+.uvod h1{text-shadow:0 2px 14px rgba(0,0,0,.6)}
+.uvod p{text-shadow:0 1px 6px rgba(0,0,0,.7);font-weight:400}
+.uvod #header .logo .symbol{background:#fff;color:#585858}
+.uvod > #header > .inner{width:100%;max-width:68em;margin:0 auto;padding:0 2.5em}
+@media screen and (max-width:736px){.uvod > #header > .inner{padding:0 1.25em}}
+.uvodText header{margin:0}
+.uvodText header p{max-width:36em}
+.uvodText header > :last-child{margin-bottom:0}
+@media screen and (max-width:736px){.uvod{padding-bottom:2.5em;margin-bottom:2em}}
 /* výběr: 3 dlaždice – návrhář velký, vedle e-shop a zpráva */
 .tiles.vyber{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:2.5em;margin:0}
 .tiles.vyber article,.tiles.vyber article.velka,.tiles.vyber article.brzy{width:auto;margin:0}
@@ -116,6 +131,7 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
 <body class="is-preload">
 <div id="wrapper">
 
+	<div class="uvod">
 	<header id="header">
 		<div class="inner">
 			<a href="/" class="logo">
@@ -129,6 +145,14 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
 		</div>
 	</header>
 
+	<div class="inner uvodText">
+			<header>
+				<h1>Výrobky z 3D tiskárny <br>se jménem i bez něj.</h1>
+				<p>Tiskneme v Bučovicích na zakázku. Zápich na dort, klíčenku, ozdobu nebo cedulku si navrhnete sami a hned vidíte, jak bude vypadat a kolik stojí.</p>
+			</header>
+	</div>
+	</div>
+
 	<nav id="menu">
 		<h2>Menu</h2>
 		<ul>
@@ -140,10 +164,6 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
 
 	<div id="main">
 		<div class="inner">
-			<header>
-				<h1>Výrobky z 3D tiskárny <br>se jménem i bez něj.</h1>
-				<p>Tiskneme v Bučovicích na zakázku. Zápich na dort, klíčenku, ozdobu nebo cedulku si navrhnete sami a hned vidíte, jak bude vypadat a kolik stojí.</p>
-			</header>
 			<section class="tiles vyber">
 				<article class="style1 velka">
 					<span class="image">
