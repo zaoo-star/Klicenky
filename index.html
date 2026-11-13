@@ -97,17 +97,7 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
   .tiles.vyber article.velka > .image .trojice{top:7%;height:46%}
   .tiles.vyber article > .image{min-height:13em}
 }
-/* efekt po kliknutí: dlaždice se „natiskne“, e-shop se zamčeně zatřese */
-.tiles.vyber article{position:relative}
-.tiskDl{position:absolute;inset:0;z-index:5;pointer-events:none;border-radius:4px;overflow:hidden}
-.tiskDl .zbyva{position:absolute;left:0;right:0;top:0;background:#fff}
-.tiskDl .vrstva{position:absolute;background:#fff}
-.tiskDl .hl{position:absolute;width:46px;height:34px;margin:-40px 0 0 -23px}
-.tiskDl .hl i{position:absolute;left:3px;right:3px;top:0;height:22px;background:#585858;border-radius:4px}
-.tiskDl .hl b{position:absolute;left:50%;top:22px;margin-left:-8px;border:8px solid transparent;border-top:10px solid #585858;border-bottom:0}
-.tiskDl .hl u{position:absolute;left:50%;top:31px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#f2849e;box-shadow:0 0 8px 2px rgba(242,132,158,.8)}
-.tiskDl{overflow:visible}
-.tiles.vyber article.tisknu > .image{transform:none!important;transition:none!important}
+/* e-shop je zamčený: po kliknutí se zatřese */
 @keyframes zamceno{0%,100%{transform:none}20%{transform:translateX(-10px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
 @keyframes zamek{0%,100%{transform:none}30%{transform:rotate(-18deg)}60%{transform:rotate(14deg)}}
 .tiles.vyber article.zatrast{animation:zamceno .45s ease}
@@ -238,33 +228,13 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
 })();
 </script>
 <script>
-/* klik na dlaždici: dlaždice zmizí a tiskárna ji po vrstvách natiskne (stejně jako uvítání) a pak se otevře odkaz; e-shop je zamčený, tak se jen zatřese */
+/* klik na návrhář: návrhář se po otevření natiskne po vrstvách (stejně jako uvítání); e-shop je zamčený, tak se jen zatřese */
 (function(){
-  var klid=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
-  document.querySelectorAll(".tiles.vyber article > a").forEach(function(a){
-    a.addEventListener("click",function(e){
-      var art=a.parentNode;
-      if(art.id==="eshop"){ e.preventDefault(); art.classList.remove("zatrast"); void art.offsetWidth; art.classList.add("zatrast"); return; }
-      if(klid||e.ctrlKey||e.metaKey||e.shiftKey||e.button>0||art.querySelector(".tiskDl")) return;
-      e.preventDefault();
-      var d=document.createElement("div"); d.className="tiskDl"; d.innerHTML='<div class="zbyva"></div><div class="vrstva"></div><div class="hl"><i></i><b></b><u></u></div>'; art.appendChild(d); art.classList.add("tisknu");
-      var zb=d.children[0], vr=d.children[1], hl=d.children[2], VRSTEV=8, DOBA=100, start=null, kam=a.href;
-      zb.style.height="100%";
-      function krok(ts){
-        if(start===null) start=ts;
-        var W=art.clientWidth, H=art.clientHeight, v=H/VRSTEV, c=(ts-start)/DOBA, n=Math.floor(c), f=c-n;
-        if(n>=VRSTEV){ zb.style.height="0"; vr.style.height="0"; hl.style.display="none"; setTimeout(function(){ location.href=kam; setTimeout(function(){ d.remove(); },800); },180); return; }
-        var vrch=H-n*v-v, x=(n%2===0)?f*W:(1-f)*W;
-        zb.style.height=vrch+"px"; vr.style.top=vrch+"px"; vr.style.height=v+"px";
-        if(n%2===0){ vr.style.left=x+"px"; vr.style.right="0"; } else { vr.style.left="0"; vr.style.right=(W-x)+"px"; }
-        hl.style.left=x+"px"; hl.style.top=vrch+"px";
-        requestAnimationFrame(krok);
-      }
-      requestAnimationFrame(krok);
-    });
+  document.querySelectorAll('a[href="/navrh/"]').forEach(function(a){
+    a.addEventListener("click",function(){ try{sessionStorage.setItem("3dz-natisknout","1");}catch(e){} });
   });
-  /* po návratu tlačítkem Zpět stránku vrátit do původního stavu */
-  addEventListener("pageshow",function(){ document.querySelectorAll(".tiskDl").forEach(function(x){x.parentNode.classList.remove("tisknu"); x.remove();}); });
+  var e=document.getElementById("eshop");
+  e.querySelector("a").addEventListener("click",function(ev){ ev.preventDefault(); e.classList.remove("zatrast"); void e.offsetWidth; e.classList.add("zatrast"); });
 })();
 </script>
 <script src="assets/js/jquery.min.js"></script>

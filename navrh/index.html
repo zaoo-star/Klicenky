@@ -533,6 +533,15 @@ label{color:var(--tlumeny)} label.pole{color:#585858}
 #lKrok{color:var(--tlumeny)} #lCena{color:#585858;font-weight:900}
 @media (min-width:1100px){#nahled{border-radius:6px} #postup{border-radius:6px 6px 0 0} #navrh > .krok.otevreno{border-radius:0 0 6px 6px}}
 .paticka a{color:#8a8a8a!important}
+
+/* příchod z úvodky: návrhář se natiskne po vrstvách jako uvítání na 3dz.cz */
+#uvTisk{position:fixed;inset:0;z-index:100000;cursor:pointer}
+#uvTisk .zbyva{position:absolute;left:0;right:0;top:0;height:100%;background:#fff}
+#uvTisk .vrstva{position:absolute;background:#fff}
+#uvTisk .hlava{position:absolute;width:46px;height:34px;margin-left:-23px;margin-top:-40px;pointer-events:none;display:none}
+#uvTisk .hlava i{position:absolute;left:3px;right:3px;top:0;height:22px;background:#585858;border-radius:4px}
+#uvTisk .hlava b{position:absolute;left:50%;top:22px;margin-left:-8px;border:8px solid transparent;border-top:10px solid #585858;border-bottom:0}
+#uvTisk .hlava u{position:absolute;left:50%;top:31px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#f2849e;box-shadow:0 0 8px 2px rgba(242,132,158,.8)}
 </style>
 <script type="importmap">
 {"imports":{
@@ -545,6 +554,33 @@ label{color:var(--tlumeny)} label.pole{color:#585858}
 </script>
 </head>
 <body>
+<script>
+/* příchod z úvodky (klik na Vlastní návrh): návrhář se natiskne po vrstvách. Jen jednou, klepnutím přeskočit. */
+(function(){
+  var ano=false; try{ano=sessionStorage.getItem("3dz-natisknout")==="1"; sessionStorage.removeItem("3dz-natisknout");}catch(e){}
+  if(!ano||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+  var t=document.createElement("div"); t.id="uvTisk"; t.setAttribute("aria-hidden","true");
+  t.innerHTML='<div class="zbyva"></div><div class="vrstva"></div><div class="hlava"><i></i><b></b><u></u></div>';
+  document.body.appendChild(t);
+  var zb=t.children[0], vr=t.children[1], hl=t.children[2], VRSTEV=14, NA_VRSTVU=140, start=null, hotovo=false, bezi=false;
+  function konec(){ if(hotovo) return; hotovo=true; t.style.transition="opacity .3s"; t.style.opacity="0"; setTimeout(function(){t.remove();},350); }
+  t.addEventListener("click",konec);
+  setTimeout(konec,6000); /* pojistka: kdyby se něco zaseklo, stránku nikdy nenechat zakrytou */
+  function krok(ts){
+    if(hotovo) return; if(start===null) start=ts;
+    var W=innerWidth, H=innerHeight, v=H/VRSTEV, c=(ts-start)/NA_VRSTVU, n=Math.floor(c), f=c-n;
+    if(n>=VRSTEV){ zb.style.height="0"; vr.style.height="0"; hl.style.display="none"; setTimeout(konec,120); return; }
+    var vrch=H-n*v-v, x=(n%2===0)?f*W:(1-f)*W;
+    zb.style.height=vrch+"px"; vr.style.top=vrch+"px"; vr.style.height=v+"px";
+    if(n%2===0){ vr.style.left=x+"px"; vr.style.right="0"; } else { vr.style.left="0"; vr.style.right=(W-x)+"px"; }
+    hl.style.left=x+"px"; hl.style.top=vrch+"px";
+    requestAnimationFrame(krok);
+  }
+  function spust(){ if(bezi||hotovo) return; bezi=true; hl.style.display="block"; requestAnimationFrame(krok); }
+  /* tisk začne, až je stránka načtená (nejpozději po 1,5 s), ať se netrhá */
+  if(document.readyState==="complete") setTimeout(spust,100); else { addEventListener("load",function(){ setTimeout(spust,150); }); setTimeout(spust,1500); }
+})();
+</script>
 <div class="wrap">
   <header>
     <div class="znacka"><a href="/" class="znLogo" aria-label="3Dz – úvodní stránka"><i>3Dz</i></a><span class="znTxt"><b>Navrhněte si 3D výrobek</b><small>3D tisk na zakázku · vytiskneme do týdne</small></span><button type="button" class="mojeTl skryt" id="mojeObjTl">📋 Moje objednávky</button></div>
