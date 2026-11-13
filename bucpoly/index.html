@@ -1,65 +1,91 @@
-<!DOCTYPE HTML>
-<!--
-	Phantom by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
+<!DOCTYPE html>
 <html lang="cs">
 <head>
-<title>Bučpoly – realitní hra na mapě Bučovic</title>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bučpoly – realitní hra na mapě Bučovic</title>
 <meta name="description" content="Bučpoly – realitní hra na mobil na mapě skutečných Bučovic. Kupujte domy, pronajímejte byty, investujte a vydělávejte i chůzí po městě.">
 <meta property="og:title" content="Bučpoly – realitní hra na mapě Bučovic">
 <meta property="og:description" content="Kupujte domy, pronajímejte byty, investujte a vydělávejte i chůzí po městě. Hra na mobil na měsíce i roky.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://3dz.cz/bucpoly/">
+<meta property="og:image" content="https://3dz.cz/nahled-3dz.jpg">
+<meta name="theme-color" content="#0b0d17">
 <link rel="icon" href="../img/bucpoly.png">
-<link rel="stylesheet" href="../assets/css/main.css">
-<noscript><link rel="stylesheet" href="../assets/css/noscript.css"></noscript>
 <style>
-#header .logo .symbol{display:inline-flex;align-items:center;justify-content:center;width:2.2em;height:2.2em;margin-right:.65em;background:#585858;color:#fff;border-radius:4px;font-weight:900;font-size:.85em;letter-spacing:0;text-transform:none}
-#header .logo .title{border-left:0;padding-left:0;margin-left:0}
-.hra{position:relative;margin:0 0 3em;padding:2.5em;border-radius:6px;background:#111317;color:#e6e6ea;display:flex;gap:2em;align-items:center}
-.hra img{width:120px;height:120px;flex:none;border-radius:22px}
-.hra h1{color:#fff;margin:0 0 .3em;font-size:2.6em}
-.hra p{margin:0;color:#c9cbd2;font-size:1.15em;font-weight:400;max-width:34em}
-.hra .tl{margin-top:1.5em}
-.button.hraj{background:#4ade80!important;color:#0b1a10!important;box-shadow:none}
-.button.hraj:hover{background:#3fcf72!important}
-.mobil{display:block;margin-top:.9em;font-size:.95em;color:#9a9ca6}
-.body p,.body li{font-weight:400}
-.body h2{margin-top:2em}
-.body ul{padding-left:1.2em}
-.body li{margin-bottom:.6em}
-.karty{display:grid;grid-template-columns:repeat(auto-fill,minmax(15em,1fr));gap:1.25em;margin:1.5em 0 2.5em}
-.karty div{border:1px solid #e2e2e2;border-radius:6px;padding:1.25em 1.25em .5em}
-.karty b{display:block;color:#585858;font-weight:900;margin-bottom:.35em}
-.karty p{font-size:.95em}
-.zpet{display:inline-block;margin-bottom:2em;font-weight:700}
-@media screen and (max-width:736px){
-  .hra{flex-direction:column;align-items:flex-start;padding:1.75em;gap:1.25em}
-  .hra img{width:84px;height:84px;border-radius:16px}
-  .hra h1{font-size:2em}
-  .hra .button{width:100%}
+/* Bučpoly – stejný tmavý futuristický vzhled jako úvodka 3dz.cz, barva hry je zelená */
+@font-face{font-family:"Unb";font-weight:700;font-display:swap;src:url(../assets/fonts/unbounded-latin-700-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Unb";font-weight:700;font-display:swap;src:url(../assets/fonts/unbounded-latin-ext-700-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"Bric";font-weight:400;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-400-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Bric";font-weight:400;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-ext-400-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"Bric";font-weight:500;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-500-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Bric";font-weight:500;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-ext-500-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"Bric";font-weight:700;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-700-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Bric";font-weight:700;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-ext-700-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"Bric";font-weight:800;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-800-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Bric";font-weight:800;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-ext-800-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+:root{--noc:#0b0d17;--karta:rgba(255,255,255,.045);--linka:rgba(255,255,255,.09);--text:#eef0f6;--sedy:#9aa2b4;--zelena:#3ddc84;--r:20px}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;background:var(--noc)}
+body{margin:0;color:var(--text);font-family:"Bric",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:19px;line-height:1.55;-webkit-font-smoothing:antialiased;background:var(--noc);
+  background-image:radial-gradient(70% 50% at 70% 0%,rgba(61,220,132,.12),rgba(61,220,132,0) 70%),linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:100% 100%,44px 44px,44px 44px;background-repeat:no-repeat,repeat,repeat}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--zelena);outline-offset:3px;border-radius:8px}
+.sirka{max-width:960px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.hlavicka{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:28px 0 0}
+.znacka{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:500;font-size:.95rem;color:#d6dae6}
+.znacka b{display:grid;place-items:center;width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);color:#fff;font-family:"Unb",sans-serif;font-weight:700;font-size:.8rem}
+.zpet{white-space:nowrap;color:var(--sedy);font-weight:500;font-size:.95rem}
+.hra{display:flex;gap:28px;align-items:center;margin:48px 0 56px}
+.hra img{width:120px;height:120px;flex:none;border-radius:28px;border:1px solid rgba(61,220,132,.4);box-shadow:0 0 40px -8px rgba(61,220,132,.6)}
+.hra h1{margin:0 0 12px;font-size:clamp(2.2rem,6vw,3.4rem);text-shadow:0 0 36px rgba(61,220,132,.35)}
+.hra p{margin:0;max-width:32em;color:#cfd3de;font-size:1.12rem}
+.hraj{display:inline-flex;align-items:center;justify-content:center;margin-top:26px;min-height:60px;padding:0 30px;border-radius:999px;background:var(--zelena);color:#06210f;font-weight:700;font-size:1.15rem;text-decoration:none;box-shadow:0 0 30px -4px rgba(61,220,132,.75)}
+.hraj:hover{background:#55e898}
+.mobil{display:block;margin-top:12px;color:var(--sedy);font-size:.95rem}
+h2{margin:0 0 20px;font-size:1.35rem}
+.mrizka{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:56px}
+.volba{--barva:var(--zelena);position:relative;padding:24px 24px 24px 40px;border-radius:var(--r);background:var(--karta);border:1px solid var(--linka);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:border-color .3s,box-shadow .3s}
+.volba:before{content:"";position:absolute;left:14px;top:22px;bottom:22px;width:5px;border-radius:5px;background:var(--barva);box-shadow:0 0 14px 1px var(--barva);transition:box-shadow .3s,filter .3s}
+.volba h3{margin:0 0 8px;font-size:1.05rem}
+.volba p{margin:0;color:var(--sedy);font-size:1rem}
+.volba.svit{border-color:var(--barva);box-shadow:0 0 0 1px var(--barva),0 0 34px -6px var(--barva),inset 0 0 40px -22px var(--barva)}
+.volba.svit:before{box-shadow:0 0 22px 3px var(--barva);filter:brightness(1.25)}
+@media (hover:hover){.volba:hover{border-color:var(--barva);box-shadow:0 0 0 1px var(--barva),0 0 34px -6px var(--barva),inset 0 0 40px -22px var(--barva)} .volba:hover:before{box-shadow:0 0 22px 3px var(--barva);filter:brightness(1.25)}}
+.text{max-width:38em;margin-bottom:48px}
+.text p{color:#cfd3de;margin:0}
+.text ol{margin:0;padding-left:1.3em;color:#cfd3de}
+.text li{margin-bottom:10px}
+.pata{padding:30px 0 50px;color:#7d8597;font-size:.95rem}
+@media (max-width:860px){
+  .mrizka{grid-template-columns:1fr}
+  .hra{flex-direction:column;align-items:flex-start;gap:20px;margin:36px 0 44px}
+  .hra img{width:88px;height:88px;border-radius:22px}
+  .hraj{width:100%}
+  .mesto{display:none}
+  body{font-size:18px}
+  .sirka{padding:0 18px}
 }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 /* příchod z úvodky: stránka se natiskne po vrstvách jako uvítání na 3dz.cz */
 #uvTisk{position:fixed;inset:0;z-index:100000;cursor:pointer;overflow:hidden}
-#uvTisk .zbyva{position:absolute;left:0;right:0;top:0;height:100%;background:#fff}
-#uvTisk .vrstva{position:absolute;background:#fff}
+#uvTisk .zbyva{position:absolute;left:0;right:0;top:0;height:100%;background:#0b0d17}
+#uvTisk .vrstva{position:absolute;background:#0b0d17}
 #uvTisk .zhava{position:absolute;height:3px;margin-top:-2px;border-radius:2px;pointer-events:none}
-#uvTisk .osa{position:absolute;left:-10px;right:-10px;height:10px;margin-top:-58px;border-radius:5px;background:linear-gradient(180deg,#8a93a8,#3b4252 55%,#262b36);box-shadow:0 6px 14px rgba(0,0,0,.3);display:none}
+#uvTisk .osa{position:absolute;left:-10px;right:-10px;height:10px;margin-top:-58px;border-radius:5px;background:linear-gradient(180deg,#8a93a8,#3b4252 55%,#262b36);box-shadow:0 6px 14px rgba(0,0,0,.5);display:none}
 #uvTisk .osa:before,#uvTisk .osa:after{content:"";position:absolute;top:-9px;width:30px;height:28px;border-radius:6px;background:#2a303d;border:1px solid #4a5366}
 #uvTisk .osa:before{left:4px} #uvTisk .osa:after{right:4px}
 #uvTisk .hlava{position:absolute;width:56px;height:62px;margin-left:-28px;margin-top:-62px;pointer-events:none;display:none}
-#uvTisk .hlava i{position:absolute;left:0;right:0;top:0;height:42px;border-radius:9px;background:linear-gradient(180deg,#d9dee8,#9aa3b6);box-shadow:0 8px 18px rgba(0,0,0,.3)}
+#uvTisk .hlava i{position:absolute;left:0;right:0;top:0;height:42px;border-radius:9px;background:linear-gradient(180deg,#d9dee8,#9aa3b6);box-shadow:0 8px 18px rgba(0,0,0,.5)}
 #uvTisk .hlava i:after{content:"";position:absolute;left:50%;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:repeating-conic-gradient(#3b4252 0 20deg,#69728a 20deg 40deg);box-shadow:inset 0 0 0 3px #3b4252}
 #uvTisk .hlava b{position:absolute;left:50%;top:42px;margin-left:-9px;border:9px solid transparent;border-top:13px solid #c58a3a;border-bottom:0}
 #uvTisk .hlava u{position:absolute;left:50%;top:55px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:#ffd1a8;box-shadow:0 0 10px 4px rgba(255,120,80,.9),0 0 28px 10px rgba(255,79,139,.45)}
 #uvTisk.parkuje .osa,#uvTisk.parkuje .hlava{transition:top .45s cubic-bezier(.5,0,.75,0);top:-80px!important}
 </style>
 </head>
-<body class="is-preload">
+<body>
 <script>
 /* příchod z úvodky (klik na Bučpoly): stránka se natiskne po vrstvách. Jen jednou, klepnutím přeskočit. */
 (function(){
@@ -91,90 +117,68 @@
   if(document.readyState==="complete") setTimeout(spust,100); else { addEventListener("load",function(){ setTimeout(spust,150); }); setTimeout(spust,1500); }
 })();
 </script>
-<div id="wrapper">
+<div class="sirka">
+  <header class="hlavicka">
+    <a class="znacka" href="/"><b>3Dz</b>3D tisk na zakázku<span class="mesto">, Bučovice</span></a>
+    <a class="zpet" href="/">Zpět na úvod</a>
+  </header>
 
-	<header id="header">
-		<div class="inner">
-			<a href="/" class="logo">
-				<span class="symbol">3Dz</span><span class="title">3D tisk na zakázku</span>
-			</a>
-			<nav>
-				<ul>
-					<li><a href="#menu">Menu</a></li>
-				</ul>
-			</nav>
-		</div>
-	</header>
+  <section class="hra">
+    <img src="../img/bucpoly.png" alt="">
+    <div>
+      <h1>Bučpoly</h1>
+      <p>Realitní hra na mobil na mapě skutečných Bučovic. Kupujete domy, pronajímáte byty, investujete do firem a vyděláváte i tím, že chodíte po městě. Hraje se dlouhodobě – na měsíce i roky.</p>
+      <a class="hraj" href="https://zaoo-star.github.io/BucoviceGPS/index.html">Otevřít hru</a>
+      <span class="mobil">Hra funguje jen na mobilu. Na počítači se nespustí.</span>
+    </div>
+  </section>
 
-	<nav id="menu">
-		<h2>Menu</h2>
-		<ul>
-			<li><a href="/">Úvodní stránka</a></li>
-			<li><a href="/navrh/">Vlastní návrh</a></li>
-			<li><a href="https://zaoo-star.github.io/BucoviceGPS/index.html">Otevřít Bučpoly</a></li>
-		</ul>
-	</nav>
+  <h2>Jak se hraje</h2>
+  <div class="mrizka">
+    <div class="volba"><h3>První nemovitost zdarma</h3><p>Na začátku dojdete k volnému domu a dostanete v něm podíl zdarma. U levnějšího domu rovnou získáte přes polovinu a můžete v něm bydlet.</p></div>
+    <div class="volba"><h3>Domy, byty a nájem</h3><p>Kupujete domy nebo jejich podíly a byty pronajímáte. Když si u vás někdo bydlí, chodí vám každý den nájem.</p></div>
+    <div class="volba"><h3>Peníze za chůzi</h3><p>Když se opravdu projdete po Bučovicích, hra vám za nachozené metry přidá peníze. Jízda autem se nepočítá.</p></div>
+    <div class="volba"><h3>Práce a investice</h3><p>Můžete chodit do práce a dostávat plat, kupovat podíly ve firmách, brát si půjčky nebo spořit.</p></div>
+    <div class="volba"><h3>Denní výzvy</h3><p>Každý den čekají výzvy, místa zájmu ve městě a nečekané události. Co se ve městě děje, píšou městské noviny.</p></div>
+    <div class="volba"><h3>Hra, která učí</h3><p>Nájem, úroky, daně, inflace i kolísání cen – všechno hra vysvětluje, takže je to i kus finanční gramotnosti.</p></div>
+  </div>
 
-	<div id="main">
-		<div class="inner">
-			<a href="/" class="zpet">&larr; Zpět na 3dz.cz</a>
+  <section class="text">
+    <h2>Na jak dlouho</h2>
+    <p>Bučpoly není hra na jeden večer. Svět běží dál, i když zrovna nehrajete, a vaše jmění roste postupně – měsíce, klidně i roky. Stačí se podívat chvilku denně.</p>
+  </section>
 
-			<section class="hra">
-				<img src="../img/bucpoly.png" alt="">
-				<div>
-					<h1>Bučpoly</h1>
-					<p>Realitní hra na mobil na mapě skutečných Bučovic. Kupujete domy, pronajímáte byty, investujete do firem a vyděláváte i tím, že chodíte po městě. Hraje se dlouhodobě – na měsíce i roky.</p>
-					<div class="tl">
-						<a href="https://zaoo-star.github.io/BucoviceGPS/index.html" class="button primary hraj">Otevřít hru</a>
-						<span class="mobil">📱 Hra funguje jen na mobilu. Na počítači se nespustí.</span>
-					</div>
-				</div>
-			</section>
-
-			<div class="body">
-				<h2>Jak se hraje</h2>
-				<div class="karty">
-					<div><b>🎁 První nemovitost zdarma</b><p>Na začátku dojdete k volnému domu a dostanete v něm podíl zdarma. U levnějšího domu rovnou získáte přes polovinu a můžete v něm bydlet.</p></div>
-					<div><b>🏘️ Domy, byty a nájem</b><p>Kupujete domy nebo jejich podíly a byty pronajímáte. Když si u vás někdo bydlí, chodí vám každý den nájem.</p></div>
-					<div><b>🚶 Peníze za chůzi</b><p>Když se opravdu projdete po Bučovicích, hra vám za nachozené metry přidá peníze. Jízda autem se nepočítá.</p></div>
-					<div><b>💼 Práce a investice</b><p>Můžete chodit do práce a dostávat plat, kupovat podíly ve firmách, brát si půjčky nebo spořit.</p></div>
-					<div><b>🎯 Denní výzvy</b><p>Každý den čekají výzvy, místa zájmu ve městě a nečekané události. Co se ve městě děje, píšou městské noviny.</p></div>
-					<div><b>🧮 Hra, která učí</b><p>Nájem, úroky, daně, inflace i kolísání cen – všechno hra vysvětluje, takže je to i kus finanční gramotnosti.</p></div>
-				</div>
-
-				<h2>Na jak dlouho</h2>
-				<p>Bučpoly není hra na jeden večer. Svět běží dál, i když zrovna nehrajete, a vaše jmění roste postupně – měsíce, klidně i roky. Stačí se podívat chvilku denně.</p>
-
-				<h2>Jak začít</h2>
-				<ul>
-					<li>Otevřete hru na mobilu přes tlačítko <b>Otevřít hru</b>.</li>
-					<li>Hra potřebuje přístup k poloze, protože se hraje na mapě Bučovic.</li>
-					<li>Hru si můžete přidat na plochu telefonu jako aplikaci – hra vám ukáže jak.</li>
-				</ul>
-				<ul class="actions" style="margin-top:2em">
-					<li><a href="https://zaoo-star.github.io/BucoviceGPS/index.html" class="button primary hraj">Otevřít hru</a></li>
-				</ul>
-			</div>
-		</div>
-	</div>
-
-	<footer id="footer">
-		<div class="inner">
-			<section>
-				<h2>3Dz</h2>
-				<p>3D tisk na zakázku<br>Bučovice</p>
-			</section>
-			<ul class="copyright">
-				<li>&copy; 3Dz</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
-			</ul>
-		</div>
-	</footer>
-
+  <section class="text">
+    <h2>Jak začít</h2>
+    <ol>
+      <li>Otevřete hru na mobilu tlačítkem Otevřít hru.</li>
+      <li>Povolte přístup k poloze – hraje se na mapě Bučovic.</li>
+      <li>Hru si můžete přidat na plochu telefonu jako aplikaci, hra vám ukáže jak.</li>
+    </ol>
+    <a class="hraj" href="https://zaoo-star.github.io/BucoviceGPS/index.html">Otevřít hru</a>
+  </section>
 </div>
-<script src="../assets/js/jquery.min.js"></script>
-<script src="../assets/js/browser.min.js"></script>
-<script src="../assets/js/breakpoints.min.js"></script>
-<script src="../assets/js/util.js"></script>
-<script src="../assets/js/main.js"></script>
+
+<footer class="pata"><div class="sirka">3Dz – 3D tisk na zakázku, Bučovice</div></footer>
+
+<script>
+/* mobil: neonově se podsvítí karta, která je zrovna uprostřed obrazovky */
+(function(){
+  if(!window.matchMedia||!matchMedia("(hover: none)").matches) return;
+  var karty=[].slice.call(document.querySelectorAll(".volba")), cekam=false;
+  function vyber(){
+    cekam=false;
+    var stred=innerHeight/2, nej=null, vzd=1e9;
+    karty.forEach(function(k){ var r=k.getBoundingClientRect(); if(r.bottom<0||r.top>innerHeight) return;
+      var d=(r.top<=stred&&r.bottom>=stred)?0:Math.min(Math.abs(r.top-stred),Math.abs(r.bottom-stred)); if(d<vzd){vzd=d;nej=k;} });
+    /* úplně dole se poslední karta do středu nedostane, tak svítí ta */
+    if(scrollY+innerHeight>=document.documentElement.scrollHeight-4){ var vid=karty.filter(function(k){var r=k.getBoundingClientRect();return r.top<innerHeight&&r.bottom>0;}); if(vid.length) nej=vid[vid.length-1]; }
+    karty.forEach(function(k){ k.classList.toggle("svit",k===nej); });
+  }
+  function naplanuj(){ if(!cekam){ cekam=true; requestAnimationFrame(vyber); } }
+  addEventListener("scroll",naplanuj,{passive:true}); addEventListener("resize",naplanuj); vyber();
+})();
+</script>
+
 </body>
 </html>
