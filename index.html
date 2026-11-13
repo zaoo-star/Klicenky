@@ -118,6 +118,13 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
 @keyframes zamek{0%,100%{transform:none}30%{transform:rotate(-18deg)}60%{transform:rotate(14deg)}}
 .tiles.vyber article.zatrast{animation:zamceno .45s ease}
 .tiles.vyber article.zatrast .ik{display:inline-block;animation:zamek .45s ease}
+.tiles.vyber article.hra4{grid-column:1 / -1}
+.tiles.vyber article.hra4 > .image{min-height:13em}
+.tiles.vyber article.hra4 > .image:before,.tiles.vyber article.hra4:hover > .image:before{background-color:#111317!important;opacity:1}
+.tiles.vyber article.hra4 .hraIk{width:3.4em;height:3.4em;border-radius:.7em;margin-bottom:.5em}
+.tiles.vyber article.hra4 .stitek{border-color:#4ade80;color:#4ade80}
+.tiles.vyber{grid-template-rows:1fr 1fr auto}
+@media screen and (max-width:980px){.tiles.vyber{grid-template-rows:auto}}
 /* uvítání: stránka se „natiskne“ po vrstvách odspodu, jako na 3D tiskárně */
 #tisk{position:fixed;inset:0;z-index:10050;pointer-events:auto;cursor:pointer}
 #tisk .zbyva{position:absolute;left:0;right:0;top:0;background:#fff}
@@ -160,6 +167,7 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
 			<li><a href="/navrh/">Vlastní návrh</a></li>
 			<li><a href="#eshop">E-shop (připravujeme)</a></li>
 			<li><a href="https://m.me/61572738666591">Napsat zprávu (Messenger)</a></li>
+			<li><a href="/bucpoly/">Bučpoly – hra</a></li>
 		</ul>
 	</nav>
 
@@ -201,6 +209,17 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
 						<div class="content">
 							<p>Máte vlastní nápad nebo dotaz? Napište nám na Messenger.</p>
 							<span class="stitek">Pro napsání zprávy klikněte sem &rarr;</span>
+						</div>
+					</a>
+				</article>
+				<article class="hra4" id="bucpoly">
+					<span class="image"></span>
+					<a href="/bucpoly/">
+						<img class="hraIk" src="img/bucpoly.png" alt="">
+						<h2>Bučpoly</h2>
+						<div class="content">
+							<p>Realitní hra na mobil na mapě skutečných Bučovic – kupujte domy, pronajímejte a vydělávejte i chůzí po městě.</p>
+							<span class="stitek">Pro popis hry klikněte sem &rarr;</span>
 						</div>
 					</a>
 				</article>
