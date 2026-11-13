@@ -568,7 +568,7 @@ label{color:var(--tlumeny)} label.pole{color:#585858}
   var t=document.createElement("div"); t.id="uvTisk"; t.setAttribute("aria-hidden","true");
   t.innerHTML='<div class="zbyva"></div><div class="vrstva"></div><div class="zhava"></div><div class="osa"></div><div class="hlava"><i></i><b></b><u></u></div>';
   document.body.appendChild(t);
-  var zb=t.children[0], vr=t.children[1], zh=t.children[2], osa=t.children[3], hl=t.children[4], VRSTEV=16, NA_VRSTVU=125, start=null, hotovo=false, bezi=false;
+  var zb=t.children[0], vr=t.children[1], zh=t.children[2], osa=t.children[3], hl=t.children[4], VRSTEV=16, NA_VRSTVU=160, start=null, hotovo=false, bezi=false;
   function konec(){ if(hotovo) return; hotovo=true; t.style.transition="opacity .3s"; t.style.opacity="0"; setTimeout(function(){t.remove();},350); }
   t.addEventListener("click",konec);
   setTimeout(konec,6000); /* pojistka: kdyby se něco zaseklo, stránku nikdy nenechat zakrytou */

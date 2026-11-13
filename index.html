@@ -202,7 +202,7 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
   t.innerHTML='<div class="zbyva"></div><div class="vrstva"></div><div class="zhava"></div><div class="osa"></div><div class="hlava"><i></i><b></b><u></u></div><span class="preskocit">Klepnutím přeskočíte</span>';
   document.body.appendChild(t);
   var zb=t.children[0], vr=t.children[1], zh=t.children[2], osa=t.children[3], hl=t.children[4];
-  var VRSTEV=16, NA_VRSTVU=135, start=null, hotovo=false;
+  var VRSTEV=16, NA_VRSTVU=160, start=null, hotovo=false;
   function konec(){ if(hotovo) return; hotovo=true; t.style.transition="opacity .35s"; t.style.opacity="0"; setTimeout(function(){t.remove();},400); }
   t.addEventListener("click",konec);
   function plynule(f){ return f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2; } /* hlava zrychlí a před koncem vrstvy zpomalí */
