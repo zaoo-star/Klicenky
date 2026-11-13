@@ -71,6 +71,15 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
   .tiles article.velka > .image{aspect-ratio:1/1}
 }
 #footer .kontakt p{max-width:30em}
+/* uvítání: stránka se „natiskne“ po vrstvách odspodu, jako na 3D tiskárně */
+#tisk{position:fixed;inset:0;z-index:10050;pointer-events:auto;cursor:pointer}
+#tisk .zbyva{position:absolute;left:0;right:0;top:0;background:#fff}
+#tisk .vrstva{position:absolute;right:0;background:#fff}
+#tisk .hlava{position:absolute;width:46px;height:34px;margin-left:-23px;margin-top:-40px;pointer-events:none}
+#tisk .hlava i{position:absolute;left:3px;right:3px;top:0;height:22px;background:#585858;border-radius:4px}
+#tisk .hlava b{position:absolute;left:50%;top:22px;margin-left:-8px;border:8px solid transparent;border-top:10px solid #585858;border-bottom:0}
+#tisk .hlava u{position:absolute;left:50%;top:31px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#f2849e;box-shadow:0 0 8px 2px rgba(242,132,158,.8)}
+#tisk .preskocit{position:absolute;left:50%;top:18px;transform:translateX(-50%);font:700 13px "Source Sans Pro",sans-serif;color:#9a9a9a;letter-spacing:.08em}
 </style>
 </head>
 <body class="is-preload">
@@ -207,6 +216,33 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
 	</footer>
 
 </div>
+<script>
+/* uvítání: stránka se natiskne po vrstvách (jen při první návštěvě; klepnutím přeskočit) */
+(function(){
+  var uz=false; try{uz=localStorage.getItem("3dz-uvitani")==="1";localStorage.setItem("3dz-uvitani","1");}catch(e){}
+  if(/[?&]uvitani\b/.test(location.search)) uz=false;
+  if(uz||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+  var t=document.createElement("div"); t.id="tisk"; t.setAttribute("aria-hidden","true");
+  t.innerHTML='<div class="zbyva"></div><div class="vrstva"></div><div class="hlava"><i></i><b></b><u></u></div><span class="preskocit">Klepnutím přeskočíte</span>';
+  document.body.appendChild(t);
+  var zb=t.children[0], vr=t.children[1], hl=t.children[2];
+  var VRSTEV=14, NA_VRSTVU=150, start=null, hotovo=false;
+  function konec(){ if(hotovo) return; hotovo=true; t.style.transition="opacity .35s"; t.style.opacity="0"; setTimeout(function(){t.remove();},400); }
+  t.addEventListener("click",konec);
+  function krok(ts){
+    if(hotovo) return; if(start===null) start=ts;
+    var W=innerWidth, H=innerHeight, v=H/VRSTEV, cas=(ts-start)/NA_VRSTVU, n=Math.floor(cas), f=cas-n;
+    if(n>=VRSTEV){ zb.style.height="0"; vr.style.width="0"; hl.style.display="none"; setTimeout(konec,150); return; }
+    var spodek=H-n*v, vrch=spodek-v, x=(n%2===0)?f*W:(1-f)*W;
+    zb.style.height=vrch+"px";
+    vr.style.top=vrch+"px"; vr.style.height=v+"px";
+    if(n%2===0){ vr.style.left=x+"px"; vr.style.right="0"; vr.style.width=""; } else { vr.style.left="0"; vr.style.right=(W-x)+"px"; vr.style.width=""; }
+    hl.style.left=x+"px"; hl.style.top=vrch+"px";
+    requestAnimationFrame(krok);
+  }
+  requestAnimationFrame(krok);
+})();
+</script>
 <script src="assets/js/jquery.min.js"></script>
 <script src="assets/js/browser.min.js"></script>
 <script src="assets/js/breakpoints.min.js"></script>
