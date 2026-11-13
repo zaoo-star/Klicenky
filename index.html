@@ -225,9 +225,9 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
 })();
 </script>
 <script>
-/* klik na návrhář: návrhář se po otevření natiskne po vrstvách (stejně jako uvítání); e-shop je zamčený, tak se jen zatřese */
+/* klik na návrhář nebo Bučpoly: stránka se po otevření natiskne po vrstvách (stejně jako uvítání); e-shop je zamčený, tak se jen zatřese */
 (function(){
-  document.querySelectorAll('a[href="/navrh/"]').forEach(function(a){
+  document.querySelectorAll('a[href="/navrh/"],a[href="/bucpoly/"]').forEach(function(a){
     a.addEventListener("click",function(){ try{sessionStorage.setItem("3dz-natisknout","1");}catch(e){} });
   });
   var e=document.getElementById("eshop");

@@ -43,9 +43,54 @@
   .hra h1{font-size:2em}
   .hra .button{width:100%}
 }
+/* příchod z úvodky: stránka se natiskne po vrstvách jako uvítání na 3dz.cz */
+#uvTisk{position:fixed;inset:0;z-index:100000;cursor:pointer;overflow:hidden}
+#uvTisk .zbyva{position:absolute;left:0;right:0;top:0;height:100%;background:#fff}
+#uvTisk .vrstva{position:absolute;background:#fff}
+#uvTisk .zhava{position:absolute;height:3px;margin-top:-2px;border-radius:2px;pointer-events:none}
+#uvTisk .osa{position:absolute;left:-10px;right:-10px;height:10px;margin-top:-58px;border-radius:5px;background:linear-gradient(180deg,#8a93a8,#3b4252 55%,#262b36);box-shadow:0 6px 14px rgba(0,0,0,.3);display:none}
+#uvTisk .osa:before,#uvTisk .osa:after{content:"";position:absolute;top:-9px;width:30px;height:28px;border-radius:6px;background:#2a303d;border:1px solid #4a5366}
+#uvTisk .osa:before{left:4px} #uvTisk .osa:after{right:4px}
+#uvTisk .hlava{position:absolute;width:56px;height:62px;margin-left:-28px;margin-top:-62px;pointer-events:none;display:none}
+#uvTisk .hlava i{position:absolute;left:0;right:0;top:0;height:42px;border-radius:9px;background:linear-gradient(180deg,#d9dee8,#9aa3b6);box-shadow:0 8px 18px rgba(0,0,0,.3)}
+#uvTisk .hlava i:after{content:"";position:absolute;left:50%;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:repeating-conic-gradient(#3b4252 0 20deg,#69728a 20deg 40deg);box-shadow:inset 0 0 0 3px #3b4252}
+#uvTisk .hlava b{position:absolute;left:50%;top:42px;margin-left:-9px;border:9px solid transparent;border-top:13px solid #c58a3a;border-bottom:0}
+#uvTisk .hlava u{position:absolute;left:50%;top:55px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:#ffd1a8;box-shadow:0 0 10px 4px rgba(255,120,80,.9),0 0 28px 10px rgba(255,79,139,.45)}
+#uvTisk.parkuje .osa,#uvTisk.parkuje .hlava{transition:top .45s cubic-bezier(.5,0,.75,0);top:-80px!important}
 </style>
 </head>
 <body class="is-preload">
+<script>
+/* příchod z úvodky (klik na Bučpoly): stránka se natiskne po vrstvách. Jen jednou, klepnutím přeskočit. */
+(function(){
+  var ano=false; try{ano=sessionStorage.getItem("3dz-natisknout")==="1"; sessionStorage.removeItem("3dz-natisknout");}catch(e){}
+  if(!ano||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+  var t=document.createElement("div"); t.id="uvTisk"; t.setAttribute("aria-hidden","true");
+  t.innerHTML='<div class="zbyva"></div><div class="vrstva"></div><div class="zhava"></div><div class="osa"></div><div class="hlava"><i></i><b></b><u></u></div>';
+  document.body.appendChild(t);
+  var zb=t.children[0], vr=t.children[1], zh=t.children[2], osa=t.children[3], hl=t.children[4], VRSTEV=16, NA_VRSTVU=160, start=null, hotovo=false, bezi=false;
+  function konec(){ if(hotovo) return; hotovo=true; t.style.transition="opacity .3s"; t.style.opacity="0"; setTimeout(function(){t.remove();},350); }
+  t.addEventListener("click",konec);
+  setTimeout(konec,6000); /* pojistka: kdyby se něco zaseklo, stránku nikdy nenechat zakrytou */
+  function plynule(f){ return f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2; }
+  function krok(ts){
+    if(hotovo) return; if(start===null) start=ts;
+    var W=innerWidth, H=innerHeight, v=H/VRSTEV, c=(ts-start)/NA_VRSTVU, n=Math.floor(c), f=plynule(c-n);
+    if(n>=VRSTEV){ zb.style.height="0"; vr.style.height="0"; zh.style.width="0"; t.classList.add("parkuje"); setTimeout(konec,420); return; }
+    var vrch=H-n*v-v, doprava=(n%2===0), x=doprava?f*W:(1-f)*W;
+    zb.style.height=vrch+"px"; vr.style.top=vrch+"px"; vr.style.height=v+"px";
+    if(doprava){ vr.style.left=x+"px"; vr.style.right="0"; } else { vr.style.left="0"; vr.style.right=(W-x)+"px"; }
+    zh.style.top=vrch+"px";
+    if(doprava){ zh.style.left="0"; zh.style.width=x+"px"; zh.style.background="linear-gradient(90deg,rgba(255,79,139,0),rgba(255,79,139,.55) 70%,#ff9a6a)"; }
+    else { zh.style.left=x+"px"; zh.style.width=(W-x)+"px"; zh.style.background="linear-gradient(270deg,rgba(255,79,139,0),rgba(255,79,139,.55) 70%,#ff9a6a)"; }
+    osa.style.top=vrch+"px"; hl.style.left=x+"px"; hl.style.top=vrch+"px";
+    requestAnimationFrame(krok);
+  }
+  function spust(){ if(bezi||hotovo) return; bezi=true; hl.style.display="block"; osa.style.display="block"; requestAnimationFrame(krok); }
+  /* tisk začne, až je stránka načtená (nejpozději po 1,5 s), ať se netrhá */
+  if(document.readyState==="complete") setTimeout(spust,100); else { addEventListener("load",function(){ setTimeout(spust,150); }); setTimeout(spust,1500); }
+})();
+</script>
 <div id="wrapper">
 
 	<header id="header">
