@@ -97,6 +97,18 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
   .tiles.vyber article.velka > .image .trojice{top:7%;height:46%}
   .tiles.vyber article > .image{min-height:13em}
 }
+/* efekt po kliknutí: dlaždice se „natiskne“, e-shop se zamčeně zatřese */
+.tiles.vyber article{position:relative}
+.tiskDl{position:absolute;inset:0;z-index:5;pointer-events:none;border-radius:4px;overflow:hidden}
+.tiskDl .vrstvy{position:absolute;left:0;right:0;bottom:0;height:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.55) 0 3px,rgba(255,255,255,.12) 3px 9px)}
+.tiskDl .hl{position:absolute;width:40px;height:30px;margin:-34px 0 0 -20px}
+.tiskDl .hl i{position:absolute;left:3px;right:3px;top:0;height:19px;background:#585858;border-radius:3px}
+.tiskDl .hl b{position:absolute;left:50%;top:19px;margin-left:-7px;border:7px solid transparent;border-top:9px solid #585858;border-bottom:0}
+.tiskDl .hl u{position:absolute;left:50%;top:27px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#fff;box-shadow:0 0 8px 3px rgba(255,255,255,.9)}
+@keyframes zamceno{0%,100%{transform:none}20%{transform:translateX(-10px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+@keyframes zamek{0%,100%{transform:none}30%{transform:rotate(-18deg)}60%{transform:rotate(14deg)}}
+.tiles.vyber article.zatrast{animation:zamceno .45s ease}
+.tiles.vyber article.zatrast .ik{display:inline-block;animation:zamek .45s ease}
 /* uvítání: stránka se „natiskne“ po vrstvách odspodu, jako na 3D tiskárně */
 #tisk{position:fixed;inset:0;z-index:10050;pointer-events:auto;cursor:pointer}
 #tisk .zbyva{position:absolute;left:0;right:0;top:0;background:#fff}
@@ -196,9 +208,9 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
 
 </div>
 <script>
-/* uvítání: stránka se natiskne po vrstvách (jen při první návštěvě; klepnutím přeskočit) */
+/* uvítání: stránka se natiskne po vrstvách (jednou při každém otevření webu; klepnutím přeskočit) */
 (function(){
-  var uz=false; try{uz=localStorage.getItem("3dz-uvitani")==="1";localStorage.setItem("3dz-uvitani","1");}catch(e){}
+  var uz=false; try{uz=sessionStorage.getItem("3dz-uvitani")==="1";sessionStorage.setItem("3dz-uvitani","1");}catch(e){}
   if(/[?&]uvitani\b/.test(location.search)) uz=false;
   if(uz||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
   var t=document.createElement("div"); t.id="tisk"; t.setAttribute("aria-hidden","true");
@@ -220,6 +232,33 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
     requestAnimationFrame(krok);
   }
   requestAnimationFrame(krok);
+})();
+</script>
+<script>
+/* klik na dlaždici: tiskárna ji rychle „natiskne“ a pak se otevře odkaz; e-shop je zamčený, tak se jen zatřese */
+(function(){
+  var klid=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll(".tiles.vyber article > a").forEach(function(a){
+    a.addEventListener("click",function(e){
+      var art=a.parentNode;
+      if(art.id==="eshop"){ e.preventDefault(); art.classList.remove("zatrast"); void art.offsetWidth; art.classList.add("zatrast"); return; }
+      if(klid||e.ctrlKey||e.metaKey||e.shiftKey||e.button>0||art.querySelector(".tiskDl")) return;
+      e.preventDefault();
+      var d=document.createElement("div"); d.className="tiskDl"; d.innerHTML='<div class="vrstvy"></div><div class="hl"><i></i><b></b><u></u></div>'; art.appendChild(d);
+      var vr=d.children[0], hl=d.children[1], VRSTEV=6, DOBA=110, start=null, kam=a.href;
+      function krok(ts){
+        if(start===null) start=ts;
+        var W=art.clientWidth, H=art.clientHeight, v=H/VRSTEV, c=(ts-start)/DOBA, n=Math.floor(c), f=c-n;
+        if(n>=VRSTEV){ vr.style.height=H+"px"; hl.style.display="none"; setTimeout(function(){ location.href=kam; setTimeout(function(){ d.remove(); },800); },120); return; }
+        vr.style.height=(n*v+v*0.15)+"px";
+        hl.style.left=((n%2===0)?f*W:(1-f)*W)+"px"; hl.style.top=(H-n*v-v)+"px";
+        requestAnimationFrame(krok);
+      }
+      requestAnimationFrame(krok);
+    });
+  });
+  /* po návratu tlačítkem Zpět stránku vrátit do původního stavu */
+  addEventListener("pageshow",function(){ document.querySelectorAll(".tiskDl").forEach(function(x){x.remove();}); });
 })();
 </script>
 <script src="assets/js/jquery.min.js"></script>
