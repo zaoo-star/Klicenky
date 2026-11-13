@@ -1,14 +1,9 @@
-<!DOCTYPE HTML>
-<!--
-	Phantom by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
+<!DOCTYPE html>
 <html lang="cs">
 <head>
-<title>3Dz – 3D tisk na zakázku | Bučovice</title>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>3Dz – 3D tisk na zakázku | Bučovice</title>
 <meta name="description" content="3Dz – 3D tisk z Bučovic. Navrhněte si vlastní zápich na dort, klíčenku, ozdobu, cedulku nebo dárek se jménem a hned uvidíte cenu.">
 <meta property="og:title" content="Nový web 3Dz – 3D tisk na zakázku">
 <meta property="og:description" content="Návrhář zápichů na dort, klíčenek, ozdob a cedulek se jménem (cenu vidíte hned) a brzy i e-shop s hotovými výrobky.">
@@ -17,114 +12,99 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="https://3dz.cz/">
+<meta name="theme-color" content="#1d2026">
 <script>
   // staré odkazy na návrhář (návrh nebo objednávka za #) poslat rovnou do návrháře
-  if (location.hash.length > 1 && location.hash !== "#menu") location.replace("/navrh/" + location.search + location.hash);
+  if (location.hash.length > 1) location.replace("/navrh/" + location.search + location.hash);
 </script>
-<link rel="stylesheet" href="assets/css/main.css">
-<noscript><link rel="stylesheet" href="assets/css/noscript.css"></noscript>
+<link rel="preload" href="assets/fonts/bricolage-grotesque-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-/* 3Dz úpravy šablony: místo fotek máme průhledné rendery, takže barva je pod obrázkem a text pod ním */
-#header .logo .symbol{display:inline-flex;align-items:center;justify-content:center;width:2.2em;height:2.2em;margin-right:.65em;background:#585858;color:#fff;border-radius:4px;font-weight:900;font-size:.85em;letter-spacing:0}
-#header .logo .title{border-left:0;padding-left:0;margin-left:0}
-#main header p{max-width:36em}
-.tiles article > .image{aspect-ratio:1/1;}
-.tiles article > .image:before{opacity:1;z-index:0}
-.tiles article > .image:after{z-index:0;opacity:.15}
-.tiles article > .image img{position:absolute;z-index:1;left:8%;top:6%;width:84%;height:62%;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25))}
-.tiles article > .image .trojice{position:absolute;z-index:1;left:4%;right:4%;top:5%;height:60%;display:flex;align-items:flex-end;justify-content:center;gap:2%}
-.tiles article > .image .trojice img{position:static;width:32%;height:100%;object-position:center bottom}
-.tiles article > a{justify-content:flex-end;padding:1.25em 1.25em 1.5em}
-.tiles article > a .content{max-height:15em;opacity:1}
-body:not(.is-touch) .tiles article:hover > .image:before{background-color:inherit;opacity:1}
-.tiles article.style1:hover > .image:before{background-color:#e7708c!important}
-.tiles article.style2:hover > .image:before{background-color:#68b8e8!important}
-.tiles article.style3:hover > .image:before{background-color:#64c0b0!important}
-.tiles article.style4:hover > .image:before{background-color:#b8488a!important}
-.tiles article.style5:hover > .image:before{background-color:#9d72bb!important}
-.tiles article.style6:hover > .image:before{background-color:#7086d9!important}
-.tiles article.velka{width:calc(66.6666% - 2.5em)}
-.tiles article.velka > .image{aspect-ratio:2/1}
-.tiles article.velka > .image .trojice{top:7%;height:62%}
-.tiles article.velka > a h2{font-size:1.75em}
-.tiles article.brzy > .image:before,.tiles article.brzy:hover > .image:before{background-color:#585858!important}
-.tiles article.brzy > .image .ikona{position:absolute;z-index:1;inset:0 0 35% 0;display:flex;align-items:center;justify-content:center;font-size:4em;color:rgba(255,255,255,.85)}
-@media screen and (min-width:981px){.tiles article.brzy > .image{aspect-ratio:auto;height:100%}}
-.tiles article > a .content p{text-shadow:0 1px 2px rgba(0,0,0,.25)}
-#header .logo .symbol{text-transform:none}
-.stitek{display:inline-block;margin-top:.6em;padding:.15em .7em;border:2px solid #fff;border-radius:4px;font-size:.8em;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
-@media screen and (max-width:1280px){.tiles article.velka{width:calc(66.6666% - 1.25em)}}
-@media screen and (max-width:980px){.tiles article.velka,.tiles article.brzy{width:calc(100% - 2.5em)}.tiles article.brzy > .image{aspect-ratio:5/2}.tiles article.brzy > .image .ikona{font-size:2.6em;inset:0 0 62% 0;align-items:flex-end}}
-@media screen and (max-width:736px){
-  .tiles article.velka,.tiles article.brzy{width:calc(100% - 1.25em)}
-  .tiles article.velka > .image{aspect-ratio:1/1}
-  .tiles article.velka > .image .trojice{top:8%;height:50%;gap:4%;align-items:center}
-  .tiles article.velka > .image .trojice img{object-position:center}
-  .tiles article.velka > a h2{font-size:1.35em}
-  .tiles article.velka > .image .trojice img{width:46%}
-  .tiles article.velka > .image .trojice img:last-child{display:none}
-  .tiles article.brzy > .image{aspect-ratio:3/2}
-  .tiles article.brzy > .image .ikona{font-size:2.6em;inset:0 0 66% 0;align-items:flex-end}
+/* 3Dz – vlastní vzhled (bez šablony).
+   Nápad: stránka je tisková podložka. Každá volba má svou barvu filamentu jako proužek vlevo,
+   jedna výrazná věc je úvod s obrázkem 3Dz a natisknutí stránky. Zbytek je klidný a čitelný
+   i pro starší zákazníky (velké písmo, velké plochy na klepnutí). */
+@font-face{font-family:"Bric";font-weight:400;font-display:swap;src:url(assets/fonts/bricolage-grotesque-latin-400-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Bric";font-weight:400;font-display:swap;src:url(assets/fonts/bricolage-grotesque-latin-ext-400-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"Bric";font-weight:500;font-display:swap;src:url(assets/fonts/bricolage-grotesque-latin-500-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Bric";font-weight:500;font-display:swap;src:url(assets/fonts/bricolage-grotesque-latin-ext-500-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"Bric";font-weight:700;font-display:swap;src:url(assets/fonts/bricolage-grotesque-latin-700-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Bric";font-weight:700;font-display:swap;src:url(assets/fonts/bricolage-grotesque-latin-ext-700-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"Bric";font-weight:800;font-display:swap;src:url(assets/fonts/bricolage-grotesque-latin-800-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Bric";font-weight:800;font-display:swap;src:url(assets/fonts/bricolage-grotesque-latin-ext-800-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+:root{
+  --podlozka:#e9ebee;   /* pozadí stránky: šedá jako tisková podložka */
+  --karta:#ffffff;
+  --inkoust:#1d2026;    /* text */
+  --sedy:#5b6270;       /* vedlejší text, zamčený e-shop */
+  --ruzova:#d93a72;     /* návrhář – hlavní akce */
+  --modra:#2f7fd1;      /* zpráva */
+  --zelena:#2fa95c;     /* Bučpoly */
+  --r:18px;
 }
-@media screen and (max-width:480px){
-  .tiles article.velka,.tiles article.brzy{width:100%}
-  .tiles article > .image{aspect-ratio:5/4}
-  .tiles article.velka > .image{aspect-ratio:1/1}
-}
-#footer .kontakt p{max-width:30em}
-/* úvod s obrázkem na pozadí */
-.uvod{position:relative;color:#fff;background:#0b0b1e url(img/pozadi-800.webp) center/cover no-repeat;padding-bottom:4em;margin-bottom:3em}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--podlozka);color:var(--inkoust);font-family:"Bric",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:19px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--modra);outline-offset:3px;border-radius:6px}
+.sirka{max-width:1080px;margin:0 auto;padding:0 24px}
+
+/* úvod */
+.uvod{position:relative;color:#fff;background:#151520 url(img/pozadi-800.webp) center/cover no-repeat;overflow:hidden}
 @media (min-width:801px){.uvod{background-image:url(img/pozadi-1408.webp)}}
-.uvod:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,24,.45) 0%,rgba(8,8,24,.62) 55%,rgba(8,8,24,.82) 100%);pointer-events:none}
-.uvod > *{position:relative}
-.uvod #header .logo,.uvod h1,.uvod p{color:#fff}
-.uvod h1{text-shadow:0 2px 14px rgba(0,0,0,.6)}
-.uvod p{text-shadow:0 1px 6px rgba(0,0,0,.7);font-weight:400}
-.uvod #header .logo .symbol{background:#fff;color:#585858}
-.uvod > #header > .inner{width:100%;max-width:68em;margin:0 auto;padding:0 2.5em}
-@media screen and (max-width:736px){.uvod > #header > .inner{padding:0 1.25em}}
-.uvodText header{margin:0}
-.uvodText header p{max-width:36em}
-.uvodText header > :last-child{margin-bottom:0}
-@media screen and (max-width:736px){.uvod{padding-bottom:2.5em;margin-bottom:2em}}
-/* výběr: 3 dlaždice – návrhář velký, vedle e-shop a zpráva */
-.tiles.vyber{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:2.5em;margin:0}
-.tiles.vyber article,.tiles.vyber article.velka,.tiles.vyber article.brzy{width:auto;margin:0}
-.tiles.vyber article.velka{grid-row:1 / span 2}
-.tiles.vyber article > .image{aspect-ratio:auto;height:100%;min-height:15em}
-.tiles.vyber article.velka > .image{min-height:30em}
-.tiles.vyber article.velka > .image .trojice{top:6%;height:58%}
-.tiles.vyber .ik{font-size:2.2em;line-height:1;margin-bottom:.35em;color:rgba(255,255,255,.95)}
-.tiles.vyber article.velka > .image:before{background-color:#dd5f80}
-.tiles.vyber article.zprava > .image:before{background-color:#2f8fcf}
-.tiles.vyber article > a .content p{font-weight:400;text-shadow:0 1px 2px rgba(0,0,0,.2)}
-.tiles.vyber article > a .content p{margin-bottom:.5em}
-.tiles.vyber .stitek{font-size:.75em;letter-spacing:.04em}
-.tiles.vyber article.zprava:hover > .image:before{background-color:#2a80ba!important}
-.tiles.vyber article.velka:hover > .image:before{background-color:#cf5273!important}
-@media screen and (max-width:980px){
-  .tiles.vyber{grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:1.25em}
-  .tiles.vyber article.velka{grid-column:1 / -1;grid-row:auto}
-  .tiles.vyber article.velka > .image{min-height:0;aspect-ratio:2/1}
+.uvod:before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(14,14,26,.9) 0%,rgba(14,14,26,.72) 50%,rgba(14,14,26,.35) 100%)}
+.uvod .sirka{position:relative;padding-top:28px;padding-bottom:72px}
+.znacka{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:500;font-size:.95rem;color:#dfe1e8}
+.znacka b{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:#fff;color:var(--inkoust);font-weight:800;font-size:.95rem;letter-spacing:-.02em}
+.uvod h1{margin:64px 0 18px;max-width:12em;font-weight:800;font-size:clamp(2.6rem,7vw,4.6rem);line-height:.98;letter-spacing:-.035em;font-variation-settings:"wdth" 90}
+.uvod p{margin:0 0 34px;max-width:30em;font-size:1.15rem;color:#e4e6ee}
+.tlacitko{display:inline-flex;align-items:center;gap:12px;min-height:60px;padding:0 28px;border-radius:999px;background:var(--ruzova);color:#fff;font-weight:700;font-size:1.15rem;text-decoration:none;box-shadow:0 10px 30px -10px rgba(217,58,114,.8)}
+.tlacitko:hover{background:#c52f64}
+.tlacitko svg{width:22px;height:22px}
+
+/* volby */
+.volby{padding:56px 0 40px}
+.volby h2{margin:0 0 22px;font-size:1.6rem;font-weight:800;letter-spacing:-.02em}
+.mrizka{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.volba{position:relative;display:flex;flex-direction:column;gap:8px;padding:26px 26px 26px 38px;border-radius:var(--r);background:var(--karta);text-decoration:none;color:var(--inkoust);min-height:200px;overflow:hidden;transition:transform .15s ease}
+.volba:before{content:"";position:absolute;left:0;top:0;bottom:0;width:12px;background:var(--barva)}
+a.volba:hover{transform:translateY(-3px)}
+.volba h3{margin:0;font-size:1.45rem;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.volba p{margin:0;color:var(--sedy);font-size:1.02rem}
+.volba .akce{margin-top:auto;padding-top:14px;font-weight:700;color:var(--barva);font-size:1.05rem;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
+.navrhar{--barva:var(--ruzova);grid-column:1 / -1;display:grid;grid-template-columns:1fr 1.1fr;align-items:center;gap:20px;min-height:0;padding:34px 34px 34px 46px}
+.navrhar h3{font-size:2.1rem}
+.navrhar p{font-size:1.12rem;max-width:26em;margin-top:8px}
+.navrhar .akce{display:inline-flex;margin-top:22px;padding:0 24px;min-height:56px;align-items:center;border-radius:999px;background:var(--ruzova);color:#fff;text-decoration:none;font-size:1.1rem}
+.navrhar .zapichy{display:flex;align-items:flex-end;justify-content:center;gap:2%;height:220px}
+.navrhar .zapichy img{width:32%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 12px 14px rgba(29,32,38,.22))}
+.zprava{--barva:var(--modra)}
+.hra{--barva:var(--zelena)}
+.hra .ik{width:46px;height:46px;border-radius:11px;margin-bottom:4px}
+.eshop{--barva:var(--sedy);background:#f4f5f7;cursor:not-allowed}
+.eshop .stav{display:inline-block;align-self:flex-start;margin-bottom:4px;padding:3px 12px;border-radius:999px;background:#dcdfe4;color:var(--sedy);font-size:.88rem;font-weight:700}
+.eshop .akce{text-decoration:none}
+.eshop.zatrast{animation:zatrast .45s ease}
+@keyframes zatrast{0%,100%{transform:none}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+
+.pata{padding:30px 0 50px;color:var(--sedy);font-size:.95rem}
+
+@media (max-width:860px){
+  .mrizka{grid-template-columns:1fr}
+  .navrhar{grid-template-columns:1fr;padding:28px 24px 28px 36px}
+  .navrhar .zapichy{order:-1;height:150px}
+  .navrhar .zapichy img:last-child{display:none}
+  .navrhar .zapichy img{width:48%}
+  .navrhar h3{font-size:1.8rem}
+  .navrhar .akce{width:100%;justify-content:center}
+  .volba{min-height:0;padding:22px 22px 22px 34px}
+  .uvod .sirka{padding-bottom:52px}
+  .uvod h1{margin-top:44px}
+  .tlacitko{width:100%;justify-content:center}
+  body{font-size:18px}
+  .sirka{padding:0 18px}
 }
-@media screen and (max-width:736px){
-  .tiles.vyber{grid-template-columns:1fr}
-  .tiles.vyber article.velka > .image{aspect-ratio:auto;min-height:24em}
-  .tiles.vyber article.velka > .image .trojice{top:7%;height:46%}
-  .tiles.vyber article > .image{min-height:13em}
-}
-/* e-shop je zamčený: po kliknutí se zatřese */
-@keyframes zamceno{0%,100%{transform:none}20%{transform:translateX(-10px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
-@keyframes zamek{0%,100%{transform:none}30%{transform:rotate(-18deg)}60%{transform:rotate(14deg)}}
-.tiles.vyber article.zatrast{animation:zamceno .45s ease}
-.tiles.vyber article.zatrast .ik{display:inline-block;animation:zamek .45s ease}
-.tiles.vyber article.hra4{grid-column:1 / -1}
-.tiles.vyber article.hra4 > .image{min-height:13em}
-.tiles.vyber article.hra4 > .image:before,.tiles.vyber article.hra4:hover > .image:before{background-color:#111317!important;opacity:1}
-.tiles.vyber article.hra4 .hraIk{width:3.4em;height:3.4em;border-radius:.7em;margin-bottom:.5em}
-.tiles.vyber article.hra4 .stitek{border-color:#4ade80;color:#4ade80}
-.tiles.vyber{grid-template-rows:1fr 1fr auto}
-@media screen and (max-width:980px){.tiles.vyber{grid-template-rows:auto}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
 /* uvítání: stránka se „natiskne“ po vrstvách odspodu, jako na 3D tiskárně */
 #tisk{position:fixed;inset:0;z-index:10050;pointer-events:auto;cursor:pointer}
 #tisk .zbyva{position:absolute;left:0;right:0;top:0;background:#fff}
@@ -133,113 +113,61 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
 #tisk .hlava i{position:absolute;left:3px;right:3px;top:0;height:22px;background:#585858;border-radius:4px}
 #tisk .hlava b{position:absolute;left:50%;top:22px;margin-left:-8px;border:8px solid transparent;border-top:10px solid #585858;border-bottom:0}
 #tisk .hlava u{position:absolute;left:50%;top:31px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:#f2849e;box-shadow:0 0 8px 2px rgba(242,132,158,.8)}
-#tisk .preskocit{position:absolute;left:50%;top:18px;transform:translateX(-50%);font:700 13px "Source Sans Pro",sans-serif;color:#9a9a9a;letter-spacing:.08em}
+#tisk .preskocit{position:absolute;left:50%;top:18px;transform:translateX(-50%);font:700 13px "Bric",sans-serif;color:#9a9a9a}
 </style>
 </head>
-<body class="is-preload">
-<div id="wrapper">
+<body>
 
-	<div class="uvod">
-	<header id="header">
-		<div class="inner">
-			<a href="/" class="logo">
-				<span class="symbol">3Dz</span><span class="title">3D tisk na zakázku</span>
-			</a>
-			<nav>
-				<ul>
-					<li><a href="#menu">Menu</a></li>
-				</ul>
-			</nav>
-		</div>
-	</header>
+<header class="uvod">
+  <div class="sirka">
+    <a class="znacka" href="/"><b>3Dz</b>3D tisk na zakázku, Bučovice</a>
+    <h1>Výrobky z 3D tiskárny se jménem i bez něj.</h1>
+    <p>Zápich na dort, klíčenku, ozdobu nebo cedulku si navrhnete sami a hned vidíte, jak bude vypadat a kolik stojí.</p>
+    <a class="tlacitko" href="/navrh/">Navrhnout výrobek <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
+</header>
 
-	<div class="inner uvodText">
-			<header>
-				<h1>Výrobky z 3D tiskárny <br>se jménem i bez něj.</h1>
-				<p>Tiskneme v Bučovicích na zakázku. Zápich na dort, klíčenku, ozdobu nebo cedulku si navrhnete sami a hned vidíte, jak bude vypadat a kolik stojí.</p>
-			</header>
-	</div>
-	</div>
+<main class="volby">
+  <div class="sirka">
+    <h2>Co tu najdete</h2>
+    <div class="mrizka">
+      <a class="volba navrhar" href="/navrh/">
+        <div>
+          <h3>Vlastní návrh</h3>
+          <p>Zápichy na dort, klíčenky, vánoční ozdoby, cedulky k narození a další dárky se jménem. Napíšete text, vyberete tvar a barvy a cenu vidíte hned.</p>
+          <span class="akce">Otevřít návrhář</span>
+        </div>
+        <div class="zapichy" aria-hidden="true">
+          <img src="img/zapich-2.webp" alt="">
+          <img src="img/zapich-1.webp" alt="">
+          <img src="img/zapich-3.webp" alt="">
+        </div>
+      </a>
+      <div class="volba eshop" id="eshop" role="button" tabindex="0" aria-disabled="true">
+        <span class="stav">Připravujeme</span>
+        <h3>E-shop</h3>
+        <p>Hotové výrobky skladem – dekorace a praktické věci do domácnosti.</p>
+        <span class="akce">Brzy otevřeme</span>
+      </div>
+      <a class="volba zprava" href="https://m.me/61572738666591">
+        <h3>Napsat zprávu</h3>
+        <p>Máte vlastní nápad nebo dotaz? Napište nám na Messenger.</p>
+        <span class="akce">Napsat na Messenger</span>
+      </a>
+      <a class="volba hra" href="/bucpoly/">
+        <img class="ik" src="img/bucpoly.png" alt="">
+        <h3>Bučpoly</h3>
+        <p>Realitní hra na mobil na mapě skutečných Bučovic.</p>
+        <span class="akce">Přečíst o hře</span>
+      </a>
+    </div>
+  </div>
+</main>
 
-	<nav id="menu">
-		<h2>Menu</h2>
-		<ul>
-			<li><a href="/navrh/">Vlastní návrh</a></li>
-			<li><a href="#eshop">E-shop (připravujeme)</a></li>
-			<li><a href="https://m.me/61572738666591">Napsat zprávu (Messenger)</a></li>
-			<li><a href="/bucpoly/">Bučpoly – hra</a></li>
-		</ul>
-	</nav>
+<footer class="pata">
+  <div class="sirka">3Dz – 3D tisk na zakázku, Bučovice</div>
+</footer>
 
-	<div id="main">
-		<div class="inner">
-			<section class="tiles vyber">
-				<article class="style1 velka">
-					<span class="image">
-						<span class="trojice">
-							<img src="img/zapich-2.webp" alt="Zápich na dort Sto let">
-							<img src="img/zapich-1.webp" alt="Zápich na dort Všechno nejlepší">
-							<img src="img/zapich-3.webp" alt="Zápich na dort se jménem Ema">
-						</span>
-					</span>
-					<a href="/navrh/">
-						<h2>Vlastní návrh</h2>
-						<div class="content">
-							<p>Zápich na dort, klíčenka, ozdoba, cedulka… Napíšete text, vyberete tvar a barvy a hned vidíte cenu.</p>
-							<span class="stitek">Pro vstup do návrháře klikněte sem &rarr;</span>
-						</div>
-					</a>
-				</article>
-				<article class="brzy" id="eshop">
-					<span class="image"></span>
-					<a href="#eshop" aria-disabled="true" onclick="return false">
-						<span class="icon fa-lock ik" aria-hidden="true"></span>
-						<h2>E-shop</h2>
-						<div class="content">
-							<p>Hotové výrobky skladem – dekorace a praktické věci do domácnosti.</p>
-							<span class="stitek">Zatím zavřeno – připravujeme</span>
-						</div>
-					</a>
-				</article>
-				<article class="style2 zprava" id="zprava">
-					<span class="image"></span>
-					<a href="https://m.me/61572738666591">
-						<span class="icon fa-comments ik" aria-hidden="true"></span>
-						<h2>Napsat zprávu</h2>
-						<div class="content">
-							<p>Máte vlastní nápad nebo dotaz? Napište nám na Messenger.</p>
-							<span class="stitek">Pro napsání zprávy klikněte sem &rarr;</span>
-						</div>
-					</a>
-				</article>
-				<article class="hra4" id="bucpoly">
-					<span class="image"></span>
-					<a href="/bucpoly/">
-						<img class="hraIk" src="img/bucpoly.png" alt="">
-						<h2>Bučpoly</h2>
-						<div class="content">
-							<p>Realitní hra na mobil na mapě skutečných Bučovic – kupujte domy, pronajímejte a vydělávejte i chůzí po městě.</p>
-							<span class="stitek">Pro popis hry klikněte sem &rarr;</span>
-						</div>
-					</a>
-				</article>
-			</section>
-		</div>
-	</div>
-
-	<footer id="footer">
-		<div class="inner">
-			<section>
-				<h2>3Dz</h2>
-				<p>3D tisk na zakázku<br>Bučovice</p>
-			</section>
-			<ul class="copyright">
-				<li>&copy; 3Dz</li><li>Design: <a href="https://html5up.net">HTML5 UP</a></li>
-			</ul>
-		</div>
-	</footer>
-
-</div>
 <script>
 /* uvítání: stránka se natiskne po vrstvách (jednou při každém otevření webu; klepnutím přeskočit) */
 (function(){
@@ -274,13 +202,9 @@ body:not(.is-touch) .tiles article:hover > .image:before{background-color:inheri
     a.addEventListener("click",function(){ try{sessionStorage.setItem("3dz-natisknout","1");}catch(e){} });
   });
   var e=document.getElementById("eshop");
-  e.querySelector("a").addEventListener("click",function(ev){ ev.preventDefault(); e.classList.remove("zatrast"); void e.offsetWidth; e.classList.add("zatrast"); });
+  function zatrast(ev){ if(ev.type==="keydown"&&ev.key!=="Enter"&&ev.key!==" ") return; ev.preventDefault(); e.classList.remove("zatrast"); void e.offsetWidth; e.classList.add("zatrast"); }
+  e.addEventListener("click",zatrast); e.addEventListener("keydown",zatrast);
 })();
 </script>
-<script src="assets/js/jquery.min.js"></script>
-<script src="assets/js/browser.min.js"></script>
-<script src="assets/js/breakpoints.min.js"></script>
-<script src="assets/js/util.js"></script>
-<script src="assets/js/main.js"></script>
 </body>
 </html>
