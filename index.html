@@ -77,7 +77,12 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
 .volba{position:relative;display:flex;flex-direction:column;gap:8px;padding:26px 26px 26px 40px;border-radius:var(--r);background:var(--karta);border:1px solid var(--linka);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);text-decoration:none;color:var(--text);min-height:200px;overflow:hidden;transition:border-color .2s,box-shadow .2s,transform .15s}
 /* proužek v barvě filamentu, svítí */
 .volba:before{content:"";position:absolute;left:14px;top:22px;bottom:22px;width:5px;border-radius:5px;background:var(--barva);box-shadow:0 0 14px 1px var(--barva)}
-a.volba:hover{border-color:var(--barva);box-shadow:0 0 0 1px var(--barva),0 18px 50px -20px var(--barva);transform:translateY(-2px)}
+/* neonové podsvícení: na počítači karta pod kurzorem, na mobilu karta uprostřed obrazovky */
+.volba{transition:border-color .3s,box-shadow .3s,transform .15s}
+.volba:before{transition:box-shadow .3s,filter .3s}
+.volba.svit{border-color:var(--barva);box-shadow:0 0 0 1px var(--barva),0 0 34px -6px var(--barva),inset 0 0 40px -22px var(--barva)}
+.volba.svit:before{box-shadow:0 0 22px 3px var(--barva);filter:brightness(1.25)}
+@media (hover:hover){.volba:hover{border-color:var(--barva);box-shadow:0 0 0 1px var(--barva),0 0 34px -6px var(--barva),inset 0 0 40px -22px var(--barva)} .volba:hover:before{box-shadow:0 0 22px 3px var(--barva);filter:brightness(1.25)} a.volba:hover{transform:translateY(-2px)}}
 .volba h3{margin:0;font-size:1.25rem;line-height:1.2}
 .volba p{margin:0;color:var(--sedy);font-size:1.02rem}
 .volba .akce{margin-top:auto;padding-top:14px;font-weight:700;color:var(--barva);font-size:1.05rem}
@@ -215,6 +220,24 @@ a.volba:hover{border-color:var(--barva);box-shadow:0 0 0 1px var(--barva),0 18px
   var e=document.getElementById("eshop");
   function zatrast(ev){ if(ev.type==="keydown"&&ev.key!=="Enter"&&ev.key!==" ") return; ev.preventDefault(); e.classList.remove("zatrast"); void e.offsetWidth; e.classList.add("zatrast"); }
   e.addEventListener("click",zatrast); e.addEventListener("keydown",zatrast);
+})();
+</script>
+<script>
+/* mobil: neonově se podsvítí karta, která je zrovna uprostřed obrazovky */
+(function(){
+  if(!window.matchMedia||!matchMedia("(hover: none)").matches) return;
+  var karty=[].slice.call(document.querySelectorAll(".volba")), cekam=false;
+  function vyber(){
+    cekam=false;
+    var stred=innerHeight/2, nej=null, vzd=1e9;
+    karty.forEach(function(k){ var r=k.getBoundingClientRect(); if(r.bottom<0||r.top>innerHeight) return;
+      var d=(r.top<=stred&&r.bottom>=stred)?0:Math.min(Math.abs(r.top-stred),Math.abs(r.bottom-stred)); if(d<vzd){vzd=d;nej=k;} });
+    /* úplně dole se poslední karta do středu nedostane, tak svítí ta */
+    if(scrollY+innerHeight>=document.documentElement.scrollHeight-4){ var vid=karty.filter(function(k){var r=k.getBoundingClientRect();return r.top<innerHeight&&r.bottom>0;}); if(vid.length) nej=vid[vid.length-1]; }
+    karty.forEach(function(k){ k.classList.toggle("svit",k===nej); });
+  }
+  function naplanuj(){ if(!cekam){ cekam=true; requestAnimationFrame(vyber); } }
+  addEventListener("scroll",naplanuj,{passive:true}); addEventListener("resize",naplanuj); vyber();
 })();
 </script>
 </body>
