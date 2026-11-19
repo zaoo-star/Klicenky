@@ -43,6 +43,7 @@
   --modra:#3fa0ff;      /* zpráva */
   --zelena:#3ddc84;     /* Bučpoly */
   --zamceno:#6b7385;    /* e-shop */
+  --zluta:#ffb547;      /* fakturace */
   --r:20px;
 }
 *{box-sizing:border-box}
@@ -95,6 +96,9 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
 .navrhar .zapichy img{width:32%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 14px 18px rgba(0,0,0,.55))}
 .zprava{--barva:var(--modra)}
 .hra{--barva:var(--zelena)}
+.faktury{--barva:var(--zluta);grid-column:1 / -1;display:grid;grid-template-columns:1fr auto;align-items:center;align-content:center;gap:6px 32px;min-height:0}
+.faktury .akce{margin:0;padding:0;grid-row:1 / span 2;grid-column:2}
+.faktury h3,.faktury p{grid-column:1}
 .hra .ik{width:46px;height:46px;border-radius:11px;margin-bottom:4px;border:1px solid rgba(61,220,132,.35)}
 .eshop{--barva:var(--zamceno);cursor:not-allowed}
 .eshop:before{box-shadow:none}
@@ -114,6 +118,8 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
   .navrhar h3{font-size:1.6rem}
   .navrhar .akce{width:100%;justify-content:center}
   .volba{min-height:0;padding:22px 22px 22px 38px}
+  .faktury{display:flex;align-items:stretch}
+  .faktury .akce{margin-top:auto;padding-top:14px}
   .uvod .sirka{padding-bottom:80px}
   .uvod h1{margin-top:44px}
   body{font-size:18px}
@@ -183,6 +189,11 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
         <h3>Bučpoly</h3>
         <p>Realitní hra na mobil na mapě skutečných Bučovic.</p>
         <span class="akce">Přečíst o hře</span>
+      </a>
+      <a class="volba faktury" href="/faktury/">
+        <h3>Faktury zdarma</h3>
+        <p>Vystavte fakturu s QR platbou za pár minut a pošlete ji jako PDF. Pro plátce i neplátce DPH, data zůstávají jen u vás.</p>
+        <span class="akce">Vystavit fakturu</span>
       </a>
     </div>
   </div>
