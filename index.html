@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>3Dz – 3D tisk, hry a appky | Bučovice</title>
-<meta name="description" content="3Dz z Bučovic: návrhář dárků se jménem z 3D tiskárny, fakturace zdarma a realitní hra Bučpoly.">
-<meta property="og:title" content="3Dz – 3D tisk, hry a appky z Bučovic">
-<meta property="og:description" content="Navrhněte si dárek se jménem z 3D tiskárny, vystavte fakturu zdarma nebo si zahrajte Bučpoly.">
+<title>3Dz – 3D tisk na zakázku | Bučovice</title>
+<meta name="description" content="3Dz – 3D tisk z Bučovic. Navrhněte si zápich na dort, klíčenku, ozdobu nebo cedulku se jménem a hned uvidíte, jak bude vypadat a kolik stojí.">
+<meta property="og:title" content="3Dz – 3D tisk na zakázku z Bučovic">
+<meta property="og:description" content="Zápichy na dort, klíčenky, ozdoby a cedulky se jménem. Navrhnete si je sami a cenu vidíte hned.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://3dz.cz/nahled-3dz.jpg">
 <meta property="og:image:width" content="1200">
@@ -43,7 +43,6 @@
   --modra:#3fa0ff;      /* zpráva */
   --zelena:#3ddc84;     /* Bučpoly */
   --zamceno:#6b7385;    /* e-shop */
-  --zluta:#ffb547;      /* fakturace */
   --r:20px;
 }
 *{box-sizing:border-box}
@@ -96,9 +95,6 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
 .navrhar .zapichy img{width:32%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 14px 18px rgba(0,0,0,.55))}
 .zprava{--barva:var(--modra)}
 .hra{--barva:var(--zelena)}
-.faktury{--barva:var(--zluta);grid-column:1 / -1;display:grid;grid-template-columns:1fr auto;align-items:center;align-content:center;gap:6px 32px;min-height:0}
-.faktury .akce{margin:0;padding:0;grid-row:1 / span 2;grid-column:2}
-.faktury h3,.faktury p{grid-column:1}
 .hra .ik{width:46px;height:46px;border-radius:11px;margin-bottom:4px;border:1px solid rgba(61,220,132,.35)}
 .eshop{--barva:var(--zamceno);cursor:not-allowed}
 .eshop:before{box-shadow:none}
@@ -118,8 +114,6 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
   .navrhar h3{font-size:1.6rem}
   .navrhar .akce{width:100%;justify-content:center}
   .volba{min-height:0;padding:22px 22px 22px 38px}
-  .faktury{display:flex;align-items:stretch}
-  .faktury .akce{margin-top:auto;padding-top:14px}
   .uvod .sirka{padding-bottom:80px}
   .uvod h1{margin-top:44px}
   body{font-size:18px}
@@ -151,9 +145,9 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
 <header class="uvod">
   <div class="obr" aria-hidden="true"></div>
   <div class="sirka">
-    <a class="znacka" href="/"><b>3Dz</b>Bučovice</a>
-    <h1>3D tisk, hry a šikovné appky z Bučovic.</h1>
-    <p>Navrhněte si dárek se jménem z 3D tiskárny, vystavte fakturu zdarma nebo si zahrajte Bučpoly.</p>
+    <a class="znacka" href="/"><b>3Dz</b>3D tisk na zakázku, Bučovice</a>
+    <h1>Dárky se jménem z naší 3D tiskárny.</h1>
+    <p>Zápich na dort, klíčenku, ozdobu nebo cedulku si navrhnete sami a hned vidíte cenu. Tiskneme v Bučovicích.</p>
   </div>
 </header>
 
@@ -190,17 +184,12 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
         <p>Realitní hra na mobil na mapě skutečných Bučovic.</p>
         <span class="akce">Přečíst o hře</span>
       </a>
-      <a class="volba faktury" href="/faktury/">
-        <h3>Faktury zdarma</h3>
-        <p>Vystavte fakturu s QR platbou za pár minut a pošlete ji jako PDF. Pro plátce i neplátce DPH, data zůstávají jen u vás.</p>
-        <span class="akce">Vystavit fakturu</span>
-      </a>
     </div>
   </div>
 </main>
 
 <footer class="pata">
-  <div class="sirka">3Dz – 3D tisk, hry a appky, Bučovice</div>
+  <div class="sirka">3Dz – 3D tisk na zakázku, Bučovice</div>
 </footer>
 
 <script>
