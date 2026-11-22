@@ -54,6 +54,20 @@ label{display:block;font-weight:800;margin:14px 0 6px}
 .chyba{color:var(--ch);font-weight:700}
 .skryt{display:none!important}
 .navod ol{padding-left:1.2em}.navod li{margin:8px 0}
+/* návštěvy webu */
+.nav h2{margin:0 0 10px;font-size:1.1rem}
+.nav .cisla{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.nav .cisla b{display:block;font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+.nav .cisla span{color:var(--tl);font-size:.85rem}
+.nav .graf{display:flex;align-items:flex-end;gap:4px;height:90px;margin:16px 0 4px}
+.nav .graf div{flex:1;background:var(--ak);border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.nav .graf div.dnes{background:#ffb37f}
+.nav .osa{display:flex;justify-content:space-between;color:var(--sl);font-size:.78rem}
+.nav table{width:100%;border-collapse:collapse;margin-top:14px;font-variant-numeric:tabular-nums}
+.nav th,.nav td{padding:7px 4px;text-align:right;border-top:1px solid var(--linka)}
+.nav th{color:var(--tl);font-weight:700;font-size:.85rem;border-top:0}
+.nav th:first-child,.nav td:first-child{text-align:left}
+@media (max-width:520px){.nav .cisla{grid-template-columns:repeat(2,1fr)}}
 code{background:#101013;border:1px solid var(--linka);border-radius:6px;padding:1px 6px;font-size:.85em}
 </style>
 </head>
@@ -86,6 +100,7 @@ code{background:#101013;border:1px solid var(--linka);border-radius:6px;padding:
   <!-- 3) Přehled -->
   <section class="skryt" id="prehled">
     <div class="souhrn" id="souhrn"></div>
+    <section class="karta nav" id="navstevy" aria-label="Návštěvy webu"><h2>Návštěvy webu</h2><p class="pozn" id="navInfo">Načítám…</p></section>
     <div class="filtry" id="filtry"></div>
     <input class="hledat" id="hledat" placeholder="Hledat jméno, kontakt nebo text…">
     <div id="seznam"></div>
@@ -108,9 +123,9 @@ else {
   const V = "10.12.2";
   const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
   const { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-auth.js`);
-  const { getFirestore, collection, query, orderBy, limit, onSnapshot, doc, updateDoc } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
+  const { getFirestore, collection, query, orderBy, limit, onSnapshot, doc, updateDoc, documentId } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
   const app = initializeApp(FIREBASE), auth = getAuth(app), db = getFirestore(app);
-  let vse = [], filtr = "aktivní", odhlasitSnap = null;
+  let vse = [], filtr = "aktivní", odhlasitSnap = null, odhlasitNav = null;
 
   $("prihlasit").onclick = async () => {
     $("prihlChyba").textContent = "";
@@ -124,12 +139,36 @@ else {
   onAuthStateChanged(auth, u => {
     $("prihlaseni").classList.toggle("skryt", !!u); $("prehled").classList.toggle("skryt", !u); $("odhlasit").classList.toggle("skryt", !u);
     if (odhlasitSnap) { odhlasitSnap(); odhlasitSnap = null; }
+    if (odhlasitNav) { odhlasitNav(); odhlasitNav = null; }
     if (!u) return;
     if (u.email !== MAJITEL) { $("prehled").classList.add("skryt"); $("prihlaseni").classList.remove("skryt"); $("prihlChyba").textContent = `Účet ${u.email} k objednávkám nemá přístup. Přihlaste se účtem ${MAJITEL}.`; return; }
     odhlasitSnap = onSnapshot(query(collection(db, KOLEKCE), orderBy("vytvoreno", "desc"), limit(300)), snap => {
       vse = snap.docs.map(d => ({ id:d.id, ...d.data() })); vykresli();
     }, e => { $("prazdno").textContent = "Objednávky nejde načíst: " + e.message + " (zkontrolujte pravidla ve Firestore)."; });
+    odhlasitNav = onSnapshot(query(collection(db, "navstevy"), orderBy(documentId(), "desc"), limit(60)), snap => {
+      kresliNavstevy(Object.fromEntries(snap.docs.map(d => [d.id, d.data()])));
+    }, e => { $("navInfo").textContent = "Návštěvy nejde načíst: " + e.message; });
   });
+
+  /* Návštěvy webu – čísla z /assets/pocitadlo.js (jeden prohlížeč = jedna návštěva za den a stránku) */
+  const STR = [["uvod", "Úvod"], ["navrh", "Návrhář"], ["bucpoly", "Bučpoly"], ["kreslik", "Kreslík"]];
+  const denKlic = d => d.toLocaleDateString("sv-SE", { timeZone:"Europe/Prague" });
+  const dnyZpet = n => { const r = [], t = Date.now(); for (let i = 0; i < n; i++) r.push(denKlic(new Date(t - i*86400000))); return r; };
+  function kresliNavstevy(D) {
+    const dny = dnyZpet(30), soucet = (k, str) => (D[k] ? (str ? (D[k][str] || 0) : STR.reduce((a, [s]) => a + (D[k][s] || 0), 0)) : 0);
+    const za = (n, str) => dny.slice(0, n).reduce((a, k) => a + soucet(k, str), 0);
+    const N = s => s.toLocaleString("cs-CZ");
+    const graf = dny.slice(0, 14).reverse(), max = Math.max(1, ...graf.map(k => soucet(k)));
+    const box = $("navstevy");
+    box.innerHTML = `<h2>Návštěvy webu</h2>
+      <div class="cisla"><div><b>${N(za(1))}</b><span>dnes</span></div><div><b>${N(soucet(dny[1]))}</b><span>včera</span></div>
+        <div><b>${N(za(7))}</b><span>7 dní</span></div><div><b>${N(za(30))}</b><span>30 dní</span></div></div>
+      <div class="graf" role="img" aria-label="Návštěvy za posledních 14 dní">${graf.map((k, i) => `<div class="${i === 13 ? "dnes" : ""}" style="height:${Math.round(soucet(k) / max * 100)}%" title="${new Date(k).toLocaleDateString("cs-CZ")}: ${soucet(k)}"></div>`).join("")}</div>
+      <div class="osa"><span>před 14 dny</span><span>dnes</span></div>
+      <table><thead><tr><th>Stránka</th><th>Dnes</th><th>7 dní</th><th>30 dní</th></tr></thead>
+        <tbody>${STR.map(([s, n]) => `<tr><td>${n}</td><td>${N(za(1, s))}</td><td>${N(za(7, s))}</td><td>${N(za(30, s))}</td></tr>`).join("")}</tbody></table>
+      <p class="pozn">Počítá se jeden prohlížeč jednou za den na každé stránce. Vidíš to jen ty.</p>`;
+  }
 
   const datum = o => o.vytvoreno && o.vytvoreno.toDate ? o.vytvoreno.toDate() : null;
   const kusy = o => (o.polozky && o.polozky.length ? o.polozky.reduce((a, p) => a + (p.ks || 0), 0) : o.pocet) || 0;
