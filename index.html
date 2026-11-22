@@ -276,6 +276,13 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
 <script type="module" src="/assets/pocitadlo.js?s=uvod"></script>
 <script type="module">
 /* veřejné číslo „Návštěv webu“ – součet všech stránek od spuštění počítadla (22. 11. 2026) */
+// Započítá se tahle návštěva právě teď? (stejné podmínky jako v /assets/pocitadlo.js) – pak ji rovnou přičteme,
+// ať nový návštěvník vidí číslo i se sebou. Zjišťujeme hned, než počítadlo za 1,5 s zapíše dnešek do localStorage.
+let ja = 0;
+try {
+  const dnes = new Date().toLocaleDateString("sv-SE", { timeZone:"Europe/Prague" });
+  if (/(^|\.)3dz\.cz$/.test(location.hostname) && !navigator.webdriver && localStorage.getItem("3dz-navsteva-uvod") !== dnes) ja = 1;
+} catch (e) {}
 try {
   const V = "10.12.2";
   const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
@@ -284,7 +291,7 @@ try {
   // každá stránka zvlášť: součet přes víc polí naráz by potřeboval složený index
   const kol = collection(db, "navstevy");
   const casti = await Promise.all(["uvod", "navrh", "bucpoly", "kreslik"].map(k => getAggregateFromServer(kol, { s:sum(k) }).then(r => r.data().s || 0)));
-  const celkem = casti.reduce((x, y) => x + y, 0);
+  const celkem = casti.reduce((x, y) => x + y, 0) + ja;
   const el = document.getElementById("navstevy");
   el.querySelector("b").textContent = celkem.toLocaleString("cs-CZ"); el.hidden = false;
 } catch (e) { /* bez čísla se patička prostě ukáže bez něj */ }
