@@ -42,6 +42,7 @@
   --ruzova:#ff4f8b;     /* návrhář – hlavní akce */
   --modra:#3fa0ff;      /* zpráva */
   --zelena:#3ddc84;     /* Bučpoly */
+  --oranzova:#ff9a3c;   /* Kreslík */
   --zamceno:#6b7385;    /* e-shop */
   --r:20px;
 }
@@ -96,6 +97,12 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
 .zprava{--barva:var(--modra)}
 .hra{--barva:var(--zelena)}
 .hra .ik{width:46px;height:46px;border-radius:11px;margin-bottom:4px;border:1px solid rgba(61,220,132,.35)}
+.kreslik{--barva:var(--oranzova);grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:20px;min-height:0;padding:30px 34px 30px 50px;
+  background:radial-gradient(60% 90% at 80% 50%,rgba(255,154,60,.14),rgba(255,154,60,0) 70%),var(--karta)}
+.kreslik h3{font-size:1.6rem}
+.kreslik p{max-width:28em;margin-top:8px;color:#c3c8d6}
+.kreslik .postavy{display:flex;justify-content:center}
+.kreslik .postavy img{width:100%;max-width:400px;height:auto;filter:drop-shadow(0 14px 18px rgba(0,0,0,.5))}
 .eshop{--barva:var(--zamceno);cursor:not-allowed}
 .eshop:before{box-shadow:none}
 .eshop .stav{display:inline-block;align-self:flex-start;margin-bottom:4px;padding:3px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.18);color:#c2c7d3;font-size:.88rem;font-weight:700}
@@ -113,6 +120,9 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
   .navrhar .zapichy img{width:48%}
   .navrhar h3{font-size:1.6rem}
   .navrhar .akce{width:100%;justify-content:center}
+  .kreslik{grid-template-columns:1fr;padding:26px 22px 26px 38px}
+  .kreslik .postavy{order:-1}
+  .kreslik .postavy img{max-width:300px}
   .volba{min-height:0;padding:22px 22px 22px 38px}
   .uvod .sirka{padding-bottom:80px}
   .uvod h1{margin-top:44px}
@@ -183,6 +193,14 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
         <h3>Bučpoly</h3>
         <p>Realitní hra na mobil na mapě skutečných Bučovic.</p>
         <span class="akce">Přečíst o hře</span>
+      </a>
+      <a class="volba kreslik" href="/kreslik/">
+        <div>
+          <h3>Kreslík</h3>
+          <p>Hra pro děti: nakreslí postavičku na papír, vyfotí ji a hrají za ni. Dvanáct her, od skákání po penalty. Zdarma, bez reklam a bez registrace.</p>
+          <span class="akce">Zahrát si</span>
+        </div>
+        <div class="postavy" aria-hidden="true"><img src="img/kreslik.webp" alt="" width="620" height="300" loading="lazy"></div>
       </a>
     </div>
   </div>
