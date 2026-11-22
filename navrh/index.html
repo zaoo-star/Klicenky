@@ -759,6 +759,7 @@ label{color:var(--tlumeny)} label.pole{color:#585858}
 
     <section class="krok skladaci" id="k-rostlina">
       <h2><span class="cislo">3</span><span class="nadpis">Péče o rostlinu<span class="souhrn"></span></span></h2>
+      <p class="pozn" style="margin-top:0">Nepovinné. Když nic nevyberete, bude na zápichu jen název rostliny. Vyplňte jen to, co chcete mít na zápichu.</p>
       <div class="podnadpis">☀️ Kolik světla?</div>
       <div class="volby" id="rSvetlo" style="grid-template-columns:repeat(2,1fr)"></div>
       <div class="podnadpis">🌡️ Teplota</div>
@@ -1434,7 +1435,7 @@ const PRODUKTY = [
   { id:"m", nazev:"Magnetka",         emoji:"🧲", titul:"🧲 Navrhněte si magnetku",          text:"Text na magnetce", typ:"k", bezDiry:true, tl:4, magnet:true, bezZad:true, pozn:"Zezadu bude otvor na magnet. Magnety si vlepíte své, nebo je po domluvě dodáme a nalepíme." },
   { id:"c", nazev:"Cedulka na dveře", emoji:"🚪", titul:"🚪 Navrhněte si cedulku na dveře",  text:"Text na cedulce", typ:"k", bezDiry:true, tl:4, bezZad:true, sroubky:true, pozn:"Přilepí se oboustrannou páskou (přibalíme), nebo přišroubuje – vyberete u tvaru." },
   { id:"j", nazev:"Jmenovka na stůl", emoji:"🥂", titul:"🥂 Jmenovky na stůl (svatba, oslava)", text:"Jméno hosta", typ:"k", bezDiry:true, tl:2.5, stojan:true, pozn:"Ke každé jmenovce vytiskneme stojánek, do kterého se zasune. Pro víc hostů zadejte seznam jmen." },
-  { id:"r", nazev:"Zápich do květináče", emoji:"🌱", titul:"🌱 Zápich do květináče", text:"Název rostliny", typ:"r", bezZad:true, pozn:"S ikonkami, jak o rostlinu pečovat. Zapíchne se do hlíny." },
+  { id:"r", nazev:"Zápich do květináče", emoji:"🌱", titul:"🌱 Zápich do květináče", text:"Název rostliny", typ:"r", bezZad:true, pozn:"Název rostliny a k němu můžete přidat ikonky péče (světlo, teplota, zálivka). Zapíchne se do hlíny." },
   { id:"b", nazev:"Vánoční ozdoba", emoji:"🎄", titul:"🎄 Vánoční ozdoba na stromeček", text:"Text na ozdobě", typ:"k", tl:3, pozn:"Ozdoba na stromeček s vaším jménem, oboustranná. Přidat můžete i vlastní obrázek – v kroku Doladit → Ozdoba vedle textu → Vlastní obrázek." },
   { id:"p", nazev:"Podtácek", emoji:"☕", titul:"☕ Podtácek s vaším textem", text:"Text na podtácku", typ:"k", bezDiry:true, tl:4, bezZad:true, pozn:"Podtácek pod hrnek nebo sklenici, tloušťka 4 mm. Hodí se i jako sada s různými jmény." },
   { id:"n", nazev:"Známka pro psa", emoji:"🐶", titul:"🐶 Známka pro psa nebo kočku", text:"Jméno zvířátka", typ:"k", tl:3, pozn:"Na obojek. Zezadu doporučujeme napsat telefon – v kroku Doladit → Zadní strana." },
@@ -2225,7 +2226,7 @@ vytvorVolby("produkty", PRODUKTY.filter(p => !p.skryty), "p", p => `${NAHLEDY[p.
   if (p.id === "q") { stav.o = ""; if (stav.t === VYCHOZI.t) { stav.t = stav.qt === "w" ? "Wi-Fi" : "Naskenuj mě"; $("text").value = stav.t; } }
   if (p.id === "j" && !ROVNY_SPODEK.includes(stav.s)) stav.s = "obdelnik";
   if (p.id === "j" && stav.f === "obla") stav.f = "elegantni";
-  if (p.id === "r") { stav.r = "1"; if (stav.t === VYCHOZI.t) { stav.t = "Monstera"; $("text").value = stav.t; } if (stav.f === "obla") stav.f = "tucne"; }
+  if (p.id === "r") { stav.r = "1"; /* péče je nepovinná: nově vybraný zápich má jen název, ikonky si zákazník přidá sám */ if (stav.rs === VYCHOZI.rs && stav.rt === VYCHOZI.rt && stav.rz === VYCHOZI.rz) { stav.rs = ""; stav.rt = ""; stav.rz = ""; $("rTeplota").value = ""; } if (stav.t === VYCHOZI.t) { stav.t = "Monstera"; $("text").value = stav.t; } if (stav.f === "obla") stav.f = "tucne"; }
   if (p.id === "d" && stav.f === "obla") stav.f = "psaci";
   if (p.id === "z") stav.a = "0";
   if (p.id !== "b" && (TVARY.find(t => t.id === stav.s) || {}).vanoce) stav.s = { p:"kolecko", n:"kost", u:"visacka" }[p.id] || "obdelnik"; // vánoční tvary jen u ozdob
