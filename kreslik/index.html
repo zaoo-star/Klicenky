@@ -2471,6 +2471,13 @@ function groundStrip(x0, x1, y, depth){
   for(let x = Math.floor(x0/T)*T; x < x1; x += T){ ctx.drawImage(tex.body, x, y, T+0.6, depth); ctx.drawImage(tex.top, x, y, T+0.6, 20); }
   ctx.strokeStyle = OUT; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
 }
+/* Stupně obtížnosti v Koši a Penaltách: každé 3 úspěchy o stupeň těžší */
+function mgStupen(m){ return Math.floor(m.score/3) + 1; }
+function mgDalsiStupen(m){   // volat hned po m.score++; vrací true, když se právě postoupilo
+  if(m.score % 3 !== 0) return false;
+  const st = mgStupen(m); sfx.power(); say('Úroveň ' + st + '. Bude to těžší!');
+  m.res = '⭐ ' + st; m.resT = 1.6; return true;
+}
 function bigText(txt, col='#ffd23f'){
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   const fs = Math.min(VW/5, 90);
@@ -2942,7 +2949,7 @@ function snakeFood(m){ let x, y, n = 0; do { x = Math.random()*m.cols|0; y = Mat
 function snakeTurn(m, d){ if(d[0] === -m.dir[0] && d[1] === -m.dir[1]) return; m.want = d; }
 
 /* ---------- ⚽ Penalty ---------- */
-MINIS.penalty = { name:'Penalty', icon:'⚽', unit:'⚽', ctrl:'drag', say:'Penalty. Švihni prstem od míče k bráně.',
+MINIS.penalty = { name:'Penalty', icon:'⚽', unit:'⚽', ctrl:'drag', stupne:true, say:'Penalty. Švihni prstem od míče k bráně.',
   start(m){ Object.assign(m, { ball:null, gx:200, gdir:1, res:'', resT:0, dive:0 }); },
   down(p){ const m = MG; if(m.ball || m.resT > 0) return; if(Math.hypot(p.x - 200, p.y - 600) < 110){ m.aim = { x:p.x, y:p.y, t:TNOW }; } },
   up(p){
@@ -2951,11 +2958,11 @@ MINIS.penalty = { name:'Penalty', icon:'⚽', unit:'⚽', ctrl:'drag', say:'Pena
     const tx = penAimX(a, p), len = Math.hypot(dx, dy), dt = Math.max(0.06, TNOW - a.t);
     const h = Math.min(250, len*0.3 + (len/dt)*0.015);
     m.ball = { t:0, tx: Math.max(-40, Math.min(440, tx)), h }; sfx.kick();
-    const lvl = Math.min(1, m.score/20);
+    const lvl = Math.min(1, (mgStupen(m) - 1)/7);   // každé 3 góly je brankář lepší
     m.gTarget = Math.random() < 0.2 + lvl*0.5 ? m.ball.tx : 80 + Math.random()*240;
   },
   step(m, dt){
-    const lvl = Math.min(1, m.score/20);
+    const lvl = Math.min(1, (mgStupen(m) - 1)/7);
     if(!m.ball){ m.gx += m.gdir*(40 + lvl*80)*dt; if(m.gx < 120 || m.gx > 280) m.gdir *= -1; m.dive = 0; }
     else {
       const b = m.ball; b.t += dt/0.62;
@@ -2969,6 +2976,7 @@ MINIS.penalty = { name:'Penalty', icon:'⚽', unit:'⚽', ctrl:'drag', say:'Pena
         else if(inGoal){ m.res = 'GÓL!'; m.score++; mgCoin(); sfx.goal(); updateHud(); if(m.score >= 10) award('kanonyr'); }
         else { m.res = 'Vedle!'; tone(300, 150, .3, 'triangle', .12); mgHurt(); }
         m.resT = 1.1; m.last = b; m.ball = null;
+        if(m.res === 'GÓL!' && mgDalsiStupen(m)) updateHud();
       }
     }
     if(m.resT > 0){ m.resT -= dt; }
@@ -3007,7 +3015,7 @@ MINIS.penalty = { name:'Penalty', icon:'⚽', unit:'⚽', ctrl:'drag', say:'Pena
     if(!m.ball && m.resT <= 0){ ctx.font = '40px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('👆', 200, 690 + Math.sin(TNOW*5)*6); }
     mgDrawParts();
     drawPaper();
-    if(m.resT > 0) bigText(m.res, m.res === 'GÓL!' ? '#ffd23f' : '#ffffff');
+    if(m.resT > 0) bigText(m.res, (m.res === 'GÓL!' || m.res.startsWith('⭐')) ? '#ffd23f' : '#ffffff');
   }
 };
 
@@ -3015,8 +3023,8 @@ function penEndY(b){ return 252 - b.h*0.5; }
 function penAimX(a, p){ const dx = p.x - a.x, dy = p.y - a.y; return 200 + dx*(340/Math.max(60, -dy))*0.75; }   // kde míč skončí (výška nad brankovou čarou)
 
 /* ---------- 🏀 Koš ---------- */
-MINIS.basket = { name:'Koš', icon:'🏀', unit:'🏀', ctrl:'drag', say:'Koš. Švihni prstem od míče nahoru a hoď ho do koše.',
-  start(m){ Object.assign(m, { ball:null, hy:300, res:'', resT:0, streak:0 }); },
+MINIS.basket = { name:'Koš', icon:'🏀', unit:'🏀', ctrl:'drag', stupne:true, say:'Koš. Švihni prstem od míče nahoru a hoď ho do koše.',
+  start(m){ Object.assign(m, { ball:null, hy:300, hy0:300, res:'', resT:0, streak:0 }); },
   down(p){ const m = MG; if(m.ball) return; if(Math.hypot(p.x - 90, p.y - 590) < 110) m.aim = { x:p.x, y:p.y, t:TNOW }; },
   up(p){
     const m = MG; if(!m.aim) return; const a = m.aim; m.aim = null;
@@ -3026,12 +3034,15 @@ MINIS.basket = { name:'Koš', icon:'🏀', unit:'🏀', ctrl:'drag', say:'Koš. 
     const X = 320 - 90, H = 590 - m.hy, g = 1400;
     const v2 = g*X*X/(2*Math.cos(th)**2*(X*Math.tan(th) - H));
     const f = Math.max(0.7, Math.min(1.3, len/200));
-    const sp = Math.sqrt(Math.max(1, v2))*(1 + (f - 1)*0.22);
+    const sp = Math.sqrt(Math.max(1, v2))*(1 + (f - 1)*(mgStupen(m) >= 4 ? 0.35 : 0.22));   // od 4. stupně víc záleží na síle švihu
     m.ball = { x:90, y:590, vx:Math.cos(th)*sp, vy:-Math.sin(th)*sp, r:22, t:0, scored:false, prevY:590 };
     if(!playVoice('hop', 0)) tone(400, 700, .12, 'triangle', .1);
   },
   step(m, dt){
-    if(m.score >= 5) m.hy = 300 + Math.sin(MG.t*0.9)*90;
+    // Obtížnost: 1 = koš stojí, 2 = po každém hodu jinde, 3+ = jezdí nahoru a dolů, čím dál víc a rychleji
+    const st = mgStupen(m);
+    if(st >= 3){ const amp = Math.min(110, 50 + (st - 3)*20), spd = Math.min(2.2, 0.8 + (st - 3)*0.3); m.hy = 300 + Math.sin(MG.t*spd)*amp; }
+    else m.hy = m.hy0;
     const rimL = { x:290, y:m.hy }, rimR = { x:350, y:m.hy }, board = { x:362, y0:m.hy - 110, y1:m.hy + 18 };
     const b = m.ball;
     if(b){
@@ -3045,11 +3056,13 @@ MINIS.basket = { name:'Koš', icon:'🏀', unit:'🏀', ctrl:'drag', say:'Koš. 
       if(b.x + b.r > board.x && b.x - b.r < board.x + 8 && b.y > board.y0 && b.y < board.y1 && b.vx > 0){ b.vx = -b.vx*0.6; b.x = board.x - b.r; sfx.bump(); }
       if(!b.scored && b.vy > 0 && b.prevY < m.hy && b.y >= m.hy && b.x > rimL.x + 6 && b.x < rimR.x - 6){
         b.scored = true; m.score++; m.streak++; mgCoin(m.streak >= 3 ? 2 : 1); sfx.win(); m.res = m.streak >= 3 ? 'Paráda!' : 'Koš!'; m.resT = 1;
+        mgDalsiStupen(m);
         if(m.score >= 10) award('kosik'); updateHud();
       }
       if(b.y > 760 || b.x < -60 || b.x > 460 || b.t > 5){
         if(!b.scored){ m.streak = 0; m.res = 'Vedle'; m.resT = 0.8; mgHurt(); }
         m.ball = null;
+        if(mgStupen(m) === 2) m.hy0 = 230 + Math.round(Math.random()*150);   // 2. stupeň: koš se po hodu přesune
       }
       trailTick(b.x, b.y, dt, true);
     } else trailTick(0, 0, dt, false);
@@ -3083,7 +3096,7 @@ MINIS.basket = { name:'Koš', icon:'🏀', unit:'🏀', ctrl:'drag', say:'Koš. 
     if(m.resT > 0) bigText(m.res, m.res === 'Vedle' ? '#ffffff' : '#ffd23f');
   }
 };
-function updateHudLite(){ const el = $('#hPow'), t = MINI.unit + ' ' + MG.score; if(el.textContent !== t) el.textContent = t; }
+function updateHudLite(){ const el = $('#hPow'), t = MINI.unit + ' ' + MG.score + (MINI.stupne ? '  ⭐' + mgStupen(MG) : ''); if(el.textContent !== t) el.textContent = t; }
 
 // Seznam všech her pro menu
 const GAMES = [
@@ -3139,7 +3152,7 @@ function updateHud(){
   $('#bSound').textContent = soundOn ? '🔊' : '🔇';
   if(MODE === 'mini' && MG){
     $('#hHearts').textContent = MG.id === 'sling' ? '🎯 ' + Math.max(0, MG.shots) : '❤️'.repeat(Math.max(0, MG.hearts)) + '🤍'.repeat(Math.max(0, 3-MG.hearts));
-    $('#hCoins').textContent = '🪙 ' + MG.coins; $('#hPow').textContent = MINI.unit + ' ' + (MG.id === 'sling' ? MG.lvl : MG.score); $('#hLevel').textContent = MINI.name;
+    $('#hCoins').textContent = '🪙 ' + MG.coins; $('#hPow').textContent = MINI.unit + ' ' + (MG.id === 'sling' ? MG.lvl : MG.score) + (MINI.stupne ? '  ⭐' + mgStupen(MG) : ''); $('#hLevel').textContent = MINI.name;
     return;
   }
   if(MODE === 'tower' && TW){
