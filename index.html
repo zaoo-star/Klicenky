@@ -279,11 +279,12 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
 try {
   const V = "10.12.2";
   const { initializeApp } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
-  const { getFirestore, collection, query, where, documentId, getAggregateFromServer, sum } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
+  const { getFirestore, collection, getAggregateFromServer, sum } = await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
   const db = getFirestore(initializeApp({ apiKey:"AIzaSyCKUXFiIS28fhEXGdLtuT2dTUPGT3_T3SY", authDomain:"dz-objednavky.firebaseapp.com", projectId:"dz-objednavky", appId:"1:926222074790:web:5d16fd2fb2848f7824c567" }, "verejne"));
-  const q = query(collection(db, "navstevy"), where(documentId(), ">=", "2026-11-22"));
-  const r = (await getAggregateFromServer(q, { a:sum("uvod"), b:sum("navrh"), c:sum("bucpoly"), d:sum("kreslik") })).data();
-  const celkem = (r.a || 0) + (r.b || 0) + (r.c || 0) + (r.d || 0);
+  // každá stránka zvlášť: součet přes víc polí naráz by potřeboval složený index
+  const kol = collection(db, "navstevy");
+  const casti = await Promise.all(["uvod", "navrh", "bucpoly", "kreslik"].map(k => getAggregateFromServer(kol, { s:sum(k) }).then(r => r.data().s || 0)));
+  const celkem = casti.reduce((x, y) => x + y, 0);
   const el = document.getElementById("navstevy");
   el.querySelector("b").textContent = celkem.toLocaleString("cs-CZ"); el.hidden = false;
 } catch (e) { /* bez čísla se patička prostě ukáže bez něj */ }
