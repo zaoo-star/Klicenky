@@ -1,0 +1,15 @@
+{
+  "name": "Kreslík",
+  "short_name": "Kreslík",
+  "description": "Nakresli postavičku na papír, vyfoť ji a skákej za ni.",
+  "lang": "cs",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "background_color": "#8fd3ff",
+  "theme_color": "#8fd3ff",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
