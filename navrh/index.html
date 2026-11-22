@@ -1944,6 +1944,13 @@ function rozdil() {
 }
 let odkazCache = { json:null, odkaz:null };
 const zakladOdkazu = () => location.origin + location.pathname;
+/* parametry odkazu na návrh/objednávku – data můžou být za ? (nové odkazy) i za # (starší) */
+function parametryOdkazu(odkaz) {
+  const [bezHash, hash = ""] = String(odkaz).split("#"), h = new URLSearchParams(hash);
+  for (const [k, v] of new URLSearchParams(bezHash.split("?")[1] || "")) if (!h.has(k)) h.set(k, v);
+  return h;
+}
+
 function odkazNavrhu() {
   const json = rozdil();
   if (json === odkazCache.json) return odkazCache.odkaz;
@@ -1964,6 +1971,8 @@ async function nactiNavrh(kod) {
   return JSON.parse(json);
 }
 const hashParams = new URLSearchParams(location.hash.slice(1));
+/* Odkaz ve zprávě je teď v podobě …/navrh/?o=… (Messenger u náhledu odkazu část za # zahazuje), starší odkazy mají data za #. Bereme obojí. */
+for (const [k, v] of new URLSearchParams(location.search)) if (["o", "n", "f", "d", "t", "tisk"].includes(k) && !hashParams.has(k)) hashParams.set(k, v);
 if (!BARVY.some(b => b.id === stav.b)) stav.b = VYCHOZI.b = BARVY[0].id;
 if (!BARVY.some(b => b.id === stav.c)) stav.c = VYCHOZI.c = (BARVY[1] || BARVY[0]).id;
 const rezimTisk = hashParams.has("t") || hashParams.has("tisk");
@@ -1997,7 +2006,7 @@ if (hashParams.get("f") && NASTAVENI.firebase) { // krátký odkaz: objednávka 
     });
   });
   okno.remove();
-  const h = new URLSearchParams((odkaz.split("#")[1] || ""));
+  const h = parametryOdkazu(odkaz);
   if (h.get("o")) hashParams.set("o", h.get("o")); else if (h.get("n")) hashParams.set("n", h.get("n"));
 }
 if (hashParams.get("o")) { // odkaz na celou objednávku (víc položek)
@@ -5196,7 +5205,7 @@ async function sPrubehem(tl, fn) {
   finally { tl.disabled = false; tl.innerHTML = puvodni; }
 }
 async function navrhZOdkazu(odkaz) {
-  const h = new URLSearchParams((odkaz.split("#")[1] || ""));
+  const h = parametryOdkazu(odkaz);
   if (h.get("n")) return { ...VYCHOZI, ...(await nactiNavrh(h.get("n"))) };
   if (h.get("d")) return { ...VYCHOZI, ...JSON.parse(decodeURIComponent(escape(atob(h.get("d").replace(/-/g, "+").replace(/_/g, "/"))))) };
   throw new Error("není to odkaz na návrh");
@@ -5553,10 +5562,12 @@ function textObjednavky() {
   ].filter(Boolean).join("\n");
 }
 // Dlouhý odkaz (s obrázkem, logem, fotkou…) Messenger ořízne. Objednávka se proto uloží do Firebase
-// a do zprávy jde krátký odkaz #f=ID – otevře ji jen majitel přihlášený Googlem.
+// a do zprávy jde krátký odkaz ?f=ID – otevře ji jen majitel přihlášený Googlem.
 let objId = "";
 const noveObjId = () => { const a = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"; return Array.from(crypto.getRandomValues(new Uint8Array(16)), b => a[b % a.length]).join(""); };
-const odkazDoZpravy = dlouhy => objId && dlouhy.length > 900 ? `${zakladOdkazu()}#f=${objId}&t` : dlouhy;
+// Do zprávy jde odkaz s ? místo # – Messenger po klepnutí na náhled odkazu otevře stránku bez části za #
+// (otevřel by se jen prázdný návrhář). Hodně dlouhý odkaz bez uložené objednávky necháme s # (adresa s ? má limit).
+const odkazDoZpravy = dlouhy => objId && dlouhy.length > 900 ? `${zakladOdkazu()}?f=${objId}&t` : (dlouhy.length < 6000 ? dlouhy.replace("#", "?") : dlouhy);
 function zkontroluj() {
   if (stav.p === "q" && !qrObsah()) {
     $("formChyba").textContent = "Ještě napište, co má QR kód otevřít (krok QR kód).";
