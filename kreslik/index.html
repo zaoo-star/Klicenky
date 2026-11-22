@@ -100,8 +100,10 @@
     display:flex;align-items:center;justify-content:center;touch-action:none}
   #touch .tb.on{background:rgba(255,210,63,.9)}
   #tLeft{left:calc(16px + env(safe-area-inset-left))}
-  #tRight{left:calc(116px + env(safe-area-inset-left))}
-  #tJump{right:calc(20px + env(safe-area-inset-right));width:104px!important;height:104px!important;font-size:22px!important}
+  #tRight{right:calc(16px + env(safe-area-inset-right))}
+  #touch .tb.jump{bottom:calc(34px + env(safe-area-inset-bottom));width:96px;height:96px;font-size:20px}
+  #tJumpL{left:calc(118px + env(safe-area-inset-left))}
+  #tJumpR{right:calc(118px + env(safe-area-inset-right))}
 
 
   /* Ovládání pro děti, které ještě nečtou: velké obrázky, krátké popisky */
@@ -199,7 +201,8 @@
 <div id="touch" hidden>
   <div class="tb" id="tLeft" data-btn="left" aria-label="Doleva">◀</div>
   <div class="tb" id="tRight" data-btn="right" aria-label="Doprava">▶</div>
-  <div class="tb" id="tJump" data-btn="jump" aria-label="Skok">SKOK</div>
+  <div class="tb jump" id="tJumpL" data-btn="jump" aria-label="Skok">SKOK</div>
+  <div class="tb jump" id="tJumpR" data-btn="jump" aria-label="Skok">SKOK</div>
 </div>
 
 <div id="dpad" hidden>
@@ -3118,7 +3121,7 @@ function showControls(){
   $('#hud').hidden = false;
   const c = MODE === 'mini' ? MINI.ctrl : MODE === 'bomb' ? 'dpadb' : MODE === 'tower' ? 'lr' : 'run';
   $('#touch').hidden = !isTouch || !(c === 'lr' || c === 'run');
-  $('#tJump').hidden = c !== 'run';
+  for(const j of document.querySelectorAll('#touch .jump')) j.hidden = c !== 'run';
   $('#dpad').hidden = !isTouch || !(c === 'dpad' || c === 'dpadb');
   $('#dpad .bomb').hidden = c !== 'dpadb';
 }
