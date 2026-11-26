@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Titulky PS5 – české titulky do her na PS5</title>
+<meta name="description" content="Titulky PS5 – české titulky do her na PS5. Program na PC překládá titulky ze hry a televize je ukáže přímo přes obraz. Zdarma, s videonávodem na instalaci.">
+<meta property="og:title" content="Titulky PS5 – české titulky do her na PS5">
+<meta property="og:description" content="Program na PC překládá titulky ze hry do češtiny a televize je ukáže přímo přes obraz. Zdarma, s videonávodem.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://3dz.cz/titulky/">
+<meta property="og:image" content="https://3dz.cz/nahled-3dz.jpg">
+<meta name="theme-color" content="#0b0d17">
+<link rel="icon" href="../img/titulky.png">
+<style>
+/* Titulky PS5 – stejný tmavý vzhled jako /bucpoly/, barva aplikace je modrá */
+@font-face{font-family:"Unb";font-weight:700;font-display:swap;src:url(../assets/fonts/unbounded-latin-700-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Unb";font-weight:700;font-display:swap;src:url(../assets/fonts/unbounded-latin-ext-700-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"Bric";font-weight:400;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-400-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Bric";font-weight:400;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-ext-400-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"Bric";font-weight:500;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-500-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Bric";font-weight:500;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-ext-500-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"Bric";font-weight:700;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-700-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Bric";font-weight:700;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-ext-700-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+@font-face{font-family:"Bric";font-weight:800;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-800-normal.woff2)format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC}
+@font-face{font-family:"Bric";font-weight:800;font-display:swap;src:url(../assets/fonts/bricolage-grotesque-latin-ext-800-normal.woff2)format("woff2");unicode-range:U+0100-02AF}
+:root{--noc:#0b0d17;--karta:rgba(255,255,255,.045);--linka:rgba(255,255,255,.09);--text:#eef0f6;--sedy:#9aa2b4;--zelena:#2f6bff;--r:20px}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;background:var(--noc)}
+body{margin:0;color:var(--text);font-family:"Bric",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:19px;line-height:1.55;-webkit-font-smoothing:antialiased;background:var(--noc);
+  background-image:radial-gradient(70% 50% at 70% 0%,rgba(47,107,255,.12),rgba(47,107,255,0) 70%),linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+  background-size:100% 100%,44px 44px,44px 44px;background-repeat:no-repeat,repeat,repeat}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--zelena);outline-offset:3px;border-radius:8px}
+.sirka{max-width:960px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.hlavicka{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:28px 0 0}
+.znacka{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:500;font-size:.95rem;color:#d6dae6}
+.znacka b{display:grid;place-items:center;width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);color:#fff;font-family:"Unb",sans-serif;font-weight:700;font-size:.8rem}
+.zpet{white-space:nowrap;color:var(--sedy);font-weight:500;font-size:.95rem}
+.hra{display:flex;gap:28px;align-items:center;margin:48px 0 56px}
+.hra img{width:120px;height:120px;flex:none;border-radius:28px;border:1px solid rgba(47,107,255,.4);box-shadow:0 0 40px -8px rgba(47,107,255,.6)}
+.hra h1{margin:0 0 12px;font-size:clamp(2.2rem,6vw,3.4rem);text-shadow:0 0 36px rgba(47,107,255,.35)}
+.hra p{margin:0;max-width:32em;color:#cfd3de;font-size:1.12rem}
+.hraj{display:inline-flex;align-items:center;justify-content:center;margin-top:26px;min-height:60px;padding:0 30px;border-radius:999px;background:var(--zelena);color:#fff;font-weight:700;font-size:1.15rem;text-decoration:none;box-shadow:0 0 30px -4px rgba(47,107,255,.75)}
+.hraj:hover{background:#4d82ff}
+.mobil{display:block;margin-top:12px;color:var(--sedy);font-size:.95rem}
+h2{margin:0 0 20px;font-size:1.35rem}
+.mrizka{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:56px}
+.volba{--barva:var(--zelena);position:relative;padding:24px 24px 24px 40px;border-radius:var(--r);background:var(--karta);border:1px solid var(--linka);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:border-color .3s,box-shadow .3s}
+.volba:before{content:"";position:absolute;left:14px;top:22px;bottom:22px;width:5px;border-radius:5px;background:var(--barva);box-shadow:0 0 14px 1px var(--barva);transition:box-shadow .3s,filter .3s}
+.volba h3{margin:0 0 8px;font-size:1.05rem}
+.volba p{margin:0;color:var(--sedy);font-size:1rem}
+.volba.svit{border-color:var(--barva);box-shadow:0 0 0 1px var(--barva),0 0 34px -6px var(--barva),inset 0 0 40px -22px var(--barva)}
+.volba.svit:before{box-shadow:0 0 22px 3px var(--barva);filter:brightness(1.25)}
+@media (hover:hover){.volba:hover{border-color:var(--barva);box-shadow:0 0 0 1px var(--barva),0 0 34px -6px var(--barva),inset 0 0 40px -22px var(--barva)} .volba:hover:before{box-shadow:0 0 22px 3px var(--barva);filter:brightness(1.25)}}
+.text{max-width:38em;margin-bottom:48px}
+.text p{color:#cfd3de;margin:0}
+.text ol{margin:0;padding-left:1.3em;color:#cfd3de}
+.text li{margin-bottom:10px}
+.pata{padding:30px 0 50px;color:#7d8597;font-size:.95rem}
+@media (max-width:860px){
+  .mrizka{grid-template-columns:1fr}
+  .hra{flex-direction:column;align-items:flex-start;gap:20px;margin:36px 0 44px}
+  .hra img{width:88px;height:88px;border-radius:22px}
+  .hraj{width:100%}
+  .mesto{display:none}
+  body{font-size:18px}
+  .sirka{padding:0 18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* příchod z úvodky: stránka se natiskne po vrstvách jako uvítání na 3dz.cz */
+#uvTisk{position:fixed;inset:0;z-index:100000;cursor:pointer;overflow:hidden}
+#uvTisk .zbyva{position:absolute;left:0;right:0;top:0;height:100%;background:#0b0d17}
+#uvTisk .vrstva{position:absolute;background:#0b0d17}
+#uvTisk .zhava{position:absolute;height:3px;margin-top:-2px;border-radius:2px;pointer-events:none}
+#uvTisk .osa{position:absolute;left:-10px;right:-10px;height:10px;margin-top:-58px;border-radius:5px;background:linear-gradient(180deg,#8a93a8,#3b4252 55%,#262b36);box-shadow:0 6px 14px rgba(0,0,0,.5);display:none}
+#uvTisk .osa:before,#uvTisk .osa:after{content:"";position:absolute;top:-9px;width:30px;height:28px;border-radius:6px;background:#2a303d;border:1px solid #4a5366}
+#uvTisk .osa:before{left:4px} #uvTisk .osa:after{right:4px}
+#uvTisk .hlava{position:absolute;width:56px;height:62px;margin-left:-28px;margin-top:-62px;pointer-events:none;display:none}
+#uvTisk .hlava i{position:absolute;left:0;right:0;top:0;height:42px;border-radius:9px;background:linear-gradient(180deg,#d9dee8,#9aa3b6);box-shadow:0 8px 18px rgba(0,0,0,.5)}
+#uvTisk .hlava i:after{content:"";position:absolute;left:50%;top:50%;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:repeating-conic-gradient(#3b4252 0 20deg,#69728a 20deg 40deg);box-shadow:inset 0 0 0 3px #3b4252}
+#uvTisk .hlava b{position:absolute;left:50%;top:42px;margin-left:-9px;border:9px solid transparent;border-top:13px solid #c58a3a;border-bottom:0}
+#uvTisk .hlava u{position:absolute;left:50%;top:55px;width:8px;height:8px;margin-left:-4px;border-radius:50%;background:#ffd1a8;box-shadow:0 0 10px 4px rgba(255,120,80,.9),0 0 28px 10px rgba(255,79,139,.45)}
+#uvTisk.parkuje .osa,#uvTisk.parkuje .hlava{transition:top .45s cubic-bezier(.5,0,.75,0);top:-80px!important}
+.tlacitka{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.tlacitka .hraj{margin-top:0}
+.hraj.druhe{background:transparent;color:var(--text);border:2px solid var(--zelena);box-shadow:none}
+.hraj.druhe:hover{background:rgba(47,107,255,.15)}
+.hraj small{font-weight:500;opacity:.8;margin-left:8px;font-size:.85rem}
+.video{margin:0 0 56px}
+.video video{display:block;width:100%;aspect-ratio:16/9;border-radius:var(--r);border:1px solid rgba(47,107,255,.4);background:#020617;box-shadow:0 0 40px -12px rgba(47,107,255,.6)}
+.video p{margin:12px 0 0;color:var(--sedy);font-size:.95rem}
+.text a{color:#9cc3ff}
+.text .pozn{margin-top:14px;color:var(--sedy);font-size:1rem}
+@media (max-width:860px){.tlacitka{flex-direction:column}}
+</style>
+</head>
+<body>
+<script>
+/* příchod z úvodky (klik na Titulky PS5): stránka se natiskne po vrstvách. Jen jednou, klepnutím přeskočit. */
+(function(){
+  var ano=false; try{ano=sessionStorage.getItem("3dz-natisknout")==="1"; sessionStorage.removeItem("3dz-natisknout");}catch(e){}
+  if(!ano||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+  var t=document.createElement("div"); t.id="uvTisk"; t.setAttribute("aria-hidden","true");
+  t.innerHTML='<div class="zbyva"></div><div class="vrstva"></div><div class="zhava"></div><div class="osa"></div><div class="hlava"><i></i><b></b><u></u></div>';
+  document.body.appendChild(t);
+  var zb=t.children[0], vr=t.children[1], zh=t.children[2], osa=t.children[3], hl=t.children[4], VRSTEV=16, NA_VRSTVU=160, start=null, hotovo=false, bezi=false;
+  function konec(){ if(hotovo) return; hotovo=true; t.style.transition="opacity .3s"; t.style.opacity="0"; setTimeout(function(){t.remove();},350); }
+  t.addEventListener("click",konec);
+  setTimeout(konec,6000); /* pojistka: kdyby se něco zaseklo, stránku nikdy nenechat zakrytou */
+  function plynule(f){ return f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2; }
+  function krok(ts){
+    if(hotovo) return; if(start===null) start=ts;
+    var W=innerWidth, H=innerHeight, v=H/VRSTEV, c=(ts-start)/NA_VRSTVU, n=Math.floor(c), f=plynule(c-n);
+    if(n>=VRSTEV){ zb.style.height="0"; vr.style.height="0"; zh.style.width="0"; t.classList.add("parkuje"); setTimeout(konec,420); return; }
+    var vrch=H-n*v-v, doprava=(n%2===0), x=doprava?f*W:(1-f)*W;
+    zb.style.height=vrch+"px"; vr.style.top=vrch+"px"; vr.style.height=v+"px";
+    if(doprava){ vr.style.left=x+"px"; vr.style.right="0"; } else { vr.style.left="0"; vr.style.right=(W-x)+"px"; }
+    zh.style.top=vrch+"px";
+    if(doprava){ zh.style.left="0"; zh.style.width=x+"px"; zh.style.background="linear-gradient(90deg,rgba(255,79,139,0),rgba(255,79,139,.55) 70%,#ff9a6a)"; }
+    else { zh.style.left=x+"px"; zh.style.width=(W-x)+"px"; zh.style.background="linear-gradient(270deg,rgba(255,79,139,0),rgba(255,79,139,.55) 70%,#ff9a6a)"; }
+    osa.style.top=vrch+"px"; hl.style.left=x+"px"; hl.style.top=vrch+"px";
+    requestAnimationFrame(krok);
+  }
+  function spust(){ if(bezi||hotovo) return; bezi=true; hl.style.display="block"; osa.style.display="block"; requestAnimationFrame(krok); }
+  /* tisk začne, až je stránka načtená (nejpozději po 1,5 s), ať se netrhá */
+  if(document.readyState==="complete") setTimeout(spust,100); else { addEventListener("load",function(){ setTimeout(spust,150); }); setTimeout(spust,1500); }
+})();
+</script>
+<div class="sirka">
+  <header class="hlavicka">
+    <a class="znacka" href="/"><b>3Dz</b>3D tisk na zakázku<span class="mesto">, Bučovice</span></a>
+    <a class="zpet" href="/">Zpět na úvod</a>
+  </header>
+
+  <section class="hra">
+    <img src="../img/titulky.png" alt="">
+    <div>
+      <h1>Titulky PS5</h1>
+      <p>České titulky do her na PS5. Program na počítači čte titulky ze hry, překládá je do češtiny a televize je ukáže přímo přes obraz. Hrajete normálně na PS5, titulky běží samy.</p>
+      <div class="tlacitka">
+        <a class="hraj" href="https://github.com/zaoo-star/titulky-ps5/releases/download/pc/TitulkyPS5-PC.zip">Stáhnout pro PC<small>ZIP · 200 MB</small></a>
+        <a class="hraj druhe" href="https://github.com/zaoo-star/titulky-ps5/releases/download/latest/TitulkyPS5.apk">Stáhnout pro TV<small>Android TV · 42 MB</small></a>
+      </div>
+      <span class="mobil">Zdarma. Program je pro Windows 10 nebo 11 (64 bit).</span>
+    </div>
+  </section>
+
+  <section class="video">
+    <h2>Videonávod na instalaci</h2>
+    <video controls preload="metadata" playsinline poster="../img/titulky-video.webp" src="../img/titulky-ps5-navod.mp4"></video>
+    <p>Tři minuty krok za krokem: účet na PS5, program na PC, spárování a aplikace do televize přes flešku.</p>
+  </section>
+
+  <h2>Co je potřeba</h2>
+  <div class="mrizka">
+    <div class="volba"><h3>PS5 a druhý účet</h3><p>Na PS5 hraje většinou víc lidí. Jeden účet bude pro titulky – ne ten hlavní, na kterém kupujete hry. Kdo má jen jeden, přidá si nového uživatele.</p></div>
+    <div class="volba"><h3>Počítač s Windows</h3><p>Windows 10 nebo 11 (64 bit), asi 1,5 GB volného místa. Počítač dělá všechnu práci: čte, překládá a nastavuje vzhled titulků.</p></div>
+    <div class="volba"><h3>Televize</h3><p>Android TV (aplikace přes flešku), nebo LG či Samsung. PS5, počítač i televize musí být na stejné domácí síti.</p></div>
+  </div>
+
+  <section class="text">
+    <h2>Jak začít</h2>
+    <ol>
+      <li>Na PS5 se přepněte na účet pro titulky a v Nastavení › Systém › Remote Play zapněte Remote Play.</li>
+      <li>Stáhněte program pro PC, rozbalte ZIP a spusťte Titulky PS5. Když se Windows zeptá, zvolte Další informace › Přesto spustit.</li>
+      <li>V programu klikněte Spárovat a přihlaste se účtem pro titulky.</li>
+      <li>Na PS5 dejte Spárovat zařízení a osmimístné číslo opište do programu.</li>
+      <li>Aplikaci pro TV nahrajte na flešku, v televizi ji nainstalujte a povolte zobrazení titulků.</li>
+      <li>V televizi zvolte Spustit překlad z PC, přepněte na PS5 a hrajte.</li>
+    </ol>
+    <p class="pozn">Máte LG nebo Samsung? Aplikace se do nich instaluje jinak: <a href="https://zaoo-star.github.io/titulky-ps5/lg.html">návod pro LG</a>, <a href="https://zaoo-star.github.io/titulky-ps5/samsung.html">návod pro Samsung</a>. Všechno podrobně je v <a href="https://zaoo-star.github.io/titulky-ps5/">návodech</a>.</p>
+  </section>
+
+  <section class="text">
+    <h2>O aplikaci</h2>
+    <p>Titulky PS5 vznikly z aplikací ReCaption a PlayCaption, upravených tak, aby hlavní práci dělal počítač. Zdrojový kód je volně na <a href="https://github.com/zaoo-star/titulky-ps5">GitHubu</a>.</p>
+  </section>
+</div>
+
+<footer class="pata"><div class="sirka">3Dz – 3D tisk na zakázku, Bučovice</div></footer>
+
+<script>
+/* mobil: neonově se podsvítí karta, která je zrovna uprostřed obrazovky */
+(function(){
+  if(!window.matchMedia||!matchMedia("(hover: none)").matches) return;
+  var karty=[].slice.call(document.querySelectorAll(".volba")), cekam=false;
+  function vyber(){
+    cekam=false;
+    var stred=innerHeight/2, nej=null, vzd=1e9;
+    karty.forEach(function(k){ var r=k.getBoundingClientRect(); if(r.bottom<0||r.top>innerHeight) return;
+      var d=(r.top<=stred&&r.bottom>=stred)?0:Math.min(Math.abs(r.top-stred),Math.abs(r.bottom-stred)); if(d<vzd){vzd=d;nej=k;} });
+    /* úplně dole se poslední karta do středu nedostane, tak svítí ta */
+    if(scrollY+innerHeight>=document.documentElement.scrollHeight-4){ var vid=karty.filter(function(k){var r=k.getBoundingClientRect();return r.top<innerHeight&&r.bottom>0;}); if(vid.length) nej=vid[vid.length-1]; }
+    karty.forEach(function(k){ k.classList.toggle("svit",k===nej); });
+  }
+  function naplanuj(){ if(!cekam){ cekam=true; requestAnimationFrame(vyber); } }
+  addEventListener("scroll",naplanuj,{passive:true}); addEventListener("resize",naplanuj); vyber();
+})();
+</script>
+
+</body>
+</html>

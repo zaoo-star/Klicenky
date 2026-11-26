@@ -43,6 +43,7 @@
   --modra:#3fa0ff;      /* zpráva */
   --zelena:#3ddc84;     /* Bučpoly */
   --oranzova:#ff9a3c;   /* Kreslík */
+  --titulky:#2f6bff;    /* Titulky PS5 */
   --zamceno:#6b7385;    /* e-shop */
   --r:20px;
 }
@@ -103,6 +104,13 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
 .kreslik p{max-width:28em;margin-top:8px;color:#c3c8d6}
 .kreslik .postavy{display:flex;justify-content:center}
 .kreslik .postavy img{width:100%;max-width:400px;height:auto;filter:drop-shadow(0 14px 18px rgba(0,0,0,.5))}
+.titulky{--barva:var(--titulky);grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:20px;min-height:0;padding:30px 34px 30px 50px;
+  background:radial-gradient(60% 90% at 80% 50%,rgba(47,107,255,.16),rgba(47,107,255,0) 70%),var(--karta)}
+.titulky h3{font-size:1.6rem}
+.titulky p{max-width:28em;margin-top:8px;color:#c3c8d6}
+.titulky .akce{color:#7aa4ff}
+.titulky .tv{display:flex;justify-content:center}
+.titulky .tv img{width:100%;max-width:400px;height:auto;border-radius:12px;box-shadow:0 14px 30px rgba(0,0,0,.5)}
 .eshop{--barva:var(--zamceno);cursor:not-allowed}
 .eshop:before{box-shadow:none}
 .eshop .stav{display:inline-block;align-self:flex-start;margin-bottom:4px;padding:3px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.18);color:#c2c7d3;font-size:.88rem;font-weight:700}
@@ -125,6 +133,9 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
   .kreslik{grid-template-columns:1fr;padding:26px 22px 26px 38px}
   .kreslik .postavy{order:-1}
   .kreslik .postavy img{max-width:300px}
+  .titulky{grid-template-columns:1fr;padding:26px 22px 26px 38px}
+  .titulky .tv{order:-1}
+  .titulky .tv img{max-width:320px}
   .volba{min-height:0;padding:22px 22px 22px 38px}
   .uvod .sirka{padding-bottom:80px}
   .uvod h1{margin-top:44px}
@@ -204,6 +215,14 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
         </div>
         <div class="postavy" aria-hidden="true"><img src="img/kreslik.webp" alt="" width="620" height="300" loading="lazy"></div>
       </a>
+      <a class="volba titulky" href="/titulky/">
+        <div>
+          <h3>Titulky PS5</h3>
+          <p>České titulky do her na PS5. Program na počítači překládá titulky ze hry a televize je ukáže přímo přes obraz. Zdarma, s videonávodem na instalaci.</p>
+          <span class="akce">Jak to nainstalovat</span>
+        </div>
+        <div class="tv" aria-hidden="true"><img src="img/titulky-tv.webp" alt="" width="720" height="399" loading="lazy"></div>
+      </a>
     </div>
   </div>
 </main>
@@ -247,7 +266,7 @@ h1,h2,h3{font-family:"Unb","Bric",sans-serif;font-weight:700;letter-spacing:-.02
 <script>
 /* klik na návrhář nebo Bučpoly: stránka se po otevření natiskne po vrstvách (stejně jako uvítání); e-shop je zamčený, tak se jen zatřese */
 (function(){
-  document.querySelectorAll('a[href="/navrh/"],a[href="/bucpoly/"]').forEach(function(a){
+  document.querySelectorAll('a[href="/navrh/"],a[href="/bucpoly/"],a[href="/titulky/"]').forEach(function(a){
     a.addEventListener("click",function(){ try{sessionStorage.setItem("3dz-natisknout","1");}catch(e){} });
   });
   var e=document.getElementById("eshop");
