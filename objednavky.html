@@ -151,7 +151,7 @@ else {
   });
 
   /* Návštěvy webu – čísla z /assets/pocitadlo.js (jeden prohlížeč = jedna návštěva za den a stránku) */
-  const STR = [["uvod", "Úvod"], ["navrh", "Návrhář"], ["bucpoly", "Bučpoly"], ["kreslik", "Kreslík"]];
+  const STR = [["uvod", "Úvod"], ["navrh", "Návrhář"], ["bucpoly", "Bučpoly"], ["kreslik", "Kreslík"], ["titulky", "Titulky PS5"]];
   const denKlic = d => d.toLocaleDateString("sv-SE", { timeZone:"Europe/Prague" });
   const dnyZpet = n => { const r = [], t = Date.now(); for (let i = 0; i < n; i++) r.push(denKlic(new Date(t - i*86400000))); return r; };
   function kresliNavstevy(D) {

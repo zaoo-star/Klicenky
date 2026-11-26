@@ -3,7 +3,7 @@
 // Ukládá jen „+1 pro stránku a den“ do Firestore (kolekce navstevy). Nic o lidech:
 // žádné IP, cookies ani identifikátory. Jeden prohlížeč se za den počítá jednou (localStorage).
 // Čísla vidí jen majitel na /objednavky.html.
-const STRANKY = ["uvod", "navrh", "bucpoly", "kreslik"];
+const STRANKY = ["uvod", "navrh", "bucpoly", "kreslik", "titulky"];
 const FIREBASE = { apiKey:"AIzaSyCKUXFiIS28fhEXGdLtuT2dTUPGT3_T3SY", authDomain:"dz-objednavky.firebaseapp.com", projectId:"dz-objednavky", storageBucket:"dz-objednavky.firebasestorage.app", messagingSenderId:"926222074790", appId:"1:926222074790:web:5d16fd2fb2848f7824c567" };
 const V = "10.12.2";
 

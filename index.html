@@ -257,7 +257,7 @@ try {
   const db = getFirestore(initializeApp({ apiKey:"AIzaSyCKUXFiIS28fhEXGdLtuT2dTUPGT3_T3SY", authDomain:"dz-objednavky.firebaseapp.com", projectId:"dz-objednavky", appId:"1:926222074790:web:5d16fd2fb2848f7824c567" }, "verejne"));
   // každá stránka zvlášť: součet přes víc polí naráz by potřeboval složený index
   const kol = collection(db, "navstevy");
-  const casti = await Promise.all(["uvod", "navrh", "bucpoly", "kreslik"].map(k => getAggregateFromServer(kol, { s:sum(k) }).then(r => r.data().s || 0)));
+  const casti = await Promise.all(["uvod", "navrh", "bucpoly", "kreslik", "titulky"].map(k => getAggregateFromServer(kol, { s:sum(k) }).then(r => r.data().s || 0)));
   const celkem = casti.reduce((x, y) => x + y, 0) + ja;
   const el = document.getElementById("navstevy");
   el.querySelector("b").textContent = celkem.toLocaleString("cs-CZ"); el.hidden = false;
